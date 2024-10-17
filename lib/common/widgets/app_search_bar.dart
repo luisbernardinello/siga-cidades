@@ -146,9 +146,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                selectedCity != null
-                    ? 'Resultados da Pesquisa para $selectedCity'
-                    : 'Resultados da Pesquisa',
+                'Resultados da Pesquisa para $selectedCity',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
