@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:diacritic/diacritic.dart';
-import 'package:sigacidades/domain/repositories/locale_repository.dart';
-import 'package:sigacidades/domain/entities/locale.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sigacidades/domain/entities/place.dart';
+import 'package:sigacidades/domain/repositories/place_repository.dart';
+import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
+import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 
 class AppSearchBar extends StatefulWidget {
   final VoidCallback onMenuTap;
-  final LocaleRepository localeRepository;
+  final PlaceRepository placeRepository;
 
   const AppSearchBar({
+    // construtor, campos requeridos
     Key? key,
     required this.onMenuTap,
-    required this.localeRepository,
+    required this.placeRepository,
   }) : super(key: key);
 
   @override
@@ -28,6 +32,17 @@ class _AppSearchBarState extends State<AppSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    // pega o estado atual do BLoC para acessar a cidade selecionada
+    final state = context.watch<CategoryBloc>().state;
+
+    // inicia a cidade selecionada com base no estado do BLoC
+    String? selectedCity;
+    if (state is CategoryLoaded) {
+      selectedCity = state.filteredPlaces.isNotEmpty
+          ? state.filteredPlaces.first.city
+          : context.read<CategoryBloc>().selectedCity; // usa a cidade do BLoC
+    }
+
     return Container(
       width: 390,
       height: 56,
@@ -45,8 +60,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
-              controller:
-                  _searchController, // controller para armazenar o texto recebido independente da pagina
+              controller: _searchController,
               style: TextStyle(
                 color: Color(0xFF737373),
                 fontSize: 12,
@@ -54,9 +68,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 fontWeight: FontWeight.w300,
               ),
               decoration: InputDecoration(
-                hintText: 'Pesquise por locais',
+                // se selectedCity for null, exibe um hint padrão sem o nome da cidade
+                hintText: selectedCity != null
+                    ? 'Pesquise por locais em $selectedCity'
+                    : 'Pesquise por locais',
                 hintStyle: TextStyle(
-                  color: Color(0xFF737373),
+                  color: Color.fromARGB(255, 94, 93, 93),
                   fontSize: 12,
                   fontFamily: 'Sora',
                   fontWeight: FontWeight.w300,
@@ -69,8 +86,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
-              // onTap executa a pesquisa e abre o modal
-              _showSearchModal(context, _searchController.text);
+              // passa a cidade selecionada como parâmetro para o modal
+              _showSearchModal(context, _searchController.text, selectedCity);
             },
             child: Icon(Icons.search, color: Color(0xFF131313)),
           ),
@@ -79,8 +96,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
     );
   }
 
-  //  abre o modal com os resultados da pesquisa
-  void _showSearchModal(BuildContext context, String query) async {
+  // função pra abrir o modal com os resultados da pesquisa
+  void _showSearchModal(
+      BuildContext context, String query, String? selectedCity) async {
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Digite algo para pesquisar.')),
@@ -88,30 +106,36 @@ class _AppSearchBarState extends State<AppSearchBar> {
       return;
     }
 
-    // diacritics remove os acentos e converte para lowercase para a busca
+    if (selectedCity == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selecione uma cidade antes de pesquisar.')),
+      );
+      return;
+    }
+
     final normalizedQuery = removeDiacritics(query).toLowerCase();
 
-    // Precisamos aguardar o resultado da busca de locais, pois a função é assíncrona
-    final allLocales = [
-      ...await widget.localeRepository.fetchLocalesByCategory(0),
-      ...await widget.localeRepository.fetchLocalesByCategory(1),
-      ...await widget.localeRepository.fetchLocalesByCategory(2),
-    ];
+    // busca todos os locais da cidade direto do repositorio
+    final allPlaces =
+        await widget.placeRepository.fetchPlacesByCity(selectedCity);
 
-    // filtra os locais
-    final searchResults = allLocales
-        .where((locale) => removeDiacritics(locale.name.toLowerCase())
+    // filtra os locais de acordo com a pesquisa
+    final searchResults = allPlaces
+        .where((place) => removeDiacritics(place.name.toLowerCase())
             .contains(normalizedQuery))
         .toList();
 
+    // gambiarra que cria um local com o nome do local como não encontrado caso a pesquisa não encontre nada
     if (searchResults.isEmpty) {
       searchResults.add(
-        Locale(
-            name: 'Local não encontrado',
-            imageUrl: 'https://via.placeholder.com/164x100'),
+        Place(
+          name: 'Local não encontrado',
+          imageUrl: 'https://via.placeholder.com/164x100',
+          city: '',
+        ),
       );
     }
-
+    //mostra a modal
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -122,7 +146,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Resultados da Pesquisa',
+                selectedCity != null
+                    ? 'Resultados da Pesquisa para $selectedCity'
+                    : 'Resultados da Pesquisa',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -133,12 +159,11 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 child: ListView.builder(
                   itemCount: searchResults.length,
                   itemBuilder: (context, index) {
-                    final locale = searchResults[index];
+                    final place = searchResults[index];
                     return ListTile(
-                      title: Text(locale.name),
+                      title: Text(place.name),
                       onTap: () {
                         Navigator.pop(context);
-                        // Quando clicar em um resultado, você pode definir a lógica de navegação
                       },
                     );
                   },

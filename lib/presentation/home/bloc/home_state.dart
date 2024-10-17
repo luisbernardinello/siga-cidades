@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:sigacidades/domain/entities/locale.dart';
+import 'package:sigacidades/domain/entities/place.dart';
 
-// Estado base, usado para comparação de estados no BLoC
 abstract class CategoryState extends Equatable {
   const CategoryState();
 
@@ -9,27 +8,24 @@ abstract class CategoryState extends Equatable {
   List<Object?> get props => [];
 }
 
-// Estado inicial, usado quando o aplicativo carrega pela primeira vez
-class CategoryInitial extends CategoryState {}
-
-// Estado de carregamento, exibido quando os dados estão sendo buscados
+// estado de loading (carregamento)
 class CategoryLoading extends CategoryState {}
 
-// Estado de sucesso, usado quando os dados são carregados com sucesso
+// estado de carregamento feito com sucesso, com os locais filtrados
 class CategoryLoaded extends CategoryState {
   final int selectedIndex;
-  final List<Locale> filteredLocales;
+  final List<Place> filteredPlaces;
 
   const CategoryLoaded({
     required this.selectedIndex,
-    required this.filteredLocales,
+    required this.filteredPlaces,
   });
 
   @override
-  List<Object?> get props => [selectedIndex, filteredLocales];
+  List<Object?> get props => [selectedIndex, filteredPlaces];
 }
 
-// Estado de erro, usado quando ocorre um erro durante a busca de dados
+// estado que gera erro
 class CategoryError extends CategoryState {
   final String message;
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sigacidades/domain/entities/locale.dart';
+import 'package:sigacidades/domain/entities/place.dart';
 
-// widget que exibe cada local
-Widget localeCard(Locale locale) {
+// widget que exibe cada lugar
+Widget placeCard(Place place) {
   return Card(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
@@ -16,7 +16,7 @@ Widget localeCard(Locale locale) {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
-            locale.name,
+            place.name,
             textAlign: TextAlign.center, // centraliza o texto
             style: const TextStyle(
               color: Color.fromARGB(255, 71, 71, 71),
@@ -27,7 +27,7 @@ Widget localeCard(Locale locale) {
           ),
         ),
         const SizedBox(height: 8),
-        // imagem do local
+        // imagem do lugar
         Container(
           width: double.infinity,
           height: 100,
@@ -37,7 +37,7 @@ Widget localeCard(Locale locale) {
               bottomRight: Radius.circular(12),
             ),
             image: DecorationImage(
-              image: NetworkImage(locale.imageUrl),
+              image: NetworkImage(place.imageUrl),
               fit: BoxFit.cover,
             ),
           ),

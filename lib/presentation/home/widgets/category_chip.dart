@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Widget para cada categoria do carrossel
+// widget para cada categoria do carrossel
 Widget categoryChip(String label, bool isSelected) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

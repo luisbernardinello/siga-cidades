@@ -1,3 +1,4 @@
+// lista com o nome dos locais
 List<String> getCategoryNames() {
   return [
     'Bosques e parques',
