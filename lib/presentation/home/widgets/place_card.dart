@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
-// widget que exibe cada lugar
+// Widget que exibe cada lugar
 Widget placeCard(Place place) {
   return Card(
     shape: RoundedRectangleBorder(
@@ -10,14 +10,14 @@ Widget placeCard(Place place) {
     elevation: 0.5,
     child: Column(
       crossAxisAlignment:
-          CrossAxisAlignment.center, // centraliza horizontalmente
+          CrossAxisAlignment.center, // Centraliza horizontalmente
       children: [
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             place.name,
-            textAlign: TextAlign.center, // centraliza o texto
+            textAlign: TextAlign.center, // Centraliza o texto
             style: const TextStyle(
               color: Color.fromARGB(255, 71, 71, 71),
               fontSize: 12,
@@ -27,7 +27,7 @@ Widget placeCard(Place place) {
           ),
         ),
         const SizedBox(height: 8),
-        // imagem do lugar
+        // Exibe a imagem do lugar
         Container(
           width: double.infinity,
           height: 100,

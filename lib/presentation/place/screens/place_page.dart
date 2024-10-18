@@ -1,39 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/common/widgets/app_search_bar.dart';
-import 'package:sigacidades/common/widgets/drawer_menu.dart';
-import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 
 class PlacePage extends StatelessWidget {
-  final Place place; // Recebe o local selecionado
+  final Place place; // Instância do lugar que representa o lugar clicado
 
   const PlacePage({Key? key, required this.place}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final placeRepository =
-        PlaceRepositoryImpl(); // Repositório para a barra de pesquisa
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(place.name), // Nome do local no app bar
-      ),
-      drawer: DrawerMenu(
-        onCitySelected: (city) {
-          // Atualiza a cidade no menu lateral
-          Navigator.pop(context); // Fecha o Drawer após selecionar a cidade
-        },
-      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Exibe a imagem do local
-            Image.network(
-              place.imageUrl,
-              width: double.infinity,
-              height: 250,
-              fit: BoxFit.cover,
+            Stack(
+              children: [
+                // Exibe a imagem do local
+                Image.network(
+                  place.imageUrl,
+                  width: double.infinity,
+                  height: 250,
+                  fit: BoxFit.cover,
+                ),
+                // Contém a lógica e o ícone de voltar para a página anterior
+                Positioned(
+                  top: 40,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); // Retorna para a página anterior
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -42,7 +53,7 @@ class PlacePage extends StatelessWidget {
                 children: [
                   Text(
                     place.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -56,7 +67,7 @@ class PlacePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Outros detalhes do local podem ser adicionados aqui futuramente
+                  // Continuaria a partir daqui caso não mude essa página
                 ],
               ),
             ),

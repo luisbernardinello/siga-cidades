@@ -1,8 +1,10 @@
 import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
 
+// Implementação concreta do PlaceRepository, que é responsável por fornecer os dados.
+// Por hora essa classe simula os dados locais, mas após o Firebase, ela se comunica com ele para receber os lugares.
 class PlaceRepositoryImpl implements PlaceRepository {
-  // locais simulados, agrupando tudo em uma lista única
+  // Lista de todos os lugares.
   final List<Place> allPlaces = [
     Place(
         name: 'Bosque da Saude',
@@ -34,7 +36,39 @@ class PlaceRepositoryImpl implements PlaceRepository {
         imageUrl: 'https://via.placeholder.com/164x100',
         city: 'Botucatu'),
     Place(
-        name: 'Supermercado Confiança',
+        name: 'Supermercado Confianca',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Supermercado Central',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Supermercado Pão',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Supermercado Paulista',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Drogaria Vitória',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Farmácia Drogal',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Farmácia Drogasil',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Drogaria São Paulo',
+        imageUrl: 'https://via.placeholder.com/164x100',
+        city: 'Botucatu'),
+    Place(
+        name: 'Drogaria Aparecida',
         imageUrl: 'https://via.placeholder.com/164x100',
         city: 'Botucatu'),
     Place(
@@ -55,9 +89,13 @@ class PlaceRepositoryImpl implements PlaceRepository {
         city: 'Bauru'),
   ];
 
+  // ====================================
+  // Busca lugares com base na categoria.
+  // ====================================
+
   @override
   Future<List<Place>> fetchPlacesByCategory(int categoryIndex) async {
-    // simula dados locais com cidade associada
+    // Simula dados locais com cidade associada
     switch (categoryIndex) {
       case 0: // Bosques e Parques
         return allPlaces
@@ -95,9 +133,13 @@ class PlaceRepositoryImpl implements PlaceRepository {
     }
   }
 
+  // ====================================
+  // Busca todos os lugares de uma cidade específica.
+  // ====================================
+
   @override
   Future<List<Place>> fetchPlacesByCity(String city) async {
-    // retorna todos os locais da cidade
+    // retorna todos os lugares da cidade em específico.
     return allPlaces
         .where((place) => place.city.toLowerCase() == city.toLowerCase())
         .toList();

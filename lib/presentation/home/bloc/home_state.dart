@@ -1,6 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
+// A base da arquitetura limpa é a separação das responsabilidades.
+// Neste arquivo temos os estados que o BLoC vai emitir conforme a página muda de estado.
+// Uso de equatable facilita as comparações entre os estados, melhorando performance do BLoC.
+
 abstract class CategoryState extends Equatable {
   const CategoryState();
 
@@ -8,13 +12,15 @@ abstract class CategoryState extends Equatable {
   List<Object?> get props => [];
 }
 
-// estado de loading (carregamento)
+// Estado de carregamento.
+// Quando o BLoC está obtendo dados (como ao buscar lugares), este estado é emitido.
 class CategoryLoading extends CategoryState {}
 
-// estado de carregamento feito com sucesso, com os locais filtrados
+// Estado de sucesso no carregamento dos dados.
+// O CategoryLoaded mantém os lugares filtrados com base na categoria e cidade selecionada.
 class CategoryLoaded extends CategoryState {
-  final int selectedIndex;
-  final List<Place> filteredPlaces;
+  final int selectedIndex; // Índice da categoria selecionada.
+  final List<Place> filteredPlaces; // Lista dos lugares filtrados.
 
   const CategoryLoaded({
     required this.selectedIndex,
@@ -25,9 +31,10 @@ class CategoryLoaded extends CategoryState {
   List<Object?> get props => [selectedIndex, filteredPlaces];
 }
 
-// estado que gera erro
+// Estado de erro.
+// Quando ocorre algum problema, como uma falha ao carregar os lugares, emite esse estado.
 class CategoryError extends CategoryState {
-  final String message;
+  final String message; // Mensagem de erro.
 
   const CategoryError(this.message);
 

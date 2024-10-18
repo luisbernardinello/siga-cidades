@@ -4,7 +4,6 @@ import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
 import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 import 'package:sigacidades/presentation/home/screens/home_page.dart';
-import 'package:sigacidades/common/widgets/drawer_menu.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,34 +12,26 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Sigacidades',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MainPage(),
-    );
-  }
-}
-
-class MainPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // blocprovider acima de toda a árvore de widgets
+    // 1. O PlaceRepositoryImpl implementa a lógica para acessar dados de fontes externas (ex: API, banco de dados).
+    //    Aqui ele é inicializado e passado ao BLoC, tem a função de isolar a camada de apresentação (UI) para que ela não haja diretamente com os dados.
     final placeRepository = PlaceRepositoryImpl();
 
     return BlocProvider(
-      create: (context) =>
-          CategoryBloc(placeRepository)..add(SelectCategoryEvent(0)),
-      child: Scaffold(
-        drawer: DrawerMenu(
-          onCitySelected: (city) {
-            // insere o evento de seleção de cidade no Bloc
-            context.read<CategoryBloc>().add(SelectCityEvent(city));
-          },
+      // Fornece o CategoryBloc para a árvore de widgets (todas as páginas).
+      // O Bloc é responsável por gerenciar o estado da aplicação.
+      // A função create inicializa o CategoryBloc e passa o placeRepository para obter os dados.
+      create: (context) => CategoryBloc(placeRepository)
+        // Evento inicial de seleção da categoria (começa na categoria de Bosques e Parques).
+        ..add(SelectCategoryEvent(0)),
+
+      // HomePage como página inicial.
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Sigacidades',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
-        body: HomePage(), // exibe a home_page
+        home: HomePage(),
       ),
     );
   }

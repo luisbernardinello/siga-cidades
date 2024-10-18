@@ -3,39 +3,50 @@ import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
 import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 
+// O BLoC (Business Logic Component) gerencia a lógica entre a interface e os dados.
+// Ele recebe eventos (CategoryEvent), faz o processamento e envia novos estados (home_state).
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  final PlaceRepository placeRepository;
-  String selectedCity = 'Bauru'; // cidade base inicial.
+  final PlaceRepository placeRepository; // Dependência do repositório de dados.
+  String selectedCity = 'Bauru'; // Cidade inicial que irá para o Drawer(Bauru).
 
+  // O construtor inicializa o BLoC com o estado de carregamento.
+  // O construtor também define como lidar com cada evento (categoria e cidade).
   CategoryBloc(this.placeRepository) : super(CategoryLoading()) {
-    // faz a manipulação do evento de seleção de categoria
+    // ====================================
+    // Manipulação do evento de seleção de categoria
+    // ====================================
     on<SelectCategoryEvent>((event, emit) async {
-      emit(CategoryLoading());
+      emit(
+          CategoryLoading()); // Emite o estado de carregamento enquanto busca os dados.
 
-      // busca os locais pela categoria que foi selecionada
+      // Acessa o repositório para buscar os lugares com base na categoria.
       final places =
           await placeRepository.fetchPlacesByCategory(event.selectedIndex);
 
-      // filtra os locais pela cidade selecionada
+      // Filtra os lugares pela cidade selecionada.
       final filteredPlaces =
           places.where((place) => place.city == selectedCity).toList();
 
+      // Emite o estado de sucesso (CategoryLoaded) com a lista filtrada de lugares.
       emit(CategoryLoaded(
         selectedIndex: event.selectedIndex,
         filteredPlaces: filteredPlaces,
       ));
     });
 
-    // faz a manipulação do evento de seleção de cidade
+    // ====================================
+    // Manipulação do evento de seleção de cidade
+    // ====================================
     on<SelectCityEvent>((event, emit) async {
-      selectedCity = event.city; // atualiza a cidade selecionada
+      selectedCity = event.city; // Atualiza a cidade selecionada.
 
-      // reenvia o evento de categoria atual para refiltrar os locais
+      // Reenvia o evento de categoria para refiltrar os locais com base na cidade.
       if (state is CategoryLoaded) {
+        // Se a categoria ja está carregada, reenvia o evento para manter a categoria atual mesmo que mude a cidade.
         add(SelectCategoryEvent((state as CategoryLoaded).selectedIndex));
       } else {
-        add(SelectCategoryEvent(
-            0)); // 0 é a categoria padrão "Bosques e Parques"
+        // Se não tiver estiver carregado, carrega a categoria padrão (0 = Bosques e Parques).
+        add(SelectCategoryEvent(0));
       }
     });
   }

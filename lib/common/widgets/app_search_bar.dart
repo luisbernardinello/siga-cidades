@@ -7,9 +7,12 @@ import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
+// Widget Stateful que implementa a barra de busca personalizada.
+// Permite que o usuário pesquise locais com base na cidade selecionada e realiza a busca no repositório.
 class AppSearchBar extends StatefulWidget {
-  final VoidCallback onMenuTap;
-  final PlaceRepository placeRepository;
+  final VoidCallback onMenuTap; // Callback para abrir o Drawer.
+  final PlaceRepository
+      placeRepository; // Instância do repositório para poder buscar os locais.
 
   const AppSearchBar({
     Key? key,
@@ -22,27 +25,33 @@ class AppSearchBar extends StatefulWidget {
 }
 
 class _AppSearchBarState extends State<AppSearchBar> {
+  // Controlador do campo de texto.
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
+    // Garante que o controlador de texto seja limpo quando o widget for destruído.
     _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Pega o estado atual do BLoC para acessar a cidade selecionada
+    // context.watch<CategoryBloc>() para ficar observando (watch) o estado do BLoC e pegar a cidade selecionada.
     final state = context.watch<CategoryBloc>().state;
 
-    // Cidade selecionada com base no estado do BLoC
+    // selectedCity inicializa a cidade selecionada com base no estado atual do BLoC, campo que pode ser nulo.
     String? selectedCity;
     if (state is CategoryLoaded) {
+      // se houver locais carregados, usa a cidade do primeiro local como padrão.
       selectedCity = state.filteredPlaces.isNotEmpty
           ? state.filteredPlaces.first.city
-          : context.read<CategoryBloc>().selectedCity; // Usa a cidade do BLoC
+          : context.read<CategoryBloc>().selectedCity; // Cidade padrão do BLoC.
     }
 
+    // ====================================
+    // Construção da interface do AppSearchBar
+    // ====================================
     return Container(
       width: 390,
       height: 56,
@@ -53,11 +62,18 @@ class _AppSearchBarState extends State<AppSearchBar> {
       ),
       child: Row(
         children: [
+          // ====================================
+          // Ícone do menu para abrir o Drawer
+          // ====================================
           GestureDetector(
-            onTap: widget.onMenuTap,
+            onTap: widget.onMenuTap, // Chama o callback para abrir o Drawer.
             child: Icon(Icons.menu, color: Color(0xFF080808)),
           ),
           const SizedBox(width: 12),
+
+          // ====================================
+          // Campo de texto para pesquisa
+          // ====================================
           Expanded(
             child: TextField(
               controller: _searchController,
@@ -68,7 +84,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 fontWeight: FontWeight.w300,
               ),
               decoration: InputDecoration(
-                // Placeholder com a cidade selecionada
+                // Mostra a cidade selecionada no placeholder.
                 hintText: selectedCity != null
                     ? 'Pesquise por locais em $selectedCity'
                     : 'Pesquise por locais',
@@ -84,9 +100,14 @@ class _AppSearchBarState extends State<AppSearchBar> {
             ),
           ),
           const SizedBox(width: 8),
+
+          // ====================================
+          // Botão de pesquisa
+          // ====================================
           GestureDetector(
             onTap: () {
               _showSearchModal(context, _searchController.text, selectedCity);
+              // Dá inicio a busca ao clicar no ícone da barra de pesquisa.
             },
             child: Icon(Icons.search, color: Color(0xFF131313)),
           ),
@@ -95,9 +116,13 @@ class _AppSearchBarState extends State<AppSearchBar> {
     );
   }
 
-  // Função para abrir o modal com os resultados da pesquisa
+  // ====================================
+  // Função que exibe modal: Exibir resultados da pesquisa
+  // ====================================
+
   void _showSearchModal(
       BuildContext context, String query, String? selectedCity) async {
+    // Verifica se existe uma pesquisa e cidade selecionada.
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Digite algo para pesquisar.')),
@@ -112,18 +137,20 @@ class _AppSearchBarState extends State<AppSearchBar> {
       return;
     }
 
+    // removeDiacritics chama o removeDiacritics passando a query para normalizar a string de busca, remove acentos deixa tudo minúsculo.
     final normalizedQuery = removeDiacritics(query).toLowerCase();
 
-    // Busca todos os locais da cidade diretamente do repositório
+    // Busca os locais no repositório pela cidade selecionada.
     final allPlaces =
         await widget.placeRepository.fetchPlacesByCity(selectedCity);
 
-    // Filtra os locais de acordo com a pesquisa
+    // Filtra os locais encontrados pela pesquisa.
     final searchResults = allPlaces
         .where((place) => removeDiacritics(place.name.toLowerCase())
             .contains(normalizedQuery))
         .toList();
 
+    // Se não existir resultados, cria um lugar chamado não encontrado.
     if (searchResults.isEmpty) {
       searchResults.add(
         Place(
@@ -134,7 +161,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
       );
     }
 
-    // Mostra o modal com os resultados de pesquisa
+    // ====================================
+    // Exibe a janela modal com os resultados da pesquisa
+    // ====================================
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -160,8 +189,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     return ListTile(
                       title: Text(place.name),
                       onTap: () {
-                        // Navega para a página de detalhes ao clicar no resultado
-                        Navigator.pop(context); // Fecha o modal
+                        // Quando o usuário clica em um resultado, fecha a janela modal e vai para a página de lugar (exibe o lugar selecionado).
+                        Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
