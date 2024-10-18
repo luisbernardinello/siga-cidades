@@ -9,6 +9,7 @@ import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 import 'package:sigacidades/common/widgets/app_search_bar.dart';
 import 'package:sigacidades/common/widgets/drawer_menu.dart';
 import 'package:sigacidades/core/utils/category_utils.dart';
+import 'package:sigacidades/presentation/place/screens/place_page.dart'; // Import da PlacePage
 
 class HomePage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -137,7 +138,21 @@ class HomePage extends StatelessWidget {
                           ),
                           itemCount: state.filteredPlaces.length,
                           itemBuilder: (context, index) {
-                            return placeCard(state.filteredPlaces[index]);
+                            final place = state.filteredPlaces[index];
+
+                            // Navega para PlacePage ao clicar no card
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PlacePage(place: place),
+                                  ),
+                                );
+                              },
+                              child: placeCard(place),
+                            );
                           },
                         );
                       } else if (state is CategoryLoading) {
