@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+
+// CustomNavBar com a lógica de seleção de página por índice
+class CustomNavBar extends StatelessWidget {
+  final int currentPage;
+  final ValueChanged<int> onSelectPage; // Callback para trocar a página
+
+  const CustomNavBar(
+      {Key? key, required this.currentPage, required this.onSelectPage})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 78,
+      padding: const EdgeInsets.only(top: 16, left: 32, right: 32, bottom: 8),
+      decoration: const ShapeDecoration(
+        color: Color(0xFFF2F2F2),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(width: 1, color: Color(0xFFE4E4E4)),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(36),
+            topRight: Radius.circular(36),
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildNavItem(context, Icons.home, 0),
+          _buildNavItem(context, Icons.list, 1),
+          _buildCenterItem(context, 2),
+          _buildNavItem(context, Icons.info, 3),
+          _buildNavItem(context, Icons.message, 4),
+        ],
+      ),
+    );
+  }
+
+  // Função para construir ícones regulares da navbar
+  Widget _buildNavItem(BuildContext context, IconData icon, int index) {
+    return GestureDetector(
+      onTap: () => onSelectPage(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: currentPage == index ? Colors.purple : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon,
+                size: 24,
+                color: currentPage == index ? Colors.white : Colors.black),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            width: 4,
+            height: 4,
+            decoration: ShapeDecoration(
+              color: currentPage == index
+                  ? const Color(0xFFEFDF58)
+                  : const Color(0xFFA2A2A2),
+              shape: const OvalBorder(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Função para o ícone central (Maps)
+  Widget _buildCenterItem(BuildContext context, int index) {
+    return GestureDetector(
+      onTap: () => onSelectPage(index),
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: ShapeDecoration(
+          color: currentPage == index ? Colors.purple : const Color(0xFFC6C6C6),
+          shape: const CircleBorder(),
+        ),
+        child: Icon(Icons.location_on_outlined,
+            size: 40,
+            color: currentPage == index ? Colors.white : Colors.black),
+      ),
+    );
+  }
+}

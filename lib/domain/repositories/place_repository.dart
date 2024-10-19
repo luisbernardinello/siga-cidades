@@ -1,4 +1,5 @@
 import 'package:sigacidades/domain/entities/place.dart';
+import 'package:geolocator/geolocator.dart'; // Para o cálculo de distância
 
 // Interface do Repositório.
 // A camada de domínio define o contrato e a entidade
@@ -9,4 +10,9 @@ abstract class PlaceRepository {
 
   // Busca lugares com base na cidade.
   Future<List<Place>> fetchPlacesByCity(String city);
+
+  // Busca lugares próximos com base na posição do usuário.
+  Future<List<Map<String, dynamic>>> fetchNearbyPlaces(
+      Position
+          userPosition); // Atualizado para retornar um mapa contendo Place e distância
 }

@@ -1,20 +1,45 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
-// O PlaceModel extende a entidade Place (Lugar) da camada de domínio.
-// O PlaceModel se trata de um DTO (Data Transfer Object) que faz a conversão dos dados entre JSON e o modelo de entidade.
+// O PlaceModel extende a entidade Place e faz a conversão de JSON para o modelo e vice-versa.
 class PlaceModel extends Place {
   PlaceModel({
     required String name,
+    required String city, // Adiciona o campo city
+    required String category,
+    required String description,
+    required String adress,
     required String imageUrl,
-    required String city,
-  }) : super(name: name, imageUrl: imageUrl, city: city);
+    required String imgDescription,
+    required String linkAD,
+    required String linkHist,
+    required GeoPoint coordinates,
+  }) : super(
+          name: name,
+          city: city, // Passa o city para a entidade
+          category: category,
+          description: description,
+          adress: adress,
+          imageUrl: imageUrl,
+          imgDescription: imgDescription,
+          linkAD: linkAD,
+          linkHist: linkHist,
+          coordinates: coordinates,
+        );
 
   // Converte um objeto JSON para um PlaceModel.
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
       name: json['name'],
+      city: json['city'], // Converte o campo city do JSON
+      category: json['category'],
+      description: json['description'],
+      adress: json['adress'],
       imageUrl: json['imageUrl'],
-      city: json['city'],
+      imgDescription: json['imgDescription'],
+      linkAD: json['linkAD'],
+      linkHist: json['linkHist'],
+      coordinates: json['coordinates'], // Assumimos que o GeoPoint está no JSON
     );
   }
 
@@ -22,8 +47,15 @@ class PlaceModel extends Place {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'city': city, // Inclui o city na conversão para JSON
+      'category': category,
+      'description': description,
+      'adress': adress,
       'imageUrl': imageUrl,
-      'city': city,
+      'imgDescription': imgDescription,
+      'linkAD': linkAD,
+      'linkHist': linkHist,
+      'coordinates': coordinates, // Inclui o GeoPoint
     };
   }
 }

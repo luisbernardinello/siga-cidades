@@ -1,147 +1,145 @@
 import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Para o uso do Geolocator
+import 'package:geolocator/geolocator.dart'; // Para o cálculo de distância
 
 // Implementação concreta do PlaceRepository, que é responsável por fornecer os dados.
-// Por hora essa classe simula os dados locais, mas após o Firebase, ela se comunica com ele para receber os lugares.
 class PlaceRepositoryImpl implements PlaceRepository {
-  // Lista de todos os lugares.
+  // Lista de todos os lugares, dessa vez com coordenadas definidas.
   final List<Place> allPlaces = [
     Place(
-        name: 'Bosque da Saude',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
+      name: 'Bosque da Saude',
+      city: 'Botucatu',
+      category: 'Bosques e Parques',
+      description: 'Um ótimo lugar para fazer trilhas e curtir a natureza.',
+      adress: 'Rua das Árvores, 123, Botucatu, SP',
+      imageUrl: 'https://via.placeholder.com/164x100',
+      imgDescription: 'Vista do bosque durante o dia',
+      linkAD: 'https://audiodescricao-bosque.com',
+      linkHist: 'https://historia-bosque.com',
+      coordinates:
+          GeoPoint(-22.885897, -48.445049), // Coordenada aleatória em Botucatu
+    ),
     Place(
-        name: 'Horto Florestal',
-        imageUrl:
-            'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/06/e2/9b/f0/horto-florestal-de-bauru.jpg?w=1200&h=1200&s=1',
-        city: 'Bauru'),
+      name: 'Horto Florestal',
+      city: 'Bauru',
+      category: 'Bosques e Parques',
+      description: 'Um grande parque com muitas árvores e fauna local.',
+      adress: 'Av. Getúlio Vargas, Bauru, SP',
+      imageUrl:
+          'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/06/e2/9b/f0/horto-florestal-de-bauru.jpg?w=1200&h=1200&s=1',
+      imgDescription: 'Entrada do Horto Florestal',
+      linkAD: 'https://audiodescricao-horto.com',
+      linkHist: 'https://historia-horto.com',
+      coordinates:
+          GeoPoint(-22.314459, -49.062146), // Coordenada aleatória em Bauru
+    ),
     Place(
-        name: 'Casarão da Picanha',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Bauru'),
+      name: 'Casarão da Picanha',
+      city: 'Bauru',
+      category: 'Comércio',
+      description: 'Um restaurante tradicional com a melhor picanha da região.',
+      adress: 'Av. Pedro de Toledo, 500, Bauru, SP',
+      imageUrl: 'https://via.placeholder.com/164x100',
+      imgDescription: 'Fachada do Casarão da Picanha',
+      linkAD: 'https://audiodescricao-casarao.com',
+      linkHist: 'https://historia-casarao.com',
+      coordinates:
+          GeoPoint(-22.315488, -49.060902), // Coordenada aleatória em Bauru
+    ),
     Place(
-        name: 'Bar do Roberto',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Bauru'),
+      name: 'Bar do Roberto',
+      city: 'Bauru',
+      category: 'Comércio',
+      description: 'Um famoso bar com petiscos e bebidas de alta qualidade.',
+      adress: 'Rua Primeiro de Agosto, 600, Bauru, SP',
+      imageUrl: 'https://via.placeholder.com/164x100',
+      imgDescription: 'Fachada do Bar do Roberto',
+      linkAD: 'https://audiodescricao-barroberto.com',
+      linkHist: 'https://historia-barroberto.com',
+      coordinates:
+          GeoPoint(-22.316137, -49.065791), // Coordenada aleatória em Bauru
+    ),
     Place(
-        name: 'Bar do Juca',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Presidente Prudente'),
-    Place(
-        name: 'Bar do Rogerio',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Presidente Prudente'),
-    Place(
-        name: 'Farmácia Droga Raia',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Supermercado Confianca',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Supermercado Central',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Supermercado Pão',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Supermercado Paulista',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Drogaria Vitória',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Farmácia Drogal',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Farmácia Drogasil',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Drogaria São Paulo',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Drogaria Aparecida',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Botucatu'),
-    Place(
-        name: 'Centro Cultural',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Bauru'),
-    Place(
-        name: 'Museu de Arte',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Presidente Prudente'),
-    Place(
-        name: 'Igreja Universal',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Bauru'),
-    Place(
-        name: 'Hospital Estadual',
-        imageUrl: 'https://via.placeholder.com/164x100',
-        city: 'Bauru'),
+      name: 'Bar do Juca',
+      city: 'Presidente Prudente',
+      category: 'Comércio',
+      description:
+          'Um bar histórico conhecido pelo atendimento e pratos típicos.',
+      adress: 'Rua das Palmeiras, 34, Presidente Prudente, SP',
+      imageUrl: 'https://via.placeholder.com/164x100',
+      imgDescription: 'Fachada do Bar do Juca',
+      linkAD: 'https://audiodescricao-barjuca.com',
+      linkHist: 'https://historia-barjuca.com',
+      coordinates: GeoPoint(-22.120929,
+          -51.387166), // Coordenada aleatória em Presidente Prudente
+    ),
   ];
 
   // ====================================
-  // Busca lugares com base na categoria.
+  // Busca lugares com base na categoria
   // ====================================
-
   @override
   Future<List<Place>> fetchPlacesByCategory(int categoryIndex) async {
-    // Simula dados locais com cidade associada
-    switch (categoryIndex) {
-      case 0: // Bosques e Parques
-        return allPlaces
-            .where((place) =>
-                place.name.contains('Bosque') || place.name.contains('Horto'))
-            .toList();
-      case 1: // Comércio
-        return allPlaces
-            .where((place) =>
-                place.name.contains('Bar') ||
-                place.name.contains('Supermercado') ||
-                place.name.contains('Farmácia'))
-            .toList();
-      case 2: // Cultura, Lazer e Esporte
-        return allPlaces
-            .where((place) =>
-                place.name.contains('Centro') || place.name.contains('Museu'))
-            .toList();
-      case 3: // Edificações Públicas
-        return [];
-      case 4: // Educação e Terceiro Setor
-        return [];
-      case 5: // Logradouros e Praças
-        return [];
-      case 6: // Religião
-        return allPlaces
-            .where((place) => place.name.contains('Igreja'))
-            .toList();
-      case 7: // Saúde
-        return allPlaces
-            .where((place) => place.name.contains('Hospital'))
-            .toList();
-      default:
-        return [];
+    final categories = [
+      'Bosques e Parques',
+      'Comércio',
+      'Cultura, Lazer e Esporte',
+      'Edificações Públicas',
+      'Educação e Terceiro Setor',
+      'Logradouros e Praças',
+      'Religião',
+      'Saúde'
+    ];
+
+    if (categoryIndex < 0 || categoryIndex >= categories.length) {
+      return []; // Se o index estiver fora do intervalo, retorna uma lista vazia
     }
+
+    // Filtra os lugares com base na categoria associada ao index
+    return allPlaces
+        .where((place) => place.category == categories[categoryIndex])
+        .toList();
   }
 
   // ====================================
   // Busca todos os lugares de uma cidade específica.
   // ====================================
-
   @override
   Future<List<Place>> fetchPlacesByCity(String city) async {
-    // retorna todos os lugares da cidade em específico.
     return allPlaces
         .where((place) => place.city.toLowerCase() == city.toLowerCase())
         .toList();
+  }
+
+  // ====================================
+  // Busca os lugares mais próximos com base nas coordenadas do usuário
+  // ====================================
+  // Função para buscar lugares próximos com as distâncias calculadas.
+  @override
+  Future<List<Map<String, dynamic>>> fetchNearbyPlaces(
+      Position userPosition) async {
+    List<Map<String, dynamic>> placesWithDistance = [];
+
+    // Calcula a distância para cada lugar e armazena no mapa
+    for (var place in allPlaces) {
+      double distanceInMeters = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        place.coordinates.latitude,
+        place.coordinates.longitude,
+      );
+
+      placesWithDistance.add({
+        'place': place,
+        'distance': distanceInMeters, // Inclui a distância calculada
+      });
+    }
+
+    // Ordena os lugares pela distância mais próxima
+    placesWithDistance.sort((a, b) => a['distance'].compareTo(b['distance']));
+
+    // Retorna os 9 lugares mais próximos com suas distâncias
+    return placesWithDistance.take(9).toList();
   }
 }

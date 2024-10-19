@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sigacidades/data/repositories/place_repository_impl.dart';
+import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
-import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 import 'package:sigacidades/presentation/home/screens/home_page.dart';
+import 'package:sigacidades/presentation/distances/screens/distances_page.dart';
+import 'package:sigacidades/presentation/main_screen.dart';
+import 'package:sigacidades/presentation/maps/screens/maps_page.dart';
+import 'package:sigacidades/presentation/about/screens/about_page.dart';
+import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
+import 'package:provider/provider.dart'; // Import para usar o Provider
 
 void main() {
   runApp(MyApp());
@@ -12,26 +19,47 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // 1. O PlaceRepositoryImpl implementa a lógica para acessar dados de fontes externas (ex: API, banco de dados).
-    //    Aqui ele é inicializado e passado ao BLoC, tem a função de isolar a camada de apresentação (UI) para que ela não haja diretamente com os dados.
+    // Inicializando o PlaceRepositoryImpl.
     final placeRepository = PlaceRepositoryImpl();
 
-    return BlocProvider(
-      // Fornece o CategoryBloc para a árvore de widgets (todas as páginas).
-      // O Bloc é responsável por gerenciar o estado da aplicação.
-      // A função create inicializa o CategoryBloc e passa o placeRepository para obter os dados.
-      create: (context) => CategoryBloc(placeRepository)
-        // Evento inicial de seleção da categoria (começa na categoria de Bosques e Parques).
-        ..add(SelectCategoryEvent(0)),
-
-      // HomePage como página inicial.
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Sigacidades',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        // O PlaceRepository será fornecido para toda a aplicação.
+        Provider<PlaceRepository>(
+          create: (_) => placeRepository,
         ),
-        home: HomePage(),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          // CategoryBloc para gerenciar o estado da HomePage e categorias.
+          BlocProvider<CategoryBloc>(
+            create: (context) => CategoryBloc(placeRepository)
+              ..add(SelectCategoryEvent(0)), // Evento inicial de categoria.
+          ),
+        ],
+        // ====================================
+        // Configuração do MaterialApp
+        // ====================================
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Sigacidades',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+
+          // initialRoute: Define a rota inicial da aplicação como a HomePage.
+          initialRoute: MainScreen.routeName,
+
+          // **Rotas nomeadas**: Definimos todas as rotas da aplicação.
+          routes: {
+            MainScreen.routeName: (context) => const MainScreen(),
+            HomePage.routeName: (context) => const HomePage(),
+            DistancesPage.routeName: (context) => const DistancesPage(),
+            MapsPage.routeName: (context) => const MapsPage(),
+            AboutPage.routeName: (context) => const AboutPage(),
+            FeedbackPage.routeName: (context) => const FeedbackPage(),
+          },
+        ),
       ),
     );
   }
