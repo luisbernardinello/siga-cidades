@@ -6,6 +6,7 @@ import 'package:sigacidades/presentation/distances/bloc/distances_state.dart';
 import 'package:sigacidades/presentation/distances/widgets/place_distance_widget.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/domain/entities/place.dart';
+import 'package:sigacidades/presentation/place/screens/place_page.dart'; // Importando a página de detalhes (PlacePage)
 
 class DistancesPage extends StatelessWidget {
   static const routeName = '/distances';
@@ -90,9 +91,21 @@ class DistancesPage extends StatelessWidget {
                 final place = placeData['place'] as Place;
                 final distance = placeData['distance'] as double;
 
-                return PlaceDistanceWidget(
-                  place: place,
-                  distance: distance,
+                // Adiciona GestureDetector para navegar para PlacePage
+                return GestureDetector(
+                  onTap: () {
+                    // Navega para PlacePage ao clicar no card
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PlacePage(place: place),
+                      ),
+                    );
+                  },
+                  child: PlaceDistanceWidget(
+                    place: place,
+                    distance: distance,
+                  ),
                 );
               },
             );

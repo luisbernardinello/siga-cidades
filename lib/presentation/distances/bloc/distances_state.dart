@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:sigacidades/domain/entities/place.dart';
 
 // ====================================
 // Estados do BLoC de distâncias

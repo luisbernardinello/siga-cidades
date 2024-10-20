@@ -16,12 +16,7 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
   // ====================================
   Future<bool> _checkLocationService() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      emit(DistancesError(
-          "Serviço de localização está desativado. Por favor, ative-o nas configurações."));
-      return false;
-    }
-    return true;
+    return serviceEnabled;
   }
 
   // ====================================
@@ -35,7 +30,11 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
       emit(DistancesLoading());
 
       // Verificar se o serviço de localização está habilitado
-      if (!await _checkLocationService()) return;
+      if (!await _checkLocationService()) {
+        emit(DistancesError(
+            "Serviço de localização está desativado. Por favor, ative-o nas configurações."));
+        return;
+      }
 
       // Verificar e solicitar permissão de localização
       LocationPermission permission = await Geolocator.checkPermission();

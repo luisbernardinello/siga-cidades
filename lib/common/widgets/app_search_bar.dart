@@ -40,51 +40,70 @@ class _AppSearchBarState extends State<AppSearchBar> {
       selectedCity = context.read<CategoryBloc>().selectedCity;
     }
 
-    return Container(
-      width: 390,
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Color(0xFFE4E4E4),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: widget.onMenuTap,
+    return Row(
+      crossAxisAlignment:
+          CrossAxisAlignment.center, // Alinhamento vertical correto
+      children: [
+        // Ícone do Drawer (fora da barra de busca)
+        GestureDetector(
+          onTap: widget.onMenuTap,
+          child: Container(
+            width: 32,
+            height: 32,
+            alignment:
+                Alignment.center, // Centraliza o ícone dentro do container
             child: Icon(Icons.menu, color: Color(0xFF080808)),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              style: TextStyle(
-                color: Color(0xFF737373),
-                fontSize: 12,
-                fontWeight: FontWeight.w300,
-              ),
-              decoration: InputDecoration(
-                hintText: selectedCity != null
-                    ? 'Pesquise por locais em $selectedCity'
-                    : 'Pesquise por locais',
-                hintStyle: TextStyle(
-                  color: Color(0xFF737373),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w300,
+        ),
+        const SizedBox(width: 12),
+
+        // Campo de busca (separado do ícone do menu)
+        Expanded(
+          child: Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: const Color(0xFFE4E4E4),
+            ),
+            child: Row(
+              children: [
+                // Campo de texto para busca
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(
+                      color: Color(0xFF737373),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: selectedCity != null
+                          ? 'Pesquise por locais em $selectedCity'
+                          : 'Pesquise por locais',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF737373),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
-                border: InputBorder.none,
-              ),
+                const SizedBox(width: 8),
+                // Botão de pesquisa (ícone de lupa)
+                GestureDetector(
+                  onTap: () {
+                    _showSearchModal(
+                        context, _searchController.text, selectedCity);
+                  },
+                  child: const Icon(Icons.search, color: Color(0xFF131313)),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              _showSearchModal(context, _searchController.text, selectedCity);
-            },
-            child: Icon(Icons.search, color: Color(0xFF131313)),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -93,14 +112,15 @@ class _AppSearchBarState extends State<AppSearchBar> {
       BuildContext context, String query, String? selectedCity) async {
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Digite algo para pesquisar.')),
+        const SnackBar(content: Text('Digite algo para pesquisar.')),
       );
       return;
     }
 
     if (selectedCity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selecione uma cidade antes de pesquisar.')),
+        const SnackBar(
+            content: Text('Selecione uma cidade antes de pesquisar.')),
       );
       return;
     }
@@ -118,39 +138,53 @@ class _AppSearchBarState extends State<AppSearchBar> {
       context: context,
       builder: (BuildContext bc) {
         return Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           height: MediaQuery.of(context).size.height * 0.4,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 'Resultados da Pesquisa para $selectedCity',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: searchResults.length,
-                  itemBuilder: (context, index) {
-                    final place = searchResults[index];
-                    return ListTile(
-                      title: Text(place.name),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PlacePage(place: place),
-                          ),
-                        );
-                      },
-                    );
-                  },
+              // Verifica se a lista de resultados está vazia
+              if (searchResults.isEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Local não encontrado',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: searchResults.length,
+                    itemBuilder: (context, index) {
+                      final place = searchResults[index];
+                      return ListTile(
+                        title: Text(place.name),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PlacePage(place: place),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
             ],
           ),
         );

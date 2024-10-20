@@ -70,10 +70,29 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
           // ====================================
+          // Seção: Linha divisória abaixo da barra de busca
+          // ====================================
+          Positioned(
+            top: 120, // Alinha logo abaixo da AppSearchBar
+            left: 16,
+            right: 16,
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 2,
+                  color: const Color(0xFFE4E4E4), // Linha divisória
+                ),
+                const SizedBox(height: 16), // Espaçamento após a linha
+              ],
+            ),
+          ),
+
+          // ====================================
           // Seção: Conteúdo dinâmico
           // ====================================
           Positioned(
-            top: 120,
+            top: 120, // Alinha o conteúdo após a linha divisória e o padding
             left: 0,
             right: 0,
             bottom: 0,
