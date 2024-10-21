@@ -39,6 +39,8 @@ dependencies:
   diacritic: ^0.1.6
   cloud_firestore: ^5.4.4
   geolocator: ^13.0.1
+  flutter_dotenv: ^5.2.1
+  mailer: ^6.2.0
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +64,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - .env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

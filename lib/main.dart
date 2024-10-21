@@ -11,8 +11,13 @@ import 'package:sigacidades/presentation/maps/screens/maps_page.dart';
 import 'package:sigacidades/presentation/about/screens/about_page.dart';
 import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
 import 'package:provider/provider.dart'; // Import para usar o Provider
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 
-void main() {
+// Função principal para rodar o app.
+Future main() async {
+  // Carrega o arquivo .env
+  await dotenv.load(fileName: '.env');
+
   runApp(MyApp());
 }
 
