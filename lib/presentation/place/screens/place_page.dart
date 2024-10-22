@@ -1,10 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:sigacidades/domain/entities/place.dart';
+import 'package:map_launcher/map_launcher.dart'; // Import map_launcher
+import 'package:flutter_svg/flutter_svg.dart'; // Para usar ícones SVG do map_launcher
 
 class PlacePage extends StatelessWidget {
   final Place place; // Instância do lugar que representa o lugar clicado
 
   const PlacePage({Key? key, required this.place}) : super(key: key);
+
+  // Função para abrir o Map Launcher com os mapas disponíveis no dispositivo
+  Future<void> _openInMapLauncher(BuildContext context) async {
+    final availableMaps = await MapLauncher.installedMaps;
+
+    if (availableMaps.isNotEmpty) {
+      await showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Wrap(
+                children: availableMaps.map((map) {
+                  return ListTile(
+                    onTap: () {
+                      map.showMarker(
+                        coords: Coords(
+                          place.coordinates.latitude,
+                          place.coordinates.longitude,
+                        ),
+                        title: place.name,
+                        description: place.adress,
+                      );
+                      Navigator.pop(context);
+                    },
+                    title: Text(map.mapName),
+                    leading: SvgPicture.asset(
+                      map.icon, // Ícone do app de mapas
+                      height: 30, // Tamanho do ícone
+                      width: 30,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      // Se nenhum app de mapas for encontrado, exibe uma mensagem
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nenhum aplicativo de mapas encontrado.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +116,35 @@ class PlacePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Continuaria a partir daqui caso não mude essa página
+                  // Exibe o endereço do local
+                  Text(
+                    'Endereço: ${place.adress}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Exibe a descrição do local
+                  Text(
+                    place.description,
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Botão para abrir no maps
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _openInMapLauncher(context),
+                      icon: const Icon(Icons.map),
+                      label: const Text('Abrir no Maps'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Para carregar variáveis de ambiente
 import 'package:sigacidades/core/utils/feedback_utils.dart'; // Para carregar o template HTML do corpo do e-mail
+import 'dart:io'; // Importa a biblioteca para detectar o dispositivo
 
 // ====================================
 // FeedbackPage: Formulário para Envio de Feedback
@@ -100,15 +101,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
       return;
     }
 
+    // Identifica o dispositivo (Android ou iOS)
+    String device = Platform.isAndroid
+        ? 'Android'
+        : Platform.isIOS
+            ? 'iOS'
+            : 'Outro';
+
     // Configura o servidor SMTP do Gmail
     final smtpServer = gmail(username, password);
 
-// Cria a mensagem de e-mail com formatação HTML do template da core/utils/feedback_utils.dart
+    // Cria a mensagem de e-mail com formatação HTML do template da core/utils/feedback_utils.dart
     final emailMessage = Message()
       ..from = Address(username, 'Sigacidades Feedback')
       ..recipients.add('luisbernardinello@gmail.com')
       ..subject = 'Feedback enviado por $name'
-      ..html = generateFeedbackEmailHTML(name, email, message);
+      ..html = generateFeedbackEmailHTML(name, email, message, device);
 
     try {
       // Tenta enviar o e-mail

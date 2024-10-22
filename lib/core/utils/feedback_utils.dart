@@ -1,5 +1,6 @@
 // Template em HTML para enviar o feedback por e-mail
-String generateFeedbackEmailHTML(String name, String email, String message) {
+String generateFeedbackEmailHTML(
+    String name, String email, String message, String device) {
   return '''
   <html>
     <body style="font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
@@ -22,6 +23,7 @@ String generateFeedbackEmailHTML(String name, String email, String message) {
                   <br>
                   <p><strong>Nome do usuário:</strong> $name</p>
                   <p><strong>E-mail:</strong> $email</p>
+                  <p><strong>Dispositivo de origem:</strong> $device</p>
                   <p><strong>Mensagem:</strong></p>
                   <p>$message</p>
                 </td>

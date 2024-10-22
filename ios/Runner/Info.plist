@@ -48,8 +48,10 @@
 
 	<!-- Permissões de localização para iOS -->
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos.</string>
+	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos e locais no mapa.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos, mesmo quando o aplicativo estiver em segundo plano.</string>
+	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos e locais no mapa, mesmo quando o aplicativo estiver em segundo plano.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Precisamos acessar sua localização para mostrar os locais no mapa.</string>
 </dict>
 </plist>

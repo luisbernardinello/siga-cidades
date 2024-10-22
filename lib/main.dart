@@ -10,6 +10,7 @@ import 'package:sigacidades/presentation/main_screen.dart';
 import 'package:sigacidades/presentation/maps/screens/maps_page.dart';
 import 'package:sigacidades/presentation/about/screens/about_page.dart';
 import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
+import 'package:sigacidades/presentation/maps/bloc/maps_bloc.dart'; // Importando MapsBloc
 import 'package:provider/provider.dart'; // Import para usar o Provider
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 
@@ -40,6 +41,10 @@ class MyApp extends StatelessWidget {
           BlocProvider<CategoryBloc>(
             create: (context) => CategoryBloc(placeRepository)
               ..add(SelectCategoryEvent(0)), // Evento inicial de categoria.
+          ),
+          // MapsBloc para gerenciar o estado do MapsPage.
+          BlocProvider<MapsBloc>(
+            create: (context) => MapsBloc(placeRepository),
           ),
         ],
         // ====================================
