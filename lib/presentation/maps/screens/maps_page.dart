@@ -29,7 +29,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
   // Lista de marcadores para exibir no mapa
   final List<Marker> _markers = [];
 
-  // Definimos os limites da América do Sul
+  // Limites da América do Sul
   final LatLngBounds _southAmericaBounds = LatLngBounds(
     LatLng(-56.0, -81.0), // Extremo sudoeste (Chile)
     LatLng(13.0, -34.0), // Extremo nordeste (Venezuela)
@@ -45,16 +45,21 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     // Inicializa o MapController
     _mapController = MapController();
 
-    // Dispara o evento Bloc para carregar a localização do usuário e os lugares
+    // ENvia o evento Bloc para carregar a localização do usuário e os lugares
     context.read<MapsBloc>().add(LoadUserLocationAndPlaces());
   }
 
   // ====================================
   // Função para animar o movimento do mapa
   // ====================================
-  // Anima suavemente a transição do mapa para uma nova posição e nível de zoom
-  // Utilizamos o Tween<double> para criar uma interpolação entre os valores de latitude, longitude e zoom.
-  // O AnimationController controla a animação e o TickerProviderStateMixin é usado para sincronizar essa animação com o tempo de tela.
+
+  // Torna suave a transição do mapa para uma nova posição e nível de zoom (zoom in e zoom out),
+  // em vez de mudar agressivamente.
+  // Tween<double> cria uma interpolação (pega dois valores (início e fim) e gera valores intermediários).
+  // Faz isso para valores de latitude, longitude e zoom.
+  // AnimationController controla a animação e o TickerProviderStateMixin é usado para sincronizar
+  // essa animação com o tempo de tela.
+
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     final camera = _mapController.camera;
 
@@ -70,16 +75,16 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     final controller = AnimationController(
       duration:
           const Duration(milliseconds: 300), // Duração da animação (300ms)
-      vsync: this, // Vsync usado para gerenciar a animação de forma eficiente
+      vsync: this,
     );
 
-    // Definimos a curva de animação, que usa um movimento suave de início e término (easeInOut).
+    // Curva de animação, usa um movimento easeInOut para ficar suave no início e no fim.
     final Animation<double> animation = CurvedAnimation(
       parent: controller,
       curve: Curves.easeInOut,
     );
 
-    // O listener atualiza o mapa à medida que a animação é executada.
+    // O listener faz a atualização do mapa conforme a animação é executada.
     controller.addListener(() {
       _mapController.move(
         LatLng(
