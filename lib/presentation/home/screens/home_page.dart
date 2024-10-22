@@ -8,8 +8,13 @@ import 'package:sigacidades/presentation/home/widgets/place_card.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 import 'package:sigacidades/core/utils/category_utils.dart';
 
+// ====================================
+// Classe HomePage (Tela Inicial)
+// ====================================
+// Tela principal que exibe as categorias e lugares. Usa o Bloc para gerenciar
+// o estado da tela com base na seleção de categorias.
 class HomePage extends StatelessWidget {
-  static const routeName = '/home';
+  static const routeName = '/home'; // Nome da rota para navegação
 
   const HomePage({super.key});
 
@@ -22,6 +27,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
+
           // ====================================
           // Seção: Título "Explore"
           // ====================================
@@ -41,6 +47,7 @@ class HomePage extends StatelessWidget {
           BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
               if (state is CategoryLoaded) {
+                // Exibe as categorias como botões horizontais
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -48,6 +55,7 @@ class HomePage extends StatelessWidget {
                       getCategoryNames().length,
                       (index) => GestureDetector(
                         onTap: () {
+                          // Dispara evento de seleção de categoria
                           context
                               .read<CategoryBloc>()
                               .add(SelectCategoryEvent(index));
@@ -57,7 +65,9 @@ class HomePage extends StatelessWidget {
                               right: 8.0), // Espaçamento entre categorias
                           child: categoryTag(
                             getCategoryNames()[index],
-                            index == state.selectedIndex,
+                            index ==
+                                state
+                                    .selectedIndex, // Verifica se a categoria está selecionada
                           ),
                         ),
                       ),
@@ -65,15 +75,16 @@ class HomePage extends StatelessWidget {
                   ),
                 );
               } else if (state is CategoryLoading) {
+                // Exibe o loading enquanto carrega as categorias
                 return const Center(child: CircularProgressIndicator());
               } else if (state is CategoryError) {
+                // Exibe mensagem de erro se não conseguir carregar as categorias
                 return Center(child: Text(state.message));
               } else {
                 return Container();
               }
             },
           ),
-
           const SizedBox(height: 20),
 
           // ====================================
@@ -83,19 +94,24 @@ class HomePage extends StatelessWidget {
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
                 if (state is CategoryLoaded) {
+                  // Exibe os lugares em um GridView
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Duas colunas no grid
+                      crossAxisCount: 2, // Número de colunas no grid
                       crossAxisSpacing:
-                          16.0, // Espaçamento horizontal entre cards
-                      mainAxisSpacing: 16.0, // Espaçamento vertical entre cards
-                      childAspectRatio: 1.2, // Proporção largura/altura
+                          16.0, // Espaçamento horizontal entre os cards
+                      mainAxisSpacing:
+                          16.0, // Espaçamento vertical entre os cards
+                      childAspectRatio:
+                          1.2, // Proporção largura/altura dos cards
                     ),
-                    itemCount: state.filteredPlaces.length,
+                    itemCount: state
+                        .filteredPlaces.length, // Número de lugares filtrados
                     itemBuilder: (context, index) {
-                      final place = state.filteredPlaces[index];
+                      final place =
+                          state.filteredPlaces[index]; // Obtém o lugar atual
 
                       // Adiciona GestureDetector para navegar para PlacePage
                       return GestureDetector(
@@ -108,14 +124,17 @@ class HomePage extends StatelessWidget {
                             ),
                           );
                         },
-                        child: placeCard(place),
+                        child: placeCard(place), // Exibe o card do lugar
                       );
                     },
                   );
                 } else if (state is CategoryLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                      child:
+                          CircularProgressIndicator()); // Exibe loading enquanto carrega os lugares
                 } else if (state is CategoryError) {
-                  return Center(child: Text(state.message));
+                  return Center(
+                      child: Text(state.message)); // Exibe mensagem de erro
                 } else {
                   return Container();
                 }

@@ -6,23 +6,32 @@ import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
+// ====================================
+// AppSearchBar: Barra de pesquisa customizada
+// ====================================
+// AppSearchBar permite ao usuário pesquisar locais com base na cidade
+// selecionada. Ela contém um campo de texto para a busca e um ícone que
+// abre o menu do drawer. É utilizado o CategoryBloc para obter a cidade selecionada
+// O resultado é filtrado de acordo com o nome dos locais da cidade selecionada.
 class AppSearchBar extends StatefulWidget {
-  final VoidCallback onMenuTap;
-  final PlaceRepository placeRepository;
+  final VoidCallback onMenuTap; // Callback para abrir o Drawer.
+  final PlaceRepository placeRepository; // Repositório para busca de locais.
 
   const AppSearchBar({
-    Key? key,
+    super.key,
     required this.onMenuTap,
     required this.placeRepository,
-  }) : super(key: key);
+  });
 
   @override
   _AppSearchBarState createState() => _AppSearchBarState();
 }
 
 class _AppSearchBarState extends State<AppSearchBar> {
+  // Controlador para receber o texto digitado pelo usuário no campo de pesquisa.
   final TextEditingController _searchController = TextEditingController();
 
+  // Limpa o controlador, para evitar vazamento de memória.
   @override
   void dispose() {
     _searchController.dispose();
@@ -31,53 +40,68 @@ class _AppSearchBarState extends State<AppSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtemos o estado atual do CategoryBloc para usar a cidade selecionada
+    // ====================================
+    // Recebe o estado atual do CategoryBloc
+    // ====================================
+    // CategoryBloc para determinar qual cidade foi selecionada
     final state = context.watch<CategoryBloc>().state;
 
-    // Cidade selecionada no estado atual
+    // Cidade atualmente selecionada pelo usuário.
     String? selectedCity;
     if (state is CategoryLoaded) {
       selectedCity = context.read<CategoryBloc>().selectedCity;
     }
 
+    // ====================================
+    // Layout da AppSearchBar
+    // ====================================
+    // A barra de pesquisa contem um ícone de menu na esquerda e um
+    // campo de texto na direita, no qual o usuário pode digitar sua busca.
     return Row(
       crossAxisAlignment:
-          CrossAxisAlignment.center, // Alinhamento vertical correto
+          CrossAxisAlignment.center, // Alinhamento vertical dos elementos.
       children: [
-        // Ícone do Drawer (fora da barra de busca)
+        // ====================================
+        // Ícone do Drawer
+        // ====================================
+        // O ícone permite ao usuário abrir o DrawerMenu.
         GestureDetector(
-          onTap: widget.onMenuTap,
+          onTap: widget.onMenuTap, // Abre o Drawer quando clicado.
           child: Container(
             width: 32,
             height: 32,
-            alignment:
-                Alignment.center, // Centraliza o ícone dentro do container
-            child: Icon(Icons.menu, color: Color(0xFF080808)),
+            alignment: Alignment.center, // Centraliza o ícone no container.
+            child: const Icon(Icons.menu, color: Color(0xFF080808)),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 12), // Espaço entre o ícone e o campo de busca.
 
-        // Campo de busca (separado do ícone do menu)
+        // ====================================
+        // Campo de busca
+        // ====================================
+        // O campo de busca permite que o usuário digite o nome de um local
+        // e faça uma pesquisa. O contexto da pesquisa é a cidade selecionada.
         Expanded(
           child: Container(
-            height: 56,
+            height: 56, // Altura do campo de busca.
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: const Color(0xFFE4E4E4),
+              borderRadius: BorderRadius.circular(24), // Borda arredondada.
+              color: const Color(0xFFE4E4E4), // Cor de fundo.
             ),
             child: Row(
               children: [
                 // Campo de texto para busca
                 Expanded(
                   child: TextField(
-                    controller: _searchController,
+                    controller: _searchController, // Controlador do texto.
                     style: const TextStyle(
                       color: Color(0xFF737373),
                       fontSize: 12,
                       fontWeight: FontWeight.w300,
                     ),
                     decoration: InputDecoration(
+                      // Placeholder que indica a cidade selecionada.
                       hintText: selectedCity != null
                           ? 'Pesquise por locais em $selectedCity'
                           : 'Pesquise por locais',
@@ -90,8 +114,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                // Botão de pesquisa (ícone de lupa)
+                const SizedBox(width: 8), // Espaço antes do ícone de pesquisa.
+
+                // ====================================
+                // Ícone de pesquisa (lupa)
+                // ====================================
+                // Ao clicar no ícone, o modal de resultados da pesquisa é exibido.
                 GestureDetector(
                   onTap: () {
                     _showSearchModal(
@@ -107,9 +135,17 @@ class _AppSearchBarState extends State<AppSearchBar> {
     );
   }
 
-  // Exibe o modal com os resultados da pesquisa
+  // ====================================
+  // _showSearchModal: Exibe o modal de resultados da pesquisa
+  // ====================================
+  // Quando o usuário faz uma pesquisa, o método busca os locais com base
+  // no texto digitado e na cidade selecionada. O resultado da busca é
+  // mostrado em um modal na parte inferior da tela.
   void _showSearchModal(
       BuildContext context, String query, String? selectedCity) async {
+    // ====================================
+    // Validações para a pesquisa
+    // ====================================
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Digite algo para pesquisar.')),
@@ -125,15 +161,26 @@ class _AppSearchBarState extends State<AppSearchBar> {
       return;
     }
 
+    // ====================================
+    // Busca pelos locais
+    // ====================================
+    // Normaliza a string de busca (remove acentos e converte para minusculo)
+    // assim garante que a pesquisa não seja sensivel
     final normalizedQuery = removeDiacritics(query).toLowerCase();
     final allPlaces =
         await widget.placeRepository.fetchPlacesByCity(selectedCity);
 
+    // Filtra os resultados com base no nome do local.
     final searchResults = allPlaces
         .where((place) => removeDiacritics(place.name.toLowerCase())
             .contains(normalizedQuery))
         .toList();
 
+    // ====================================
+    // Exibição dos resultados em um modal
+    // ====================================
+    // O modal exibe a lista de locais encontrados,
+    // ou msg de erro de que nenhum local foi encontrado.
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -143,6 +190,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              // Título do modal, mostra a cidade pesquisada.
               Text(
                 'Resultados da Pesquisa para $selectedCity',
                 style: const TextStyle(
@@ -151,12 +199,13 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 ),
               ),
               const SizedBox(height: 10),
-              // Verifica se a lista de resultados está vazia
+
+              // Verifica se existem resultados.
               if (searchResults.isEmpty)
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Local não encontrado',
+                    'Local não encontrado', // Mensagem de erro.
                     style: TextStyle(
                       color: Colors.red,
                       fontSize: 16,
@@ -165,6 +214,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                   ),
                 )
               else
+                // Lista os resultados da busca.
                 Expanded(
                   child: ListView.builder(
                     itemCount: searchResults.length,
@@ -173,6 +223,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       return ListTile(
                         title: Text(place.name),
                         onTap: () {
+                          // Ao clicar em um local, vai para a pagina de detalhes do lugar.
                           Navigator.pop(context);
                           Navigator.push(
                             context,

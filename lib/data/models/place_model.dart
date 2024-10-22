@@ -5,7 +5,7 @@ import 'package:sigacidades/domain/entities/place.dart';
 class PlaceModel extends Place {
   PlaceModel({
     required String name,
-    required String city, // Adiciona o campo city
+    required String city,
     required String category,
     required String description,
     required String adress,
@@ -16,7 +16,7 @@ class PlaceModel extends Place {
     required GeoPoint coordinates,
   }) : super(
           name: name,
-          city: city, // Passa o city para a entidade
+          city: city,
           category: category,
           description: description,
           adress: adress,
@@ -31,7 +31,7 @@ class PlaceModel extends Place {
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
       name: json['name'],
-      city: json['city'], // Converte o campo city do JSON
+      city: json['city'],
       category: json['category'],
       description: json['description'],
       adress: json['adress'],
@@ -39,7 +39,7 @@ class PlaceModel extends Place {
       imgDescription: json['imgDescription'],
       linkAD: json['linkAD'],
       linkHist: json['linkHist'],
-      coordinates: json['coordinates'], // Assumimos que o GeoPoint está no JSON
+      coordinates: json['coordinates'],
     );
   }
 
@@ -47,7 +47,7 @@ class PlaceModel extends Place {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'city': city, // Inclui o city na conversão para JSON
+      'city': city,
       'category': category,
       'description': description,
       'adress': adress,
@@ -55,7 +55,7 @@ class PlaceModel extends Place {
       'imgDescription': imgDescription,
       'linkAD': linkAD,
       'linkHist': linkHist,
-      'coordinates': coordinates, // Inclui o GeoPoint
+      'coordinates': coordinates,
     };
   }
 }

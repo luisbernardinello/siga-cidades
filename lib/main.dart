@@ -10,15 +10,22 @@ import 'package:sigacidades/presentation/main_screen.dart';
 import 'package:sigacidades/presentation/maps/screens/maps_page.dart';
 import 'package:sigacidades/presentation/about/screens/about_page.dart';
 import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
-import 'package:sigacidades/presentation/maps/bloc/maps_bloc.dart'; // Importando MapsBloc
-import 'package:provider/provider.dart'; // Import para usar o Provider
+import 'package:sigacidades/presentation/maps/bloc/maps_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 // Função principal para rodar o app.
 Future main() async {
+  // Inicializa os Widgets
+  WidgetsFlutterBinding.ensureInitialized();
   // Carrega o arquivo .env
   await dotenv.load(fileName: '.env');
-
+  // Inicializa o backend de cache do FMTC (flutter_map_tile_caching)
+  await FMTCObjectBoxBackend().initialise();
+  // Cria o store para cache de tiles
+  await FMTCStore('mapStore').manage.create();
+  // Dá inicio ao app após os carregamentos iniciais
   runApp(MyApp());
 }
 
@@ -60,7 +67,7 @@ class MyApp extends StatelessWidget {
           // initialRoute: Define a rota inicial da aplicação como a HomePage.
           initialRoute: MainScreen.routeName,
 
-          // **Rotas nomeadas**: Definimos todas as rotas da aplicação.
+          // Rotas nomeadas: Aqui é definido todas as rotas do app.
           routes: {
             MainScreen.routeName: (context) => const MainScreen(),
             HomePage.routeName: (context) => const HomePage(),

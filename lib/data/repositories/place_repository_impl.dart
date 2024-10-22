@@ -142,4 +142,49 @@ class PlaceRepositoryImpl implements PlaceRepository {
     // Retorna os 9 lugares mais próximos com suas distâncias
     return placesWithDistance.take(9).toList();
   }
+
+  // ====================================
+  // Busca todos os lugares com base na posição do usuário (sem limite)
+  // ====================================
+  @override
+  Future<List<Place>> fetchPlacesMap(Position userPosition) async {
+    List<Place> allNearbyPlaces = [];
+
+    // Adiciona lugares e calcula a distância para ordenar pela proximidade
+    for (var place in allPlaces) {
+      // ignore: unused_local_variable
+      double distanceInMeters = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        place.coordinates.latitude,
+        place.coordinates.longitude,
+      );
+
+      // Adiciona lugar na lista de lugares próximos
+      allNearbyPlaces.add(place);
+    }
+
+    // Ordena os lugares pela proximidade
+    allNearbyPlaces.sort((a, b) {
+      double distanceA = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        a.coordinates.latitude,
+        a.coordinates.longitude,
+      );
+
+      double distanceB = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        b.coordinates.latitude,
+        b.coordinates.longitude,
+      );
+
+      // Ordena do mais próximo para o mais distante
+      return distanceA.compareTo(distanceB);
+    });
+
+    // Retorna a lista de lugares ordenados
+    return allNearbyPlaces;
+  }
 }

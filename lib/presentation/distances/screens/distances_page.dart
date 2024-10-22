@@ -6,21 +6,23 @@ import 'package:sigacidades/presentation/distances/bloc/distances_state.dart';
 import 'package:sigacidades/presentation/distances/widgets/place_distance_widget.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/presentation/place/screens/place_page.dart'; // Importando a página de detalhes (PlacePage)
+import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
+/// Página que exibe os locais próximos ao usuário.
+/// Utiliza o padrão Bloc para gerenciar o estado da busca de locais.
 class DistancesPage extends StatelessWidget {
-  static const routeName = '/distances';
+  static const routeName = '/distances'; // Nome da rota para navegação
 
   const DistancesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Mantemos a lógica do DistancesBloc para obter os lugares e distâncias
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16.0), // Espaçamento lateral
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0), // Define a margem lateral da página
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start, // Alinhamento do conteúdo na esquerda
         children: [
           const SizedBox(height: 16),
 
@@ -42,24 +44,28 @@ class DistancesPage extends StatelessWidget {
           // ====================================
           Expanded(
             child: BlocProvider(
+              // BLoC responsável por buscar os lugares próximos
               create: (context) => DistancesBloc(
                   context.read<PlaceRepository>())
-                ..add(FetchNearbyPlacesEvent()), // Carregar lugares próximos
+                ..add(
+                    FetchNearbyPlacesEvent()), // Evento para carregar lugares próximos
               child: BlocBuilder<DistancesBloc, DistancesState>(
                 builder: (context, state) {
                   if (state is DistancesLoading) {
-                    // Exibe um indicador de carregamento enquanto os lugares estão sendo carregados
+                    // Estado de carregamento, exibe o indicador de carregamento enquanto os lugares estão sendo buscados
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is DistancesPermissionRequired ||
                       state is DistancesError) {
-                    // Lógica de exibição de mensagem de erro ou permissão requerida
+                    // Mensagens de erro ou permissão necessária
                     String message;
                     if (state is DistancesPermissionRequired) {
-                      message = state.message;
+                      message =
+                          state.message; // Mensagem de permissão necessária
                     } else if (state is DistancesError) {
-                      message = state.message;
+                      message = state.message; // Mensagem de erro
                     } else {
-                      message = "Ocorreu um erro inesperado.";
+                      message =
+                          "Ocorreu um erro inesperado."; // Caso ocorra um erro não previsto
                     }
 
                     // Exibe a mensagem de erro centralizada
@@ -82,6 +88,7 @@ class DistancesPage extends StatelessWidget {
                             const SizedBox(height: 24),
                             ElevatedButton(
                               onPressed: () {
+                                // Botão de tentar novamente gera o evento para tentar buscar os lugares
                                 context
                                     .read<DistancesBloc>()
                                     .add(FetchNearbyPlacesEvent());
@@ -107,36 +114,44 @@ class DistancesPage extends StatelessWidget {
                       ),
                     );
                   } else if (state is DistancesLoaded) {
-                    // Quando os lugares e distâncias são carregados
-                    final nearbyPlaces = state.nearbyPlacesWithDistances;
+                    // Quando os lugares e distâncias são carregados com sucesso
+                    final nearbyPlaces = state
+                        .nearbyPlacesWithDistances; // Lista de lugares e suas distâncias
 
                     return ListView.builder(
-                      itemCount: nearbyPlaces.length,
+                      itemCount: nearbyPlaces
+                          .length, // Define a quantidade de itens na lista
                       itemBuilder: (context, index) {
-                        final placeData = nearbyPlaces[index];
-                        final place = placeData['place'] as Place;
-                        final distance = placeData['distance'] as double;
+                        final placeData = nearbyPlaces[
+                            index]; // Dados do lugar no index atual
+                        final place =
+                            placeData['place'] as Place; // Instância do lugar
+                        final distance = placeData['distance']
+                            as double; // Distância do lugar
 
-                        // Adiciona GestureDetector para navegar para PlacePage
+                        // Adiciona GestureDetector para navegação ao PlacePage ao clicar no card
                         return GestureDetector(
                           onTap: () {
-                            // Navega para PlacePage ao clicar no card
+                            // Navega para a pagina de detalhes do lugar
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PlacePage(place: place),
+                                builder: (context) => PlacePage(
+                                    place:
+                                        place), // Passa o lugar selecionado para PlacePage
                               ),
                             );
                           },
                           child: PlaceDistanceWidget(
-                            place: place,
-                            distance: distance,
+                            place: place, // Passa o lugar para o widget
+                            distance:
+                                distance, // Passa a distância para o widget
                           ),
                         );
                       },
                     );
                   }
-                  return Container(); // Estado padrão
+                  return Container(); // Retorna um container vazio para o estado padrão
                 },
               ),
             ),

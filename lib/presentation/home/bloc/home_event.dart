@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-// O `CategoryEvent` define os eventos que podem ocorrer no BLoC.
+// O CategoryEvent define os eventos que podem ocorrer no BLoC.
 // Esses eventos representam as ações que a interface da camada de presentation envia para o BLoC processar.
 abstract class CategoryEvent extends Equatable {
   @override

@@ -15,4 +15,7 @@ abstract class PlaceRepository {
   Future<List<Map<String, dynamic>>> fetchNearbyPlaces(
       Position
           userPosition); // Atualizado para retornar um mapa contendo Place e distância
+
+  // Busca todos os lugares com base na posição do usuário para o mapa.
+  Future<List<Place>> fetchPlacesMap(Position userPosition);
 }

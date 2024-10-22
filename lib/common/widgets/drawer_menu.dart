@@ -4,29 +4,44 @@ import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
 import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 
+// ====================================
+// DrawerMenu: Menu lateral de seleção de cidade
+// ====================================
+// O DrawerMenu permite ao usuário selecionar uma cidade da lista.
+// Quando uma cidade é selecionada, a aplicação vai filtrar os dados
+// com base na cidade escolhida. O onCitySelected envia a cidade para o widget pai
+// O CategoryBloc é acionado para armazenar a cidade selecionada.
 class DrawerMenu extends StatelessWidget {
-  final Function(String) onCitySelected;
+  final Function(String)
+      onCitySelected; // Callback que recebe a cidade selecionada.
 
   const DrawerMenu({
-    Key? key,
+    super.key,
     required this.onCitySelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      // ====================================
+      // Container que define o layout do Drawer
+      // ====================================
       child: Container(
         padding: const EdgeInsets.only(
-          top: 100,
+          top: 100, // Espaço para para o título.
           left: 16,
           right: 16,
           bottom: 24,
         ),
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration:
+            const BoxDecoration(color: Colors.white), // Cor de fundo do Drawer.
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Alinha o conteúdo na esquerda.
           children: [
-            // Título "SIGA CIDADES"
+            // ====================================
+            // Título do Drawer
+            // ====================================
             const Text(
               'SIGA CIDADES',
               style: TextStyle(
@@ -36,12 +51,14 @@ class DrawerMenu extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 40), // Espaço maior antes das cidades
+            const SizedBox(height: 40), // Espaço entre o titulo e as cidades.
 
-            // Seção de cidades
+            // ====================================
+            // Opções de cidades
+            // ====================================
             BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
-                // Cidades que podem ser selecionadas
+                // Exibe as cidades como opções no Drawer.
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -60,14 +77,18 @@ class DrawerMenu extends StatelessWidget {
     );
   }
 
-  // Método para cada opção de cidade no Drawer
+  // ====================================
+  // _buildCityOption: Opção de cidade no Drawer.
+  // ====================================
+  // Cada cidade ao ser clicada envia um evento para o CategoryBloc e atualiza o estado da cidade selecionada.
   Widget _buildCityOption(BuildContext context, String cityName) {
     return GestureDetector(
       onTap: () {
-        // lógica do Bloc para selecionar a cidade
+        // Envia o evento para atualizar a cidade selecionada no CategoryBloc.
         context.read<CategoryBloc>().add(SelectCityEvent(cityName));
-        onCitySelected(cityName); // Chama a função de callback
-        Navigator.pop(context); // Fecha o Drawer ao selecionar a cidade
+        onCitySelected(
+            cityName); // Notifica o widget pai sobre a cidade selecionada.
+        Navigator.pop(context); // Fecha o Drawer depois da seleção.
       },
       child: Text(
         cityName,
