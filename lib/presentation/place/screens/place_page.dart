@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:sigacidades/domain/entities/place.dart';
+import 'package:sigacidades/presentation/place/widgets/audio_player_widget.dart'; // Importa o AudioPlayerWidget
 import 'package:map_launcher/map_launcher.dart'; // Importa o map_launcher para abrir apps externos de mapas
-import 'package:flutter_svg/flutter_svg.dart'; // Para usar icones SVG do map_launcher (icone do Google Maps e os demais)
+import 'package:flutter_svg/flutter_svg.dart'; // Para usar ícones SVG do map_launcher
 
-// ====================================
-// Página de detalhes de um lugar em específico
-// ====================================
 class PlacePage extends StatelessWidget {
-  final Place place; // A instância do lugar selecionado
+  final Place place;
 
   const PlacePage({Key? key, required this.place}) : super(key: key);
 
-  // ====================================
-  // Função: Abre apps de mapas com o Map Launcher
-  // ====================================
   Future<void> _openInMapLauncher(BuildContext context) async {
-    final availableMaps = await MapLauncher
-        .installedMaps; // Busca os apps de mapas instalados no dispositivo
-
-    // Se existe algum, exibe uma lista de opções
+    final availableMaps = await MapLauncher.installedMaps;
     if (availableMaps.isNotEmpty) {
       await showModalBottomSheet(
         context: context,
@@ -26,29 +18,23 @@ class PlacePage extends StatelessWidget {
           return SafeArea(
             child: SingleChildScrollView(
               child: Wrap(
-                // Cria uma lista de apps de mapas do dispositivo
                 children: availableMaps.map((map) {
                   return ListTile(
-                    // Ao clicar, abre o mapa selecionado com o marcador do lugar
                     onTap: () {
                       map.showMarker(
                         coords: Coords(
                           place.coordinates.latitude,
                           place.coordinates.longitude,
                         ),
-                        title: place
-                            .name, // Passa parao app de mapa o título do lugar
-                        description:
-                            place.adress, // Passa o endereço na descrição
+                        title: place.name,
+                        description: place.adress,
                       );
-                      Navigator.pop(context); // Fecha o modal depois
+                      Navigator.pop(context);
                     },
-                    // Nome do app de mapas (ex: Google Maps, Waze, etc.)
                     title: Text(map.mapName),
-                    // Ícone do app de mapas
                     leading: SvgPicture.asset(
                       map.icon,
-                      height: 30, // Tamanho do ícone
+                      height: 30,
                       width: 30,
                     ),
                   );
@@ -59,7 +45,6 @@ class PlacePage extends StatelessWidget {
         },
       );
     } else {
-      // Se não houver apps de mapas disponíveis, exibe uma mensagem
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Nenhum aplicativo de mapas encontrado.'),
@@ -68,131 +53,93 @@ class PlacePage extends StatelessWidget {
     }
   }
 
-  // ====================================
-  // Widget build: Faz a interface da página
-  // ====================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start, // Alinhamento na esquerda
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
-                // ====================================
-                // Imagem do lugar
-                // ====================================
                 Image.network(
-                  place.imageUrl, // URL da imagem do lugar
-                  width: double.infinity, // Largura total da tela
-                  height: 250, // Altura fixa da imagem
-                  fit: BoxFit
-                      .cover, // A imagem cobre todo o espaço sem distorcer
+                  place.imageUrl,
+                  width: double.infinity,
+                  height: 250,
+                  fit: BoxFit.cover,
                 ),
-
-                // ====================================
-                // Botão "Voltar" posicionado sobre a imagem
-                // ====================================
                 Positioned(
-                  top: 40, // Margem superior
-                  left: 16, // Margem esquerda
+                  top: 40,
+                  left: 16,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Volta para a pagina anterior
+                      Navigator.pop(context);
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(
-                          8), // Espaçamento interno do botão
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(
-                            0.5), // Fundo com um pouco de transparência
-                        shape: BoxShape.circle, // Forma circular do botão
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons
-                            .arrow_back, // Ícone de de seta para a esquerda, para voltar
-                        color: Colors.white, // Cor branca para contraste
-                        size: 24, // Tamanho do ícone
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-
-            // ====================================
-            // Conteúdo
-            // ====================================
             Padding(
-              padding: const EdgeInsets.all(
-                  16.0), // Espaçamento ao redor do conteúdo
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start, // Alinha o texto na esquerda
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ====================================
-                  // Nome do lugar (título principal)
-                  // ====================================
                   Text(
-                    place.name, // Nome do lugar
+                    place.name,
                     style: const TextStyle(
-                      fontSize: 24, // Tamanho grande para destaque
-                      fontWeight: FontWeight.bold, // Negrito para destaque
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(
-                      height: 8), // Espaçamento vertical entre os textos
-
-                  // ====================================
-                  // Cidade do lugar
-                  // ====================================
+                  const SizedBox(height: 8),
                   Text(
-                    'Cidade: ${place.city}', // Exibe a cidade
+                    'Cidade: ${place.city}',
                     style: TextStyle(
-                      fontSize: 18, // Tamanho médio
-                      color: Colors.grey[600], // Cor cinza para o texto
+                      fontSize: 18,
+                      color: Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // ====================================
-                  // Endereço do lugar
-                  // ====================================
                   Text(
-                    'Endereço: ${place.adress}', // Exibe o endereço
+                    'Endereço: ${place.adress}',
                     style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w500, // Negrito
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // ====================================
-                  // Descrição do lugar
-                  // ====================================
                   Text(
-                    place.description, // Exibe a descrição do lugar
+                    place.description,
                     style: const TextStyle(
-                      fontSize: 16, // Tamanho normal
+                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // ====================================
-                  // Botão: "Abrir localização"
-                  // ====================================
+                  // Adiciona o player de áudio
+                  AudioPlayerWidget(place: place),
+
+                  const SizedBox(height: 24),
                   Center(
                     child: ElevatedButton.icon(
-                      onPressed: () => _openInMapLauncher(
-                          context), // chama o método de abrir map_launcher
-                      icon: const Icon(Icons.map), // Ícone de mapa no botão
-                      label: const Text('Abrir localização'), // Texto no botão
+                      onPressed: () => _openInMapLauncher(context),
+                      icon: const Icon(Icons.map),
+                      label: const Text('Abrir localização'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12), // Margem interna do botão
+                            horizontal: 24, vertical: 12),
                       ),
                     ),
                   ),

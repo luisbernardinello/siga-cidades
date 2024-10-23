@@ -29,7 +29,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imageUrl:
           'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/06/e2/9b/f0/horto-florestal-de-bauru.jpg?w=1200&h=1200&s=1',
       imgDescription: 'Entrada do Horto Florestal',
-      linkAD: 'https://audiodescricao-horto.com',
+      linkAD:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       linkHist: 'https://historia-horto.com',
       coordinates:
           GeoPoint(-22.314459, -49.062146), // Coordenada aleatória em Bauru
@@ -42,7 +43,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       adress: 'Av. Pedro de Toledo, 500, Bauru, SP',
       imageUrl: 'https://via.placeholder.com/164x100',
       imgDescription: 'Fachada do Casarão da Picanha',
-      linkAD: 'https://audiodescricao-casarao.com',
+      linkAD:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       linkHist: 'https://historia-casarao.com',
       coordinates:
           GeoPoint(-22.315488, -49.060902), // Coordenada aleatória em Bauru
@@ -55,7 +57,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       adress: 'Rua Primeiro de Agosto, 600, Bauru, SP',
       imageUrl: 'https://via.placeholder.com/164x100',
       imgDescription: 'Fachada do Bar do Roberto',
-      linkAD: 'https://audiodescricao-barroberto.com',
+      linkAD:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       linkHist: 'https://historia-barroberto.com',
       coordinates:
           GeoPoint(-22.316137, -49.065791), // Coordenada aleatória em Bauru
@@ -69,7 +72,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       adress: 'Rua das Palmeiras, 34, Presidente Prudente, SP',
       imageUrl: 'https://via.placeholder.com/164x100',
       imgDescription: 'Fachada do Bar do Juca',
-      linkAD: 'https://audiodescricao-barjuca.com',
+      linkAD:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       linkHist: 'https://historia-barjuca.com',
       coordinates: GeoPoint(-22.120929,
           -51.387166), // Coordenada aleatória em Presidente Prudente
