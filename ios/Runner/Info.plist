@@ -53,5 +53,15 @@
 	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos e locais no mapa, mesmo quando o aplicativo estiver em segundo plano.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Precisamos acessar sua localização para mostrar os locais no mapa.</string>
+	<!-- Permissões d para usar o audio_manager para iOS -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

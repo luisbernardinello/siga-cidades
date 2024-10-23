@@ -8,13 +8,15 @@ abstract class SongPlayerState extends Equatable {
   List<Object?> get props => [];
 }
 
+class SongPlayerInitial extends SongPlayerState {}
+
 // Estado inicial enquanto o áudio está carregando
 class SongPlayerLoading extends SongPlayerState {}
 
-// Estado quando o áudio foi carregado e está pronto para tocar
-class SongPlayerReady extends SongPlayerState {}
+// Estado inicial enquanto o áudio está carregando
+class SongPlayerBuffering extends SongPlayerState {}
 
-// Estado quando o áudio está em reprodução ou pronto para reproduzir
+// Estado quando o áudio foi carregado e está pronto para tocar
 class SongPlayerLoaded extends SongPlayerState {
   final bool isPlaying;
   final Duration position;

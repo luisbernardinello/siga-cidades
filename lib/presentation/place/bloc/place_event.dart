@@ -53,5 +53,11 @@ class UpdatePositionEvent extends SongPlayerEvent {
 // Evento para indicar que o áudio está em buffering
 class BufferingEvent extends SongPlayerEvent {}
 
+// Evento para indicar que o áudio está em buffering
+class TimeoutEvent extends SongPlayerEvent {}
+
 // Evento para indicar que o áudio está pronto para tocar
 class ReadyEvent extends SongPlayerEvent {}
+
+// Evento para resetar o player ao final do áudio
+class ResetPlayerEvent extends SongPlayerEvent {}

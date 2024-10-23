@@ -16,7 +16,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imageUrl: 'https://via.placeholder.com/164x100',
       imgDescription: 'Vista do bosque durante o dia',
       linkAD: 'https://audiodescricao-bosque.com',
-      linkHist: 'https://historia-bosque.com',
+      linkHist:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       coordinates:
           GeoPoint(-22.885897, -48.445049), // Coordenada aleatória em Botucatu
     ),
@@ -31,7 +32,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imgDescription: 'Entrada do Horto Florestal',
       linkAD:
           'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
-      linkHist: 'https://historia-horto.com',
+      linkHist:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       coordinates:
           GeoPoint(-22.314459, -49.062146), // Coordenada aleatória em Bauru
     ),
@@ -45,7 +47,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imgDescription: 'Fachada do Casarão da Picanha',
       linkAD:
           'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
-      linkHist: 'https://historia-casarao.com',
+      linkHist:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       coordinates:
           GeoPoint(-22.315488, -49.060902), // Coordenada aleatória em Bauru
     ),
@@ -59,7 +62,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imgDescription: 'Fachada do Bar do Roberto',
       linkAD:
           'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
-      linkHist: 'https://historia-barroberto.com',
+      linkHist:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       coordinates:
           GeoPoint(-22.316137, -49.065791), // Coordenada aleatória em Bauru
     ),
@@ -74,7 +78,8 @@ class PlaceRepositoryImpl implements PlaceRepository {
       imgDescription: 'Fachada do Bar do Juca',
       linkAD:
           'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
-      linkHist: 'https://historia-barjuca.com',
+      linkHist:
+          'https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3',
       coordinates: GeoPoint(-22.120929,
           -51.387166), // Coordenada aleatória em Presidente Prudente
     ),
