@@ -55,7 +55,7 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
 
       // Definindo as configurações de localização
       final LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high, // Precisão máxima da localização
+        accuracy: LocationAccuracy.medium, // Precisão máxima da localização
         distanceFilter:
             100, // Atualizar a localização quando o usuário mover 100 metros
       );
