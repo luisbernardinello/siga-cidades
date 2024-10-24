@@ -19,10 +19,10 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // Controla a página atual selecionada no `IndexedStack`
+  // Controla a página atual que foi selecionada no IndexedStack (definido na seção conteúdo dinâmico)
   int _selectedIndex = 0;
 
-  // Define todas as páginas que serão carregadas dinamicamente
+  // Lista com todas as páginas que serão carregadas dinamicamente
   final List<Widget> _pages = [
     const HomePage(),
     const DistancesPage(),
@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
       // ====================================
       drawer: DrawerMenu(
         onCitySelected: (city) {
-          // Lógica de seleção de cidade (se necessário)
+          // Caso de precisarmos fazer algo de acessibilidade quando a cidade é selecionada no drawer
         },
       ),
 
@@ -81,9 +81,9 @@ class _MainScreenState extends State<MainScreen> {
                 Container(
                   width: double.infinity,
                   height: 2,
-                  color: const Color(0xFFE4E4E4), // Linha divisória
+                  color: const Color(0xFFE4E4E4),
                 ),
-                const SizedBox(height: 16), // Espaçamento após a linha
+                const SizedBox(height: 16), // Espaçamento depois da linha
               ],
             ),
           ),
@@ -96,6 +96,7 @@ class _MainScreenState extends State<MainScreen> {
             left: 0,
             right: 0,
             bottom: 0,
+            // Aqui temos a IndexedStack que carrega as páginas da lista e passa o index da página selecionada
             child: IndexedStack(
               index: _selectedIndex, // Carrega a página selecionada
               children: _pages, // Carrega todas as páginas
@@ -111,7 +112,8 @@ class _MainScreenState extends State<MainScreen> {
         currentPage: _selectedIndex,
         onSelectPage: (index) {
           setState(() {
-            _selectedIndex = index; // Atualiza a página selecionada
+            _selectedIndex =
+                index; // Aqui recebemos o index da página e fazemos a atualização da página selecionada na NavBar pelo usuário
           });
         },
       ),

@@ -54,6 +54,8 @@ dependencies:
   flutter_downloader: ^1.11.8
   audio_video_progress_bar: ^2.0.3
   auto_size_text: ^3.0.0
+  just_audio_background: ^0.0.1-beta.13
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:

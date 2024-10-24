@@ -45,7 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Este app não utiliza do seu microfone, por isso recomendamos negar esta autorização.</string>
 	<!-- Permissões de localização para iOS -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Este aplicativo precisa de acesso à sua localização para mostrar lugares próximos e locais no mapa.</string>

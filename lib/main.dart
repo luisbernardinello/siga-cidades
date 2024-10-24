@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
@@ -12,7 +13,7 @@ import 'package:sigacidades/presentation/about/screens/about_page.dart';
 import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
 import 'package:sigacidades/presentation/maps/bloc/maps_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 // Função principal para rodar o app.
@@ -25,14 +26,20 @@ Future main() async {
   await FMTCObjectBoxBackend().initialise();
   // Cria o store para cache de tiles
   await FMTCStore('mapStore').manage.create();
-  // Dá inicio ao app após os carregamentos iniciais
+  // Cria a configuração do Just Audio Background
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
+  // Dá inicio ao app depois dos carregamentos iniciais
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Inicializando o PlaceRepositoryImpl.
+    // Inicializa o PlaceRepositoryImpl.
     final placeRepository = PlaceRepositoryImpl();
 
     return MultiProvider(
@@ -55,7 +62,7 @@ class MyApp extends StatelessWidget {
           ),
         ],
         // ====================================
-        // Configuração do MaterialApp
+        // Configuração do MaterialApp com as rotas do app
         // ====================================
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
