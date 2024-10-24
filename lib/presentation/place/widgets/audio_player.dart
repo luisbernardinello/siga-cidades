@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:sigacidades/presentation/place/widgets/control_buttons.dart';
 import 'package:audio_session/audio_session.dart';
-import 'package:uuid/uuid.dart';
 
 /// Widget responsável por reproduzir áudio
 /// Utiliza as bibliotecas just_audio, audio_session e rxdart.
@@ -35,13 +33,8 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
   void initState() {
     super.initState();
     _player = AudioPlayer(); // Inicializa o player de áudio
-    var uuid = Uuid();
     // Faz a inicialização da fonte de áudio (passando a url) com suporte a cache, assim temos pré-carregamento com o caching do áudio para aceleramento.
-    _audioSource = LockCachingAudioSource(Uri.parse(widget.audioUrl),
-        // MediaItem para usar a just_audio_background., uuid gera um identificador unico, cada reprodução sempre terá o mesmo ID baseado na audioURL
-        tag: MediaItem(
-            id: uuid.v5(Namespace.url.value, widget.audioUrl),
-            title: widget.audioTitle));
+    _audioSource = LockCachingAudioSource(Uri.parse(widget.audioUrl));
 
     // Inicializa a reprodução de áudio
     _initPlayer();
