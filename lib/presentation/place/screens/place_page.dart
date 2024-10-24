@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:map_launcher/map_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/presentation/place/widgets/audio_player_widget.dart'; // Importa o AudioPlayerWidget
-import 'package:map_launcher/map_launcher.dart'; // Importa o map_launcher para abrir apps externos de mapas
-import 'package:flutter_svg/flutter_svg.dart'; // Para usar ícones SVG do map_launcher
+import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
 
 class PlacePage extends StatelessWidget {
   final Place place;
@@ -105,18 +105,10 @@ class PlacePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Cidade: ${place.city}',
+                    place.adress,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Endereço: ${place.adress}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -128,10 +120,18 @@ class PlacePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Adiciona o player de áudio
-                  AudioPlayerWidget(place: place),
+                  // Player de áudio
+                  SongPlayerWidget(
+                      audioUrl: place.linkHist,
+                      audioTitle: 'Informações Gerais'),
+
+                  const SizedBox(height: 14),
+
+                  SongPlayerWidget(
+                      audioUrl: place.linkAD, audioTitle: 'Audiodescrição'),
 
                   const SizedBox(height: 24),
+
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: () => _openInMapLauncher(context),
