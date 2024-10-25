@@ -9,8 +9,8 @@ import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 // ====================================
 // O DrawerMenu permite ao usuário selecionar uma cidade da lista.
 // Quando uma cidade é selecionada, a aplicação vai filtrar os dados
-// com base na cidade escolhida. O onCitySelected envia a cidade para o widget pai
-// O CategoryBloc é acionado para armazenar a cidade selecionada.
+// com base na cidade escolhida.
+// O CategoryBloc armazena a cidade selecionada.
 class DrawerMenu extends StatelessWidget {
   final Function(String)
       onCitySelected; // Callback que recebe a cidade selecionada.
@@ -28,7 +28,7 @@ class DrawerMenu extends StatelessWidget {
       // ====================================
       child: Container(
         padding: const EdgeInsets.only(
-          top: 100, // Espaço para para o título.
+          top: 100, // Espaço para o título.
           left: 16,
           right: 16,
           bottom: 24,
@@ -79,6 +79,7 @@ class DrawerMenu extends StatelessWidget {
 
   // ====================================
   // _buildCityOption: Opção de cidade no Drawer.
+  // (Não usamos Semantic aqui, o callback envia a cidade para a main screen que globalmente notifica o usuário sonoramente)
   // ====================================
   // Cada cidade ao ser clicada envia um evento para o CategoryBloc e atualiza o estado da cidade selecionada.
   Widget _buildCityOption(BuildContext context, String cityName) {

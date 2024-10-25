@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/common/widgets/app_search_bar.dart';
 import 'package:sigacidades/common/widgets/nav_bar.dart';
@@ -45,7 +46,14 @@ class _MainScreenState extends State<MainScreen> {
       // ====================================
       drawer: DrawerMenu(
         onCitySelected: (city) {
-          // Caso de precisarmos fazer algo de acessibilidade quando a cidade é selecionada no drawer
+          // Passa a função para o drawer e recebe o callback com o nome da cidade
+          // Usamos aqui o Semantics por questões de acessibilidade ao selecionar a cidade do drawer
+          // SemanticsService é usada em contexto global
+          // A cidade será lida pelo leitor de tela sem precisar ser inserido em um contexto de algum widget específico.
+          SemanticsService.announce(
+            'Cidade selecionada: $city',
+            TextDirection.ltr,
+          );
         },
       ),
 
