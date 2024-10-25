@@ -258,7 +258,7 @@ class _PlacePageState extends State<PlacePage> {
                                   child: Icon(
                                     _selectedPlayer ==
                                             AudioPlayerType.informacoesGerais
-                                        ? Icons.my_library_books
+                                        ? Icons.library_books
                                         : Icons.hearing,
                                     color: Colors.white,
                                   ),
