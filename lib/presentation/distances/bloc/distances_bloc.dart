@@ -29,14 +29,14 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
     try {
       emit(DistancesLoading());
 
-      // Verificar se o serviço de localização está habilitado
+      // Verifica se o serviço de localização está habilitado
       if (!await _checkLocationService()) {
         emit(DistancesError(
             "Serviço de localização está desativado. Por favor, ative-o nas configurações."));
         return;
       }
 
-      // Verificar e solicitar permissão de localização
+      // Verifica e solicita a permissão de localização
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -62,7 +62,7 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
 
       // Pega a posição atual do usuário usando as novas configurações de localização
       Position userPosition = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings, // Passando as configurações
+        locationSettings: locationSettings, // Passa as configurações
       );
 
       // Busca os lugares mais próximos e suas distâncias

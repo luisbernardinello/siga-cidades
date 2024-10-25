@@ -33,9 +33,9 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
   void initState() {
     super.initState();
     _player = AudioPlayer();
-    var uuid = Uuid();
+    var uuid = const Uuid();
 
-    // Inicializa a fonte de áudio com suporte a cache e define um identificador único
+    // Inicializa a fonte de áudio com suporte a cache e define um identificador único pelo hash gerado da URL com o plugin uuid
     _audioSource = LockCachingAudioSource(
       Uri.parse(widget.audioUrl),
       tag: MediaItem(
@@ -74,7 +74,7 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
           // Interrupção terminou
           switch (event.type) {
             case AudioInterruptionType.duck:
-              // O app que gerou interrupção terminou; restauramos o volume.
+              // O app que gerou interrupção terminou, restauramos o volume.
               _player.setVolume(1.0);
               break;
             case AudioInterruptionType.pause:
@@ -88,7 +88,7 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
         }
       });
 
-      // Listener para desconexão de fones de ouvido
+      // Listener para oc aso de desconexão de fones de ouvido
       session.becomingNoisyEventStream.listen((_) {
         _player.pause(); // Pausa ao desconectar fones de ouvido
       });
@@ -122,6 +122,7 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
           // ),
         ),
         ControlButtons(_player),
+        // Envia para a barra de progresso o stream do _positionDataStream
         StreamBuilder<PositionData>(
           stream: _positionDataStream,
           builder: (context, snapshot) {
@@ -153,8 +154,7 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
       );
 }
 
-/// Classe responsável por encapsular dados de posição, buffer e duração do player,
-/// facilitando a atualização da barra de progresso.
+/// Estrutura responsável por encapsular dados de posição, buffer e duração do player
 class PositionData {
   final Duration position;
   final Duration bufferedPosition;

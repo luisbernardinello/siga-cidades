@@ -6,7 +6,7 @@ import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
 
 /// Página responsável por exibir informações de um local específico e permitir
-/// ao usuário alternar entre dois players de áudio: "Informações Gerais" e "Audiodescrição".
+/// ao usuário reproduzir o áudio de Informações Gerais e Audiodescrição mesmo com app minimizado.
 class PlacePage extends StatefulWidget {
   final Place place; // Entidade que contém as informações do local
 
@@ -159,9 +159,9 @@ class _PlacePageState extends State<PlacePage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // --------------- Início do botão de toggle
+                  // --------------- Início do Toggle button
 
-                  // Toggle button para escolher entre "Informações Gerais" e "Audiodescrição"
+                  // Toggle button para escolha entre "Informações Gerais" e "Audiodescrição"
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -351,7 +351,7 @@ class _PlacePageState extends State<PlacePage> {
   }
 }
 
-/// Enum para definir os diferentes tipos de players disponíveis.
+/// Enum para os diferentes tipos de players disponíveis.
 enum AudioPlayerType {
   informacoesGerais, // Player de Informações Gerais
   audiodescricao, // Player de Audiodescrição

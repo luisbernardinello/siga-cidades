@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
+// ====================================
+// Widget para as distâncias dos lugares
+// ====================================
 class PlaceDistanceWidget extends StatelessWidget {
   final Place place;
   final double distance;

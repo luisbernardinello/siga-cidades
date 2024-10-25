@@ -31,8 +31,8 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
 
   // Limites da América do Sul
   final LatLngBounds _southAmericaBounds = LatLngBounds(
-    LatLng(-56.0, -81.0), // Extremo sudoeste (Chile)
-    LatLng(13.0, -34.0), // Extremo nordeste (Venezuela)
+    LatLng(-56.0, -81.0), // Ponto no extremo sudoeste (Chile)
+    LatLng(13.0, -34.0), // Ponto no extremo nordeste (Venezuela)
   );
 
   // ====================================
@@ -155,7 +155,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
   // ====================================
   // Widget build
   // ====================================
-  // Responsável por construir o layout da página com o mapa e os componentes
+  // Builda o layout da página com o mapa e os componentes
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MapsBloc, MapsState>(
@@ -189,7 +189,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
             ),
           );
 
-          // Adiciona os marcadores dos lugares carregados
+          // Adiciona os marcadores de posição dos lugares carregados
           for (Place place in state.places) {
             _markers.add(
               Marker(
@@ -232,9 +232,9 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                 // ====================================
                 // FlutterMap
                 // ====================================
-                // Componente principal que renderiza o mapa
+                // Componente principal que renderiza o mapa.
                 FlutterMap(
-                  mapController: _mapController, // Controlador do mapa
+                  mapController: _mapController, // Controlador do mapa.
                   // Opções do mapa
                   options: MapOptions(
                     initialCenter:
@@ -331,8 +331,8 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                     heroTag: 'center_on_user',
                     mini: true,
                     onPressed: () {
-                      _animatedMapMove(
-                          _currentPosition, 15); // Centraliza o mapa no usuário
+                      // Centraliza o mapa no usuário chamando o método de animação suave
+                      _animatedMapMove(_currentPosition, 15);
                     },
                     child: const Icon(
                       Icons.person_pin_circle,
@@ -344,6 +344,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
             ),
           );
         } else if (state is MapsError) {
+          // Caso de erro, gera erro com mensagem do estado do erro como feedback para o usuário
           return Center(
             child: Text(
               'Erro ao carregar mapa: ${state.message}',

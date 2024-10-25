@@ -107,21 +107,21 @@ class ControlButtons extends StatelessWidget {
   }
 
   // ====================================
-  // Função para ativar e reproduzir o áudio
+  // Função para reproduzir o áudio e ativar a audio session
   // ====================================
   Future<void> _playAudio() async {
     final session = await AudioSession.instance;
-    await session.setActive(true); // Ativa a sessão de áudio
+    await session.setActive(true); // Ativa a audio session
     await player.play();
   }
 
   // ====================================
-  // Função para pausar e desativar a sessão de áudio
+  // Função para pausar o áudio e desativar a audio session
   // ====================================
   Future<void> _pauseAudio() async {
     await player.pause();
     final session = await AudioSession.instance;
-    await session.setActive(false); // Desativa a sessão de áudio
+    await session.setActive(false); // Desativa a audio session
   }
 
   // ====================================
@@ -137,15 +137,13 @@ class ControlButtons extends StatelessWidget {
       newSpeed = 2.0;
     } else if (currentSpeed == 2.0) {
       newSpeed = 2.5;
-    } else if (currentSpeed == 2.5) {
-      newSpeed = 0.5;
     } else {
       newSpeed = 1.0; // Retorna para a velocidade normal
     }
 
-    player.setSpeed(newSpeed); // Define a nova velocidade no player
+    player.setSpeed(newSpeed); // Passa a nova velocidade para o player
 
-    // Feedback sonoro com Snackbar para o usuário
+    // Faz o feedback através do Snackbar para o usuário
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Velocidade ${newSpeed.toStringAsFixed(1)}x'),

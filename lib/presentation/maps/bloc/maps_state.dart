@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
 // Define os estados possíveis que o MapsBloc pode emitir.
-// Equatable para otimizar a comparação entre estados.
 abstract class MapsState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -12,7 +11,7 @@ abstract class MapsState extends Equatable {
 // ====================================
 // Estado MapsLoading
 // ====================================
-// Indica que o mapa e as informações de lugares estão sendo carregados.
+// Indica que o mapa e as info dos lugares estão em carregamento.
 class MapsLoading extends MapsState {}
 
 // ====================================

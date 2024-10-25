@@ -9,7 +9,7 @@ import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
 /// Página que exibe os locais próximos ao usuário.
-/// Utiliza o padrão Bloc para gerenciar o estado da busca de locais.
+/// Bloc gerencia o estado da busca de locais.
 class DistancesPage extends StatelessWidget {
   static const routeName = '/distances'; // Nome da rota para navegação
 
@@ -114,7 +114,7 @@ class DistancesPage extends StatelessWidget {
                       ),
                     );
                   } else if (state is DistancesLoaded) {
-                    // Quando os lugares e distâncias são carregados com sucesso
+                    // Caso de os lugares e distâncias serem carregados com sucesso
                     final nearbyPlaces = state
                         .nearbyPlacesWithDistances; // Lista de lugares e suas distâncias
 

@@ -3,6 +3,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+// ====================================
+// Classe AboutPage com Contatos (Sobre nós)
+// ====================================
+
 class AboutPage extends StatelessWidget {
   static const routeName = '/about';
 
@@ -69,7 +73,7 @@ class AboutPage extends StatelessWidget {
                 height: 2,
                 color: const Color(0xFFE4E4E4),
               ),
-              const SizedBox(height: 8), // Espaço depois da linha
+              const SizedBox(height: 8),
               const Contacts(),
             ],
           ),
@@ -235,7 +239,7 @@ class _ContactsState extends State<Contacts> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text(
-                'Não encontrado aplicativo de envio de e-mail disponível.')),
+                'Não encontrado aplicativo de envio de e-mail no dispositivo.')),
       );
     }
   }

@@ -64,7 +64,7 @@ class MapsBloc extends Bloc<MapsEvent, MapsState> {
       // Verifica e solicita permissões de localização
       if (!await _checkAndRequestLocationPermission()) {
         emit(MapsError(
-            "Permissão de localização negada. Por favor, habilite-a nas configurações."));
+            "Permissão de localização negada. Por favor, habilite a localização nas configurações do seu dispositivo."));
         return;
       }
 
@@ -75,7 +75,7 @@ class MapsBloc extends Bloc<MapsEvent, MapsState> {
             100, // Faz a atualização da localização quando o usuário andar 100 metros
       );
 
-      // Obtém a localização atual do usuário com as configurações de localização
+      // Pega a localização atual do usuário com as configurações de localização
       Position userPosition = await Geolocator.getCurrentPosition(
         locationSettings: locationSettings, // Passa as configurações
       );
@@ -86,7 +86,7 @@ class MapsBloc extends Bloc<MapsEvent, MapsState> {
       // Emite o estado MapsLoaded com a localização do usuário e os lugares
       emit(MapsLoaded(userLocation: userPosition, places: places));
     } catch (e) {
-      // Emite um estado de erro caso ocorra uma exceção
+      // Emite um estado de erro no caso de erro
       emit(MapsError('Erro ao carregar o mapa e os lugares.'));
     }
   }
