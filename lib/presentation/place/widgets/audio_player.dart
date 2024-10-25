@@ -112,14 +112,14 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            widget.audioTitle,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          // child: Text(
+          //   widget.audioTitle,
+          //   style: const TextStyle(
+          //     fontSize: 18,
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          // ),
         ),
         ControlButtons(_player),
         StreamBuilder<PositionData>(

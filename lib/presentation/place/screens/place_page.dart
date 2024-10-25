@@ -159,29 +159,136 @@ class _PlacePageState extends State<PlacePage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Alternador para escolher entre "Informações Gerais" e "Audiodescrição"
+                  // --------------- Início do botão de toggle
+
+                  // Toggle button para escolher entre "Informações Gerais" e "Audiodescrição"
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Informações Gerais"),
-                      Switch(
-                        value:
-                            _selectedPlayer == AudioPlayerType.audiodescricao,
-                        onChanged: (value) {
-                          _onAudioChanged(!value); // Alterna entre os players
-                        },
+                      // Semantics para "Informações Gerais"
+                      Semantics(
+                        label: "Informações Gerais",
+                        selected: _selectedPlayer ==
+                            AudioPlayerType.informacoesGerais,
+                        hint: _selectedPlayer ==
+                                AudioPlayerType.informacoesGerais
+                            ? "Selecionado, toque para alternar para Audiodescrição"
+                            : "Toque para selecionar Informações Gerais",
+                        button: true,
+                        child: Text(
+                          "Informações Gerais",
+                          style: TextStyle(
+                            // fontSize: 16,
+                            fontWeight: _selectedPlayer ==
+                                    AudioPlayerType.informacoesGerais
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: _selectedPlayer ==
+                                    AudioPlayerType.informacoesGerais
+                                ? Colors.deepPurple
+                                : Colors.grey.withOpacity(0.5),
+                          ),
+                        ),
                       ),
-                      const Text("Audiodescrição"),
+                      const SizedBox(width: 8),
+                      // Container para alternar gerando a ação do Toggle Button
+                      GestureDetector(
+                        onTap: () {
+                          _onAudioChanged(_selectedPlayer ==
+                              AudioPlayerType.audiodescricao);
+                        },
+                        child: Container(
+                          width: 80,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: _selectedPlayer ==
+                                    AudioPlayerType.informacoesGerais
+                                ? Colors.deepPurple.shade100
+                                : Colors.amber.shade100,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0, 3),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              if (_selectedPlayer ==
+                                  AudioPlayerType.informacoesGerais)
+                                Positioned(
+                                  left: 8,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    elevation: 3,
+                                    shape: const CircleBorder(),
+                                    child: Icon(
+                                      Icons.info,
+                                      color: Colors.amber.shade100,
+                                    ),
+                                  ),
+                                ),
+                              if (_selectedPlayer ==
+                                  AudioPlayerType.audiodescricao)
+                                const Positioned(
+                                  right: 8,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    elevation: 3,
+                                    shape: CircleBorder(),
+                                    child: Icon(
+                                      Icons.hearing,
+                                      color: Colors.deepPurple,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Semantics para "Audiodescrição"
+                      Semantics(
+                        label: "Audiodescrição",
+                        selected:
+                            _selectedPlayer == AudioPlayerType.audiodescricao,
+                        hint: _selectedPlayer == AudioPlayerType.audiodescricao
+                            ? "Selecionado, toque para alternar para Informações Gerais"
+                            : "Toque para selecionar Audiodescrição",
+                        button: true,
+                        child: Text(
+                          "Audiodescrição",
+                          style: TextStyle(
+                            // fontSize: 16,
+                            fontWeight: _selectedPlayer ==
+                                    AudioPlayerType.audiodescricao
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: _selectedPlayer ==
+                                    AudioPlayerType.audiodescricao
+                                ? Colors.deepPurple
+                                : Colors.grey.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
 
-                  // Exibe o player de áudio correspondente à seleção
+                  // --------------- Fim do botão de toggle
+
+                  // const SizedBox(height: 24),
+
+                  // Exibe o player de áudio correspondente ao que foi selecionado no Toggle Button
                   if (_selectedPlayer == AudioPlayerType.informacoesGerais)
                     SongPlayerWidget(
                       audioUrl: widget.place.linkHist,
                       audioTitle: 'Informações Gerais',
                       onPlayerInit: (player) {
-                        _activePlayer = player; // Registra o player ativo
+                        _activePlayer =
+                            player; // Passa o player que está ativo (lógica para termos o just_audio_background)
                       },
                       key: const Key('InformacoesGerais'), // Força rebuild
                     )
@@ -190,7 +297,7 @@ class _PlacePageState extends State<PlacePage> {
                       audioUrl: widget.place.linkAD,
                       audioTitle: 'Audiodescrição',
                       onPlayerInit: (player) {
-                        _activePlayer = player; // Registra o player ativo
+                        _activePlayer = player; // Passa o player que está ativo
                       },
                       key: const Key('Audiodescricao'), // Força rebuild
                     ),
