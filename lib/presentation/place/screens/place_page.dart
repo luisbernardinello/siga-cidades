@@ -3,7 +3,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/presentation/place/widgets/audio_player_2.dart';
+import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
 
 /// Página responsável por exibir informações de um local específico e permitir
 /// ao usuário alternar entre dois players de áudio: "Informações Gerais" e "Audiodescrição".

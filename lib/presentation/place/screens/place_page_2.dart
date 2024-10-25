@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
+import 'package:sigacidades/presentation/place/widgets/audio_player_2.dart';
 
 class PlacePage extends StatelessWidget {
   final Place place;
