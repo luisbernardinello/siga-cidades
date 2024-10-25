@@ -1,44 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sigacidades/domain/entities/place.dart';
-import 'package:sigacidades/presentation/place/widgets/audio_player_2.dart';
+import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
 
-class PlacePage extends StatefulWidget {
+class PlacePage extends StatelessWidget {
   final Place place;
 
   const PlacePage({Key? key, required this.place}) : super(key: key);
 
-  @override
-  _PlacePageState createState() => _PlacePageState();
-}
-
-class _PlacePageState extends State<PlacePage> {
-  AudioPlayerType _selectedPlayer = AudioPlayerType.informacoesGerais;
-  AudioPlayer? _activePlayer; // Referência ao player ativo para controle
-
-  // ====================================
-  // Função para alternar o player
-  // ====================================
-  void _onAudioChanged(bool isGeneralInfo) {
-    setState(() {
-      _selectedPlayer = isGeneralInfo
-          ? AudioPlayerType.informacoesGerais
-          : AudioPlayerType.audiodescricao;
-
-      // Pausar e liberar o player anterior
-      if (_activePlayer != null) {
-        _activePlayer!.stop(); // Pausa o player
-        _activePlayer!.dispose(); // Libera o player
-        _activePlayer = null; // Reseta o player ativo
-      }
-    });
-  }
-
-  // ====================================
-  // Função para abrir o mapa
-  // ====================================
   Future<void> _openInMapLauncher(BuildContext context) async {
     final availableMaps = await MapLauncher.installedMaps;
     if (availableMaps.isNotEmpty) {
@@ -53,11 +23,11 @@ class _PlacePageState extends State<PlacePage> {
                     onTap: () {
                       map.showMarker(
                         coords: Coords(
-                          widget.place.coordinates.latitude,
-                          widget.place.coordinates.longitude,
+                          place.coordinates.latitude,
+                          place.coordinates.longitude,
                         ),
-                        title: widget.place.name,
-                        description: widget.place.adress,
+                        title: place.name,
+                        description: place.adress,
                       );
                       Navigator.pop(context);
                     },
@@ -83,9 +53,6 @@ class _PlacePageState extends State<PlacePage> {
     }
   }
 
-  // ====================================
-  // Build da interface
-  // ====================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,13 +60,10 @@ class _PlacePageState extends State<PlacePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ====================================
-            // Imagem do local e botão de voltar
-            // ====================================
             Stack(
               children: [
                 Image.network(
-                  widget.place.imageUrl,
+                  place.imageUrl,
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
@@ -127,14 +91,13 @@ class _PlacePageState extends State<PlacePage> {
                 ),
               ],
             ),
-
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.place.name,
+                    place.name,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -142,7 +105,7 @@ class _PlacePageState extends State<PlacePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.place.adress,
+                    place.adress,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -150,58 +113,25 @@ class _PlacePageState extends State<PlacePage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    widget.place.description,
+                    place.description,
                     style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // ====================================
-                  // Alternador para escolher o player
-                  // ====================================
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Informações Gerais"),
-                      Switch(
-                        value:
-                            _selectedPlayer == AudioPlayerType.audiodescricao,
-                        onChanged: (value) {
-                          _onAudioChanged(!value);
-                        },
-                      ),
-                      const Text("Audiodescrição"),
-                    ],
-                  ),
+                  // Player de áudio
+                  SongPlayerWidget(
+                      audioUrl: place.linkHist,
+                      audioTitle: 'Informações Gerais'),
 
-                  // ====================================
-                  // Player de áudio correspondente
-                  // ====================================
-                  if (_selectedPlayer == AudioPlayerType.informacoesGerais)
-                    SongPlayerWidget(
-                      audioUrl: widget.place.linkHist,
-                      audioTitle: 'Informações Gerais',
-                      onPlayerInit: (player) {
-                        _activePlayer = player;
-                      },
-                      key: const Key('InformacoesGerais'), // Força rebuild
-                    )
-                  else
-                    SongPlayerWidget(
-                      audioUrl: widget.place.linkAD,
-                      audioTitle: 'Audiodescrição',
-                      onPlayerInit: (player) {
-                        _activePlayer = player;
-                      },
-                      key: const Key('Audiodescricao'), // Força rebuild
-                    ),
+                  const SizedBox(height: 14),
+
+                  SongPlayerWidget(
+                      audioUrl: place.linkAD, audioTitle: 'Audiodescrição'),
 
                   const SizedBox(height: 24),
 
-                  // ====================================
-                  // Botão de Mapa
-                  // ====================================
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: () => _openInMapLauncher(context),
@@ -221,12 +151,4 @@ class _PlacePageState extends State<PlacePage> {
       ),
     );
   }
-}
-
-// ====================================
-// Enum para definir os diferentes tipos de players
-// ====================================
-enum AudioPlayerType {
-  informacoesGerais,
-  audiodescricao,
 }

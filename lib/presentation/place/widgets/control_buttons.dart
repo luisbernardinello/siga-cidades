@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 
 /// Classe responsável pelos botões de controle de reprodução de áudio.
-/// Possui funcionalidades de Play/Pause e ajuste de velocidade de reprodução
+/// Possui funcionalidades de Play/Pause e ajuste de velocidade de reprodução.
 class ControlButtons extends StatelessWidget {
   final AudioPlayer player;
 
@@ -16,7 +17,6 @@ class ControlButtons extends StatelessWidget {
         // ====================================
         // Botão de Play/Pause
         // ====================================
-        // Aqui trabalhamos com o StreamBuilder para receber o Stream gerado pela interação do usuário com os botões
         StreamBuilder<PlayerState>(
           stream: player.playerStateStream,
           builder: (context, snapshot) {
@@ -25,23 +25,22 @@ class ControlButtons extends StatelessWidget {
             final playing = playerState?.playing;
 
             // ====================================
-            // Se o áudio terminar (estado "completed"),
-            // volta para o início e mostra o ícone de replay
+            // Ícone de "Replay" se o áudio terminou.
             // ====================================
             if (processingState == ProcessingState.completed) {
               return IconButton(
                 icon: const Icon(Icons.replay), // Ícone de replay
                 iconSize: 54.0,
-                onPressed: () {
-                  player.seek(Duration.zero); // Volta para o início do áudio
-                  player.play(); // Reinicia a reprodução do áudio
+                onPressed: () async {
+                  player.seek(Duration.zero); // Volta ao início do áudio
+                  await _playAudio(); // Ativa e inicia a reprodução
                 },
                 tooltip: 'Reiniciar áudio', // Tooltip para acessibilidade
               );
             }
 
             // ====================================
-            // Indicador de carregamento/buffering
+            // Indicador de carregamento/buffering.
             // ====================================
             if (processingState == ProcessingState.loading ||
                 processingState == ProcessingState.buffering) {
@@ -51,40 +50,42 @@ class ControlButtons extends StatelessWidget {
                   width: 54.0,
                   height: 54.0,
                   margin: const EdgeInsets.all(8.0),
-                  child:
-                      const CircularProgressIndicator(), // Mostra o carregamento com o mesmo tamanho do botão para consistência do design.
+                  child: const CircularProgressIndicator(),
                 ),
               );
             }
 
             // ====================================
-            // Se o áudio estiver pausado, mostra o botão de play
+            // Exibe o botão de play se o áudio estiver pausado.
             // ====================================
             if (playing != true) {
               return IconButton(
                 icon: const Icon(Icons.play_arrow), // Ícone de play
                 iconSize: 54.0,
-                onPressed: player.play, // Faz a reprodução do áudio
+                onPressed: () async {
+                  await _playAudio();
+                },
                 tooltip: 'Reproduzir', // Tooltip para acessibilidade
               );
             }
 
             // ====================================
-            // Se o áudio estiver tocando, mostra o botão de Pause
+            // Exibe o botão de pause se o áudio estiver tocando.
             // ====================================
             return IconButton(
               icon: const Icon(Icons.pause), // Ícone de pause
               iconSize: 54.0,
-              onPressed: player.pause, // Pausa a reprodução
+              onPressed: () async {
+                await _pauseAudio();
+              },
               tooltip: 'Pausar', // Tooltip para acessibilidade
             );
           },
         ),
 
         // ====================================
-        // Botão para alterar a velocidade
+        // Botão para alterar a velocidade.
         // ====================================
-        // Aqui trabalhamos com o StreamBuilder para receber o Stream gerado pela interação do usuário com os botões
         StreamBuilder<double>(
           stream: player.speedStream,
           builder: (context, snapshot) {
@@ -95,11 +96,9 @@ class ControlButtons extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               onPressed: () {
-                _changePlaybackSpeed(
-                    context, player, speed); // Muda a velocidade
+                _changePlaybackSpeed(context, player, speed);
               },
-              tooltip:
-                  'Velocidade de reprodução ${speed.toStringAsFixed(1)}x', // Tooltip para acessibilidade
+              tooltip: 'Velocidade de reprodução ${speed.toStringAsFixed(1)}x',
             );
           },
         ),
@@ -108,9 +107,26 @@ class ControlButtons extends StatelessWidget {
   }
 
   // ====================================
-  // Função para alterar a velocidade (referente ao botão para alterar a velocidade)
+  // Função para ativar e reproduzir o áudio
   // ====================================
-  // Alterar a velocidade de reprodução do áudio entre 0.5x, 1.0x, 1.5x, 2.0x, 2.5x.
+  Future<void> _playAudio() async {
+    final session = await AudioSession.instance;
+    await session.setActive(true); // Ativa a sessão de áudio
+    await player.play();
+  }
+
+  // ====================================
+  // Função para pausar e desativar a sessão de áudio
+  // ====================================
+  Future<void> _pauseAudio() async {
+    await player.pause();
+    final session = await AudioSession.instance;
+    await session.setActive(false); // Desativa a sessão de áudio
+  }
+
+  // ====================================
+  // Função para alterar a velocidade do áudio.
+  // ====================================
   void _changePlaybackSpeed(
       BuildContext context, AudioPlayer player, double currentSpeed) {
     double newSpeed;
@@ -127,11 +143,9 @@ class ControlButtons extends StatelessWidget {
       newSpeed = 1.0; // Retorna para a velocidade normal
     }
 
-    player.setSpeed(newSpeed); // Nova velocidade no player
+    player.setSpeed(newSpeed); // Define a nova velocidade no player
 
-    // ====================================
-    // Feedback sonoro com Snackbar com a velocidade atualizada
-    // ====================================
+    // Feedback sonoro com Snackbar para o usuário
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Velocidade ${newSpeed.toStringAsFixed(1)}x'),

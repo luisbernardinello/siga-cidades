@@ -28,11 +28,11 @@ Future main() async {
   await FMTCStore('mapStore').manage.create();
 
   // Cria a configuração do Just Audio Background
-  // await JustAudioBackground.init(
-  //   androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
-  //   androidNotificationChannelName: 'Audio playback',
-  //   androidNotificationOngoing: true,
-  // );
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
 
   // Dá inicio ao app depois dos carregamentos iniciais
   runApp(MyApp());
