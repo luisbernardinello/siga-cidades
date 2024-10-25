@@ -175,81 +175,101 @@ class _PlacePageState extends State<PlacePage> {
                             ? "Selecionado, toque para alternar para Audiodescrição"
                             : "Toque para selecionar Informações Gerais",
                         button: true,
-                        child: Text(
-                          "Informações Gerais",
-                          style: TextStyle(
-                            // fontSize: 16,
-                            fontWeight: _selectedPlayer ==
-                                    AudioPlayerType.informacoesGerais
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: _selectedPlayer ==
-                                    AudioPlayerType.informacoesGerais
-                                ? Colors.deepPurple
-                                : Colors.grey.withOpacity(0.5),
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            _selectedPlayer = AudioPlayerType.informacoesGerais;
+                          }),
+                          child: Text(
+                            "Informações Gerais",
+                            style: TextStyle(
+                              // fontSize: 15,
+                              fontWeight: _selectedPlayer ==
+                                      AudioPlayerType.informacoesGerais
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: _selectedPlayer ==
+                                      AudioPlayerType.informacoesGerais
+                                  ? Colors.deepPurple
+                                  : Colors.grey.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Container para alternar gerando a ação do Toggle Button
+
+                      // Container para o botão de alternância estilizado
                       GestureDetector(
-                        onTap: () {
-                          _onAudioChanged(_selectedPlayer ==
-                              AudioPlayerType.audiodescricao);
-                        },
+                        onTap: () => setState(() {
+                          _selectedPlayer = _selectedPlayer ==
+                                  AudioPlayerType.informacoesGerais
+                              ? AudioPlayerType.audiodescricao
+                              : AudioPlayerType.informacoesGerais;
+                        }),
                         child: Container(
                           width: 80,
                           height: 40,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: _selectedPlayer ==
-                                    AudioPlayerType.informacoesGerais
-                                ? Colors.deepPurple.shade100
-                                : Colors.amber.shade100,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade400,
-                                offset: const Offset(0, 3),
-                                blurRadius: 6,
-                              ),
-                            ],
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(40),
                           ),
                           child: Stack(
-                            alignment: Alignment.center,
                             children: [
-                              if (_selectedPlayer ==
-                                  AudioPlayerType.informacoesGerais)
-                                Positioned(
-                                  left: 8,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    elevation: 3,
-                                    shape: const CircleBorder(),
-                                    child: Icon(
-                                      Icons.info,
-                                      color: Colors.amber.shade100,
-                                    ),
+                              // Indicador animado para alternância entre opções
+                              AnimatedPositioned(
+                                duration: const Duration(milliseconds: 200),
+                                left: _selectedPlayer ==
+                                        AudioPlayerType.informacoesGerais
+                                    ? 4
+                                    : 40,
+                                top: 2,
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: _selectedPlayer ==
+                                            AudioPlayerType.informacoesGerais
+                                        ? LinearGradient(
+                                            colors: [
+                                              Color(0xFFFF9D44),
+                                              Color(0xFFFFC453)
+                                              // Color(0xFF804FB3),
+                                              // Color(0xFFB589D6)
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          )
+                                        : LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFDA59),
+                                              Color(0xFFFFE4AF)
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.25),
+                                        blurRadius: 6,
+                                        offset: const Offset(2, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    _selectedPlayer ==
+                                            AudioPlayerType.informacoesGerais
+                                        ? Icons.category
+                                        : Icons.hearing,
+                                    color: Colors.white,
                                   ),
                                 ),
-                              if (_selectedPlayer ==
-                                  AudioPlayerType.audiodescricao)
-                                const Positioned(
-                                  right: 8,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    elevation: 3,
-                                    shape: CircleBorder(),
-                                    child: Icon(
-                                      Icons.hearing,
-                                      color: Colors.deepPurple,
-                                    ),
-                                  ),
-                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
+
                       // Semantics para "Audiodescrição"
                       Semantics(
                         label: "Audiodescrição",
@@ -259,18 +279,23 @@ class _PlacePageState extends State<PlacePage> {
                             ? "Selecionado, toque para alternar para Informações Gerais"
                             : "Toque para selecionar Audiodescrição",
                         button: true,
-                        child: Text(
-                          "Audiodescrição",
-                          style: TextStyle(
-                            // fontSize: 16,
-                            fontWeight: _selectedPlayer ==
-                                    AudioPlayerType.audiodescricao
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: _selectedPlayer ==
-                                    AudioPlayerType.audiodescricao
-                                ? Colors.deepPurple
-                                : Colors.grey.withOpacity(0.5),
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            _selectedPlayer = AudioPlayerType.audiodescricao;
+                          }),
+                          child: Text(
+                            "Audiodescrição",
+                            style: TextStyle(
+                              // fontSize: 15,
+                              fontWeight: _selectedPlayer ==
+                                      AudioPlayerType.audiodescricao
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: _selectedPlayer ==
+                                      AudioPlayerType.audiodescricao
+                                  ? Colors.deepPurple
+                                  : Colors.grey.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
