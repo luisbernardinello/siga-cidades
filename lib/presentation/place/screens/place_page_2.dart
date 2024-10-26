@@ -122,13 +122,14 @@ class PlacePage extends StatelessWidget {
 
                   // Player de áudio
                   SongPlayerWidget(
-                      audioUrl: place.linkHist,
+                      audioUrl: place.audioPlaceInfoUrl,
                       audioTitle: 'Informações Gerais'),
 
                   const SizedBox(height: 14),
 
                   SongPlayerWidget(
-                      audioUrl: place.linkAD, audioTitle: 'Audiodescrição'),
+                      audioUrl: place.audioDescriptionUrl,
+                      audioTitle: 'Audiodescrição'),
 
                   const SizedBox(height: 24),
 

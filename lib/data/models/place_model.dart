@@ -10,9 +10,9 @@ class PlaceModel extends Place {
     required String description,
     required String adress,
     required String imageUrl,
-    required String imgDescription,
-    required String linkAD,
-    required String linkHist,
+    required String imageDescription,
+    required String audioDescriptionUrl,
+    required String audioPlaceInfoUrl,
     required GeoPoint coordinates,
   }) : super(
           name: name,
@@ -21,9 +21,9 @@ class PlaceModel extends Place {
           description: description,
           adress: adress,
           imageUrl: imageUrl,
-          imgDescription: imgDescription,
-          linkAD: linkAD,
-          linkHist: linkHist,
+          imageDescription: imageDescription,
+          audioDescriptionUrl: audioDescriptionUrl,
+          audioPlaceInfoUrl: audioPlaceInfoUrl,
           coordinates: coordinates,
         );
 
@@ -36,9 +36,9 @@ class PlaceModel extends Place {
       description: json['description'],
       adress: json['adress'],
       imageUrl: json['imageUrl'],
-      imgDescription: json['imgDescription'],
-      linkAD: json['linkAD'],
-      linkHist: json['linkHist'],
+      imageDescription: json['imageDescription'],
+      audioDescriptionUrl: json['audioDescriptionUrl'],
+      audioPlaceInfoUrl: json['audioPlaceInfoUrl'],
       coordinates: json['coordinates'],
     );
   }
@@ -52,9 +52,9 @@ class PlaceModel extends Place {
       'description': description,
       'adress': adress,
       'imageUrl': imageUrl,
-      'imgDescription': imgDescription,
-      'linkAD': linkAD,
-      'linkHist': linkHist,
+      'imageDescription': imageDescription,
+      'audioDescriptionUrl': audioDescriptionUrl,
+      'audioPlaceInfoUrl': audioPlaceInfoUrl,
       'coordinates': coordinates,
     };
   }

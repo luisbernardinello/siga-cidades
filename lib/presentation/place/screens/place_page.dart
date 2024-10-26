@@ -309,7 +309,7 @@ class _PlacePageState extends State<PlacePage> {
                   // Exibe o player de áudio correspondente ao que foi selecionado no Toggle Button
                   if (_selectedPlayer == AudioPlayerType.informacoesGerais)
                     SongPlayerWidget(
-                      audioUrl: widget.place.linkHist,
+                      audioUrl: widget.place.audioPlaceInfoUrl,
                       audioTitle: 'Informações Gerais',
                       onPlayerInit: (player) {
                         _activePlayer =
@@ -319,7 +319,7 @@ class _PlacePageState extends State<PlacePage> {
                     )
                   else
                     SongPlayerWidget(
-                      audioUrl: widget.place.linkAD,
+                      audioUrl: widget.place.audioDescriptionUrl,
                       audioTitle: 'Audiodescrição',
                       onPlayerInit: (player) {
                         _activePlayer = player; // Passa o player que está ativo

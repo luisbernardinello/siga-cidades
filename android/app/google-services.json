@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "654546656277",
+    "project_id": "sigacidades",
+    "storage_bucket": "sigacidades.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654546656277:android:ddf723bae3d20a39d1c21c",
+        "android_client_info": {
+          "package_name": "com.example.sigacidades"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuYcJdFFt6b0FIJDKQ71hG3iTc1q76SPE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

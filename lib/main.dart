@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:sigacidades/data/repositories/place_repository_impl.dart';
 import 'package:sigacidades/domain/repositories/place_repository.dart';
+import 'package:sigacidades/firebase_options.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
 import 'package:sigacidades/presentation/home/screens/home_page.dart';
@@ -15,11 +17,13 @@ import 'package:sigacidades/presentation/maps/bloc/maps_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 
 // Função principal para rodar o app.
 Future main() async {
   // Inicializa os Widgets
   WidgetsFlutterBinding.ensureInitialized();
+
   // Carrega o arquivo .env
   await dotenv.load(fileName: '.env');
   // Inicializa o backend de cache do FMTC (flutter_map_tile_caching)
@@ -34,6 +38,9 @@ Future main() async {
     androidNotificationOngoing: true,
   );
 
+  // Inicializa o Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   // Dá inicio ao app depois dos carregamentos iniciais
   runApp(MyApp());
 }
@@ -43,7 +50,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Inicializa o PlaceRepositoryImpl.
     final placeRepository = PlaceRepositoryImpl();
-
     return MultiProvider(
       providers: [
         // O PlaceRepository será fornecido para toda a aplicação.
@@ -71,13 +77,19 @@ class MyApp extends StatelessWidget {
           title: 'Sigacidades',
           theme: ThemeData(
             primarySwatch: Colors.blue,
+            // Responsividade de tela
+            useMaterial3: true,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
 
-          // initialRoute: Define a rota inicial da aplicação como a HomePage.
-          initialRoute: MainScreen.routeName,
+          // Define a rota inicial da aplicação (HomePage).
+
+          // initialRoute: MainScreen.routeName,
+          initialRoute: '/', // Define LogoSplashScreen como rota inicial
 
           // Rotas nomeadas: Aqui é definido todas as rotas do app.
           routes: {
+            '/': (context) => const LogoSplashScreen(),
             MainScreen.routeName: (context) => const MainScreen(),
             HomePage.routeName: (context) => const HomePage(),
             DistancesPage.routeName: (context) => const DistancesPage(),
@@ -87,6 +99,23 @@ class MyApp extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+// SplashScreen para exibir o logo do BF
+class LogoSplashScreen extends StatelessWidget {
+  const LogoSplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSplashScreen(
+      duration: 1500, // Duração de 1 segundo
+      splash: 'assets/logo_bf.png', // Logo do BF
+      nextScreen: const MainScreen(),
+      splashTransition: SplashTransition.sizeTransition,
+      splashIconSize: 200,
+      backgroundColor: Colors.white,
     );
   }
 }

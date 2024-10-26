@@ -35,7 +35,8 @@ class PlaceDistanceWidget extends StatelessWidget {
             Text(
               _formatDistance(distance), // Formata a distância
               style: const TextStyle(
-                color: Color(0xFF00FF00), // Cor verde para a distância
+                color:
+                    Color(0xFFFFA500), // Cor laranja escuro para acessibilidade
                 fontWeight: FontWeight.w600, // Negrito
               ),
             ),

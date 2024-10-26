@@ -8,9 +8,9 @@ class Place {
   final String description; // Descrição do local
   final String adress; // Endereço do local
   final String imageUrl; // URL para a imagem do local
-  final String imgDescription; // Descrição da imagem
-  final String linkAD; // Link para áudio-descrição do local
-  final String linkHist; // Link para áudio da história do local
+  final String imageDescription; // Descrição da imagem
+  final String audioDescriptionUrl; // Link para áudio-descrição do local
+  final String audioPlaceInfoUrl; // Link para áudio da história do local
   final GeoPoint coordinates; // Coordenadas do local (latitude, longitude)
 
   Place({
@@ -20,9 +20,9 @@ class Place {
     required this.description,
     required this.adress,
     required this.imageUrl,
-    required this.imgDescription,
-    required this.linkAD,
-    required this.linkHist,
+    required this.imageDescription,
+    required this.audioDescriptionUrl,
+    required this.audioPlaceInfoUrl,
     required this.coordinates,
   });
 }

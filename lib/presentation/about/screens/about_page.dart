@@ -147,21 +147,21 @@ class _ContactsState extends State<Contacts> {
               _buildGridItem(
                 title: "Site Biblioteca Falada",
                 imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/mapasonoro-ba939.appspot.com/o/image%2Fcategorias%2Flogo_bf.png?alt=media&token=39c6d7b5-dd3d-4561-8266-f5f12f46bb7a',
+                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_bf.png?alt=media&token=82c974cd-e14f-4b4b-b221-9ee4737f3cd3',
                 onTap: () => _launchUrl('https://bibliotecafalada.unesp.br/'),
                 size: size,
               ),
               _buildGridItem(
                 title: "Instagram",
                 imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/mapasonoro-ba939.appspot.com/o/image%2Fcategorias%2Finstagram.png?alt=media&token=2912925d-053f-4f65-b1b5-81ba15aaea85',
+                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_instagram.png?alt=media&token=12ee4900-0279-45f3-a62b-3660fb4fc652',
                 onTap: () => _launchUrl('https://www.instagram.com/bfalada/'),
                 size: size,
               ),
               _buildGridItem(
                 title: "Facebook",
                 imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/mapasonoro-ba939.appspot.com/o/image%2Fcategorias%2Flogo_facebook.png?alt=media&token=4e7e04d0-540b-42cf-8805-0cf07ee3a555',
+                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_facebook.png?alt=media&token=d210d8ca-bcb4-4d93-8eeb-85710533f261',
                 onTap: () =>
                     _launchUrl('https://www.facebook.com/bibliotecafalada/'),
                 size: size,
@@ -169,7 +169,7 @@ class _ContactsState extends State<Contacts> {
               _buildGridItem(
                 title: "Twitter",
                 imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/mapasonoro-ba939.appspot.com/o/image%2Fcategorias%2Flogo_twitter.PNG?alt=media&token=37b0f890-95c3-48e2-8f5c-3d5af156eaeb',
+                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_twitter.PNG?alt=media&token=6c1cf947-d622-46e9-9656-8e866b0831f8',
                 onTap: () => _launchUrl('https://twitter.com/BFalada'),
                 size: size,
               ),

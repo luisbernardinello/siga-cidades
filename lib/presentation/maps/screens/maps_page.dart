@@ -9,6 +9,7 @@ import 'package:sigacidades/presentation/maps/bloc/maps_state.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
 class MapsPage extends StatefulWidget {
   static const routeName = '/maps';
@@ -100,9 +101,8 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
   }
 
   // ====================================
-  // Função para abrir aplicativos externos de mapas usando map_launcher (Google Maps, Waze, etc.)
-  // ====================================
-  // MapLauncher detecta os mapas instalados no dispositivo do usuário
+// Função para abrir aplicativos externos de mapas usando map_launcher e direcionar para a página de lugares
+// ====================================
   Future<void> _openInMapLauncher(Place place) async {
     final availableMaps = await MapLauncher.installedMaps;
 
@@ -113,37 +113,85 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
           return SafeArea(
             child: SingleChildScrollView(
               child: Wrap(
-                // Exibe a lista de aplicativos de mapas disponíveis
-                children: availableMaps.map((map) {
-                  return ListTile(
+                children: [
+                  // Opção "Mais Detalhes" no início da janela modal para o usuário ser direcionado ao lugar
+                  ListTile(
                     onTap: () {
-                      // Abre o mapa escolhido e marca a localização de Place
-                      map.showMarker(
-                        coords: Coords(
-                          place.coordinates.latitude,
-                          place.coordinates.longitude,
+                      // Vai para a página de detalhes do lugar
+                      Navigator.pop(context); // Fecha o modal antes
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PlacePage(place: place),
                         ),
-                        title: place.name,
-                        description: place.adress,
                       );
-                      Navigator.pop(
-                          context); // Fecha o modal depoois da seleção
                     },
-                    title: Text(map.mapName),
-                    leading: SvgPicture.asset(
-                      map.icon, // Icone do app de mapas do SVG (na documentação, a maioria dos apps de localização estão disponíveis)
-                      height: 30,
-                      width: 30,
+                    title: const Text(
+                      "Mais Detalhes",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
                     ),
-                  );
-                }).toList(),
+                    leading: const Icon(
+                      Icons.info_outline,
+                      color: Colors.blueAccent,
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.blueAccent,
+                      size: 18,
+                    ),
+                  ),
+
+                  // Linha separadora para os lugares carregados pela map_launcher
+                  const Divider(thickness: 1),
+
+                  // Título "Abrir com:"
+                  const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Text(
+                      "Abrir com",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+
+                  // Lista de aplicativos de mapas disponíveis
+                  ...availableMaps.map((map) {
+                    return ListTile(
+                      onTap: () {
+                        map.showMarker(
+                          coords: Coords(
+                            place.coordinates.latitude,
+                            place.coordinates.longitude,
+                          ),
+                          title: place.name,
+                          description: place.adress,
+                        );
+                        Navigator.pop(context);
+                      },
+                      title: Text(map.mapName),
+                      leading: SvgPicture.asset(
+                        map.icon,
+                        height: 30,
+                        width: 30,
+                      ),
+                    );
+                  }).toList(),
+                ],
               ),
             ),
           );
         },
       );
     } else {
-      // Caso nenhum app de mapas seja encontrado
+      // Caso de nenhum app de mapas ser encontrado
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Nenhum aplicativo de mapas encontrado.'),

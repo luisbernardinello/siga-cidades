@@ -9,18 +9,19 @@ import 'package:sigacidades/presentation/place/screens/place_page.dart';
 // ====================================
 // AppSearchBar: Barra de pesquisa customizada
 // ====================================
-// AppSearchBar permite ao usuário pesquisar locais com base na cidade
-// selecionada. Ela contém um campo de texto para a busca e um ícone que
-// abre o menu do drawer. É utilizado o CategoryBloc para obter a cidade selecionada
-// O resultado é filtrado de acordo com o nome dos locais da cidade selecionada.
+// AppSearchBar é o widget que permite ao usuário pesquisar lugares com base na cidade selecionada no drawer
+// É utilizado aqui o CategoryBloc para obter a cidade selecionada
+// e o resultado é filtrado na busca de acordo com o nome dos lugares (para a cidade selecionada)
 class AppSearchBar extends StatefulWidget {
   final VoidCallback onMenuTap; // Callback para abrir o Drawer.
-  final PlaceRepository placeRepository; // Repositório para busca de locais.
+  final PlaceRepository placeRepository; // Repository para buscar os lugares.
+  final String? selectedCity; // Cidade selecionada passada pelo main screen
 
   const AppSearchBar({
     super.key,
     required this.onMenuTap,
     required this.placeRepository,
+    this.selectedCity,
   });
 
   @override
@@ -31,7 +32,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   // Controlador para receber o texto digitado pelo usuário no campo de pesquisa.
   final TextEditingController _searchController = TextEditingController();
 
-  // Limpa o controlador, para evitar vazamento de memória.
+  // Limpa o controlador
   @override
   void dispose() {
     _searchController.dispose();
@@ -47,7 +48,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
     final state = context.watch<CategoryBloc>().state;
 
     // Cidade atualmente selecionada pelo usuário.
-    String? selectedCity;
+    // Atualiza a cidade com base no CategoryBloc do estado da cidade passada do MainScreen.
+    // Utilizamos Bauru como cidade padrão para a pesquisa
+    String selectedCity = widget.selectedCity ?? 'Bauru';
     if (state is CategoryLoaded) {
       selectedCity = context.read<CategoryBloc>().selectedCity;
     }
@@ -56,7 +59,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
     // Layout da AppSearchBar
     // ====================================
     // A barra de pesquisa contem um ícone de menu na esquerda e um
-    // campo de texto na direita, no qual o usuário pode digitar sua busca.
+    // campo de texto na direita no qual o usuário pode digitar a busca.
     return Row(
       crossAxisAlignment:
           CrossAxisAlignment.center, // Alinhamento vertical dos elementos.
@@ -102,9 +105,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                     ),
                     decoration: InputDecoration(
                       // Placeholder que indica a cidade selecionada.
-                      hintText: selectedCity != null
-                          ? 'Pesquise por locais em $selectedCity'
-                          : 'Pesquise por locais',
+                      hintText: 'Pesquise por locais em $selectedCity',
                       hintStyle: const TextStyle(
                         color: Color(0xFF737373),
                         fontSize: 12,
@@ -142,7 +143,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   // no texto digitado e na cidade selecionada. O resultado da busca é
   // mostrado em um modal na parte inferior da tela.
   void _showSearchModal(
-      BuildContext context, String query, String? selectedCity) async {
+      BuildContext context, String query, String selectedCity) async {
     // ====================================
     // Validações para a pesquisa
     // ====================================
@@ -153,19 +154,11 @@ class _AppSearchBarState extends State<AppSearchBar> {
       return;
     }
 
-    if (selectedCity == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Selecione uma cidade antes de pesquisar.')),
-      );
-      return;
-    }
-
     // ====================================
     // Busca pelos locais
     // ====================================
     // Normaliza a string de busca (remove acentos e converte para minusculo)
-    // assim garante que a pesquisa não seja sensivel
+    // assim garante que a pesquisa não seja sensível
     final normalizedQuery = removeDiacritics(query).toLowerCase();
     final allPlaces =
         await widget.placeRepository.fetchPlacesByCity(selectedCity);
