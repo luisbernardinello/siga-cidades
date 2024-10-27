@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sigacidades/common/widgets/app_search_bar.dart';
 
 class CustomDesktopNavBar extends StatelessWidget {
   final int currentPage; // Página selecionada.
   final ValueChanged<int> onSelectPage; // Callback para trocar a página.
+  final VoidCallback onMenuTap; // Callback para abrir o Drawer.
+  final String? selectedCity; // Cidade selecionada para busca.
 
   const CustomDesktopNavBar({
     Key? key,
     required this.currentPage,
     required this.onSelectPage,
+    required this.onMenuTap,
+    required this.selectedCity,
   }) : super(key: key);
 
   @override
@@ -25,13 +31,35 @@ class CustomDesktopNavBar extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavItem(context, 'Início', Icons.home, 0),
-          _buildNavItem(context, 'Distâncias', Icons.list, 1),
-          _buildNavItem(context, 'Mapa', Icons.map, 2),
-          _buildNavItem(context, 'Sobre', Icons.info, 3),
-          _buildNavItem(context, 'Feedback', Icons.message, 4),
+          // Ícone de menu para abrir o Drawer (mantido à esquerda).
+          GestureDetector(
+            onTap: onMenuTap,
+            child: const Icon(Icons.menu, color: Color(0xFF080808)),
+          ),
+
+          // Navegação principal no centro da barra.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildNavItem(context, 'Início', Icons.home, 0),
+              _buildNavItem(context, 'Distâncias', Icons.list, 1),
+              _buildNavItem(context, 'Mapa', Icons.map, 2),
+              _buildNavItem(context, 'Sobre', Icons.info, 3),
+              _buildNavItem(context, 'Feedback', Icons.message, 4),
+            ],
+          ),
+
+          // Barra de busca alinhada à direita.
+          SizedBox(
+            width: 300,
+            child: AppSearchBar(
+              onMenuTap: onMenuTap, // Função que não será usada aqui.
+              placeRepository: context.read(), // Repositório de locais
+              selectedCity: selectedCity, // Cidade selecionada
+            ),
+          ),
         ],
       ),
     );

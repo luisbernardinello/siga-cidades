@@ -8,103 +8,88 @@ import 'package:sigacidades/domain/repositories/place_repository.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 
-/// Página que exibe os locais próximos ao usuário.
-/// Bloc gerencia o estado da busca de locais.
 class DistancesPage extends StatelessWidget {
-  static const routeName = '/distances'; // Nome da rota para navegação
+  static const routeName = '/distances';
 
   const DistancesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isDesktop = screenWidth >= 1024;
+
+    double horizontalPadding = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
+    double titleFontSize = isDesktop ? 24 : (isTablet ? 20 : 16);
+    double buttonFontSize = isDesktop ? 18 : 16;
+    double spacingBetweenItems = isDesktop ? 24 : 16;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0), // Define a margem lateral da página
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, // Alinhamento do conteúdo na esquerda
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-
-          // ====================================
-          // Seção: Título "Locais próximos"
-          // ====================================
-          const Text(
+          Text(
             'Locais próximos',
             style: TextStyle(
-              color: Color(0xFF080808),
-              fontSize: 16,
+              color: const Color(0xFF080808),
+              fontSize: titleFontSize,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 15),
-
-          // ====================================
-          // Seção: Lista de lugares com distâncias
-          // ====================================
+          SizedBox(height: spacingBetweenItems),
           Expanded(
             child: BlocProvider(
-              // BLoC responsável por buscar os lugares próximos
-              create: (context) => DistancesBloc(
-                  context.read<PlaceRepository>())
-                ..add(
-                    FetchNearbyPlacesEvent()), // Evento para carregar lugares próximos
+              create: (context) =>
+                  DistancesBloc(context.read<PlaceRepository>())
+                    ..add(FetchNearbyPlacesEvent()),
               child: BlocBuilder<DistancesBloc, DistancesState>(
                 builder: (context, state) {
                   if (state is DistancesLoading) {
-                    // Estado de carregamento, exibe o indicador de carregamento enquanto os lugares estão sendo buscados
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is DistancesPermissionRequired ||
                       state is DistancesError) {
-                    // Mensagens de erro ou permissão necessária
-                    String message;
-                    if (state is DistancesPermissionRequired) {
-                      message =
-                          state.message; // Mensagem de permissão necessária
-                    } else if (state is DistancesError) {
-                      message = state.message; // Mensagem de erro
-                    } else {
-                      message =
-                          "Ocorreu um erro inesperado."; // Caso ocorra um erro não previsto
-                    }
+                    String message = state is DistancesPermissionRequired
+                        ? state.message
+                        : (state is DistancesError
+                            ? state.message
+                            : "Ocorreu um erro inesperado.");
 
-                    // Exibe a mensagem de erro centralizada
                     return Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        padding: EdgeInsets.symmetric(horizontal: 24.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
                               message,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.red,
-                                fontSize: 18,
+                                fontSize: titleFontSize,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 24),
                             ElevatedButton(
                               onPressed: () {
-                                // Botão de tentar novamente gera o evento para tentar buscar os lugares
                                 context
                                     .read<DistancesBloc>()
                                     .add(FetchNearbyPlacesEvent());
                               },
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                     horizontal: 24, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 backgroundColor: Colors.blue,
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Tentar Novamente',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: buttonFontSize,
                                   color: Colors.white,
                                 ),
                               ),
@@ -114,44 +99,35 @@ class DistancesPage extends StatelessWidget {
                       ),
                     );
                   } else if (state is DistancesLoaded) {
-                    // Caso de os lugares e distâncias serem carregados com sucesso
-                    final nearbyPlaces = state
-                        .nearbyPlacesWithDistances; // Lista de lugares e suas distâncias
+                    final nearbyPlaces = state.nearbyPlacesWithDistances;
 
                     return ListView.builder(
-                      itemCount: nearbyPlaces
-                          .length, // Define a quantidade de itens na lista
+                      itemCount: nearbyPlaces.length,
                       itemBuilder: (context, index) {
-                        final placeData = nearbyPlaces[
-                            index]; // Dados do lugar no index atual
-                        final place =
-                            placeData['place'] as Place; // Instância do lugar
-                        final distance = placeData['distance']
-                            as double; // Distância do lugar
+                        final placeData = nearbyPlaces[index];
+                        final place = placeData['place'] as Place;
+                        final distance = placeData['distance'] as double;
 
-                        // Adiciona GestureDetector para navegação ao PlacePage ao clicar no card
                         return GestureDetector(
                           onTap: () {
-                            // Navega para a pagina de detalhes do lugar
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PlacePage(
-                                    place:
-                                        place), // Passa o lugar selecionado para PlacePage
+                                builder: (context) => PlacePage(place: place),
                               ),
                             );
                           },
                           child: PlaceDistanceWidget(
-                            place: place, // Passa o lugar para o widget
-                            distance:
-                                distance, // Passa a distância para o widget
+                            place: place,
+                            distance: distance,
+                            isTablet: isTablet,
+                            isDesktop: isDesktop,
                           ),
                         );
                       },
                     );
                   }
-                  return Container(); // Retorna um container vazio para o estado padrão
+                  return Container();
                 },
               ),
             ),

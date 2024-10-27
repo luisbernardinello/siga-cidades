@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Para carregar variáveis de ambiente
-import 'package:sigacidades/core/utils/feedback_utils.dart'; // Para carregar o template HTML do corpo do e-mail
-import 'dart:io'; // Importa a biblioteca para detectar o dispositivo
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sigacidades/core/utils/feedback_utils.dart';
+import 'dart:io';
 
-// ====================================
-// FeedbackPage: Formulário para Envio de Feedback
-// ====================================
-// Permite aos usuários enviar feedback pelo App.
-// Enviado pela lib mailer com SMTP.
 class FeedbackPage extends StatefulWidget {
   static const routeName = '/feedback';
 
@@ -20,24 +15,15 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
-  // ====================================
-  // Chave global para gerenciar o estado do formulário
-  // ====================================
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  // Controladores para capturar os valores dos campos de texto
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
 
-  // Regex para validação dos campos Nome e E-mail
   static final RegExp namePattern = RegExp('[a-zA-Z]');
   static final RegExp emailPattern = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
 
-  // ====================================
-  // Funções de Validação do Formulário
-  // ====================================
   String? _validateName(String? name) {
     if (name == null || name.isEmpty) {
       return "Informe o seu nome!";
@@ -63,9 +49,61 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return null;
   }
 
-  // ====================================
-  // Função para exibir o alerta de sucesso após o envio do feedback
-  // ====================================
+  Future<void> _sendEmail(String name, String email, String message) async {
+    String? username = dotenv.env['EMAIL_USERNAME'];
+    String? password = dotenv.env['EMAIL_PASSWORD'];
+
+    if (username == null || password == null) {
+      print("Credenciais de e-mail não carregadas corretamente.");
+      return;
+    }
+
+    String device = Platform.isAndroid
+        ? 'Android'
+        : Platform.isIOS
+            ? 'iOS'
+            : 'Outro';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'Sigacidades Feedback')
+      ..recipients.add('luisbernardinello@gmail.com')
+      ..subject = 'Feedback enviado por $name'
+      ..html = generateFeedbackEmailHTML(name, email, message, device);
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('E-mail enviado: ' + sendReport.toString());
+      _showSuccessDialog();
+    } on MailerException catch (e) {
+      print('Erro ao enviar e-mail: ${e.toString()}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao enviar feedback.')),
+      );
+    }
+  }
+
+  Future<void> _sendFeedback() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      final String name = _nameController.text;
+      final String email = _emailController.text;
+      final String feedback = _feedbackController.text;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enviando feedback...')),
+      );
+
+      await _sendEmail(name, email, feedback);
+
+      _nameController.clear();
+      _emailController.clear();
+      _feedbackController.clear();
+    }
+  }
+
   Future<void> _showSuccessDialog() async {
     return showDialog<void>(
       context: context,
@@ -78,7 +116,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha a janela
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -87,143 +125,88 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  // ====================================
-  // Função para enviar o e-mail usando SMTP
-  // ====================================
-  Future<void> _sendEmail(String name, String email, String message) async {
-    // Carrega as credenciais do arquivo .env
-    String? username = dotenv.env['EMAIL_USERNAME'];
-    String? password = dotenv.env['EMAIL_PASSWORD'];
-
-    // Verifica se as credenciais estão presentes
-    if (username == null || password == null) {
-      print("Credenciais de e-mail não carregadas corretamente.");
-      return;
-    }
-
-    // Identifica o dispositivo (Android ou iOS)
-    String device = Platform.isAndroid
-        ? 'Android'
-        : Platform.isIOS
-            ? 'iOS'
-            : 'Outro';
-
-    // Configura o servidor SMTP do Gmail
-    final smtpServer = gmail(username, password);
-
-    // Cria a mensagem de e-mail com formatação HTML do template da core/utils/feedback_utils.dart
-    final emailMessage = Message()
-      ..from = Address(username, 'Sigacidades Feedback')
-      ..recipients.add('luisbernardinello@gmail.com')
-      ..subject = 'Feedback enviado por $name'
-      ..html = generateFeedbackEmailHTML(name, email, message, device);
-
-    try {
-      // Tenta enviar o e-mail
-      final sendReport = await send(emailMessage, smtpServer);
-      print('E-mail enviado: ' + sendReport.toString());
-      _showSuccessDialog(); // Mostra o alerta de sucesso
-    } on MailerException catch (e) {
-      // Em caso de erro, log para ver no console
-      print('Erro ao enviar e-mail: ${e.toString()}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        // Exibe mensagem de erro no rodapé
-        const SnackBar(content: Text('Erro ao enviar feedback.')),
-      );
-    }
-  }
-
-  // ====================================
-  // Função para processar o envio do feedback
-  // ====================================
-  Future<void> _sendFeedback() async {
-    // Valida o formulário enviado
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      final String name = _nameController.text;
-      final String email = _emailController.text;
-      final String feedback = _feedbackController.text;
-
-      // Exibe uma mensagem de processamento no rodapé
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enviando feedback...')),
-      );
-
-      // Envia o e-mail
-      await _sendEmail(name, email, feedback);
-
-      // Limpa os campos após o envio
-      _nameController.clear();
-      _emailController.clear();
-      _feedbackController.clear();
-    }
-  }
-
-  // ====================================
-  // Interface do Formulário de Feedback
-  // ====================================
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey, // Atribui a chave global ao formulário para validação
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Por favor, envie-nos o seu feedback:',
-              style: TextStyle(
-                color: Color(0xFF080808),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 15),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isDesktop = screenWidth >= 1024;
 
-            // Campo Nome Completo
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nome Completo',
-                border: OutlineInputBorder(),
-              ),
-              validator: _validateName, // Valida o nome
-            ),
-            const SizedBox(height: 16),
+    double padding = isDesktop ? 32.0 : 16.0;
+    double fontSize = isDesktop ? 19 : (isTablet ? 17 : 15);
+    double buttonFontSize = isDesktop ? 18 : 16;
+    double fieldWidth = isDesktop ? 600 : double.infinity;
 
-            // Campo E-mail
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'E-mail',
-                border: OutlineInputBorder(),
-              ),
-              validator: _validateEmail, // Valida o e-mail
-            ),
-            const SizedBox(height: 16),
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: Container(
+          width: fieldWidth,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Envie o seu feedback:',
+                  style: TextStyle(
+                    color: const Color(0xFF080808),
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 15),
 
-            // Campo Mensagem
-            TextFormField(
-              controller: _feedbackController,
-              decoration: const InputDecoration(
-                labelText: 'Mensagem',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 5, // Permite múltiplas linhas para o feedback
-              validator: _validateFeedback, // Valida a mensagem
-            ),
-            const SizedBox(height: 24),
+                // Campo Nome Completo
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome Completo',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: _validateName,
+                ),
+                const SizedBox(height: 16),
 
-            // Botão Enviar
-            Center(
-              child: ElevatedButton(
-                onPressed: _sendFeedback, // Chama a função de envio
-                child: const Text('Enviar Feedback'),
-              ),
+                // Campo E-mail
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'E-mail',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: _validateEmail,
+                ),
+                const SizedBox(height: 16),
+
+                // Campo Mensagem
+                TextFormField(
+                  controller: _feedbackController,
+                  decoration: const InputDecoration(
+                    labelText: 'Mensagem',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 5,
+                  validator: _validateFeedback,
+                ),
+                const SizedBox(height: 24),
+
+                // Botão Enviar
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _sendFeedback,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 40 : 24, vertical: 12),
+                    ),
+                    child: Text(
+                      'Enviar Feedback',
+                      style: TextStyle(fontSize: buttonFontSize),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -231,7 +214,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   @override
   void dispose() {
-    // Limpa os controladores de texto, liberando a memória
     _nameController.dispose();
     _emailController.dispose();
     _feedbackController.dispose();

@@ -74,7 +74,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
 
       // ====================================
-      // Seção: App Search Bar e CustomDesktopNavBar para Desktop
+      // Seção: CustomDesktopNavBar com Barra de Busca para Desktop
       // ====================================
       body: Column(
         children: [
@@ -86,29 +86,36 @@ class _MainScreenState extends State<MainScreen> {
                   _selectedIndex = index; // Atualiza a página selecionada
                 });
               },
+              onMenuTap: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              selectedCity: selectedCity,
             ),
           Expanded(
             child: Stack(
               children: [
                 // ====================================
-                // Seção: App Search Bar
+                // Seção: App Search Bar para Tablet e Mobile
                 // ====================================
-                Positioned(
-                  top: topPadding,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: paddingHorizontal),
-                    child: AppSearchBar(
-                      onMenuTap: () {
-                        _scaffoldKey.currentState?.openDrawer();
-                      },
-                      placeRepository: context.read(), // Repositório de locais
-                      selectedCity: selectedCity, // Passa a cidade selecionada
+                if (!isDesktop)
+                  Positioned(
+                    top: topPadding,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: paddingHorizontal),
+                      child: AppSearchBar(
+                        onMenuTap: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        placeRepository:
+                            context.read(), // Repositório de locais
+                        selectedCity:
+                            selectedCity, // Passa a cidade selecionada
+                      ),
                     ),
                   ),
-                ),
 
                 // ====================================
                 // Seção: Linha divisória abaixo da barra de busca
