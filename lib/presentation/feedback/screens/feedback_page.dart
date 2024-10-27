@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:sigacidades/core/utils/feedback_utils.dart';
+import 'package:sigacidades/core/utils/feedback_email_text.dart';
 import 'dart:io';
 
 class FeedbackPage extends StatefulWidget {
@@ -110,7 +110,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Sucesso!'),
+          title: const Text('Obrigado!'),
           content: const Text('Seu feedback foi enviado com sucesso!'),
           actions: <Widget>[
             TextButton(
@@ -136,10 +136,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
     double buttonFontSize = isDesktop ? 18 : 16;
     double fieldWidth = isDesktop ? 600 : double.infinity;
 
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(padding),
-        child: Container(
+        child: SizedBox(
           width: fieldWidth,
           child: Form(
             key: _formKey,
@@ -188,7 +188,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   maxLines: 5,
                   validator: _validateFeedback,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
                 // Botão Enviar
                 Center(

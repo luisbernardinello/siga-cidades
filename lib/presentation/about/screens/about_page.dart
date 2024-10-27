@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:sigacidades/core/utils/privacy_policy_text.dart';
+import 'package:sigacidades/core/utils/terms_of_use_text.dart';
 
 class AboutPage extends StatelessWidget {
   static const routeName = '/about';
@@ -80,7 +82,7 @@ class AboutPage extends StatelessWidget {
                   onPressed: () => _showPolicyModal(
                     context,
                     "Política de Privacidade",
-                    _privacyPolicyText,
+                    privacyPolicyText,
                   ),
                   fontSize: buttonFontSize,
                 ),
@@ -91,7 +93,7 @@ class AboutPage extends StatelessWidget {
                   onPressed: () => _showPolicyModal(
                     context,
                     "Termos de Uso",
-                    _termsOfUseText,
+                    termsOfUseText,
                   ),
                   fontSize: buttonFontSize,
                 ),
@@ -337,11 +339,3 @@ class Contacts extends StatelessWidget {
     }
   }
 }
-
-const String _privacyPolicyText = '''
-[Aqui insira o texto completo da Política de Privacidade]
-''';
-
-const String _termsOfUseText = '''
-[Aqui insira o texto completo dos Termos de Uso]
-''';

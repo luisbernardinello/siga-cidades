@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
-// O PlaceModel extende a entidade Place e faz a conversão de JSON para o modelo e vice-versa.
+// O PlaceModel extende a entidade Place e faz a conversão de JSON para o PlaceModel e do PlaceModel para JSON.
 class PlaceModel extends Place {
   PlaceModel({
     required String name,
