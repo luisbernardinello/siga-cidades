@@ -20,7 +20,7 @@ class DistancesPage extends StatelessWidget {
     final bool isDesktop = screenWidth >= 1024;
 
     double horizontalPadding = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
-    double titleFontSize = isDesktop ? 24 : (isTablet ? 20 : 16);
+    double titleFontSize = isDesktop ? 16 : (isTablet ? 18 : 16);
     double buttonFontSize = isDesktop ? 18 : 16;
     double spacingBetweenItems = isDesktop ? 24 : 16;
 
@@ -30,12 +30,15 @@ class DistancesPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Text(
-            'Locais próximos',
-            style: TextStyle(
-              color: const Color(0xFF080808),
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w800,
+          Semantics(
+            header: true,
+            child: Text(
+              'Locais próximos',
+              style: TextStyle(
+                color: const Color(0xFF080808),
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           SizedBox(height: spacingBetweenItems),
@@ -57,44 +60,47 @@ class DistancesPage extends StatelessWidget {
                             : "Ocorreu um erro inesperado.");
 
                     return Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              message,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: titleFontSize,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: () {
-                                context
-                                    .read<DistancesBloc>()
-                                    .add(FetchNearbyPlacesEvent());
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                backgroundColor: Colors.blue,
-                              ),
-                              child: Text(
-                                'Tentar Novamente',
+                      child: Semantics(
+                        label: 'Erro ao carregar locais próximos: $message',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                message,
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: buttonFontSize,
-                                  color: Colors.white,
+                                  color: Colors.red,
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context
+                                      .read<DistancesBloc>()
+                                      .add(FetchNearbyPlacesEvent());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  backgroundColor: Colors.blue,
+                                ),
+                                child: Text(
+                                  'Tentar Novamente',
+                                  style: TextStyle(
+                                    fontSize: buttonFontSize,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );

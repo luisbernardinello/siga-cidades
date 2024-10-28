@@ -28,31 +28,39 @@ class PlaceDistanceWidget extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: cardVerticalPadding),
         child: ListTile(
-          title: Text(
-            place.name,
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
+          // Informações completas de acessibilidade do lugar
+          title: Semantics(
+            label: 'Nome do local: ${place.name}',
+            child: Text(
+              place.name,
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${place.category} - ${place.city}',
-                style: TextStyle(
-                  fontSize: subtitleFontSize,
+          subtitle: Semantics(
+            label:
+                '${place.category}, ${place.city}, a uma distância de ${_formatDistance(distance)}',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${place.category} - ${place.city}',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                  ),
                 ),
-              ),
-              Text(
-                _formatDistance(distance),
-                style: TextStyle(
-                  color: const Color(0xFFFFA500),
-                  fontWeight: FontWeight.w600,
-                  fontSize: distanceFontSize,
+                Text(
+                  _formatDistance(distance),
+                  style: TextStyle(
+                    color: const Color(0xFFFFA500),
+                    fontWeight: FontWeight.w600,
+                    fontSize: distanceFontSize,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -63,7 +71,7 @@ class PlaceDistanceWidget extends StatelessWidget {
     if (distance < 1000) {
       return '${distance.toStringAsFixed(0)} metros';
     } else {
-      return '${(distance / 1000).toStringAsFixed(2)} km';
+      return '${(distance / 1000).toStringAsFixed(2)} quilômetros';
     }
   }
 }

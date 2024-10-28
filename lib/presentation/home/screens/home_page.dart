@@ -30,22 +30,21 @@ class HomePage extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
 
-          // ====================================
-          // Seção: Título "Explore"
-          // ====================================
-          const Text(
-            'Explore',
-            style: TextStyle(
-              color: Color(0xFF080808),
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+          // Título da seção "Explore"
+          Semantics(
+            header: true,
+            child: const Text(
+              'Explore',
+              style: TextStyle(
+                color: Color(0xFF080808),
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           const SizedBox(height: 15),
 
-          // ====================================
-          // Seção: Carrossel de categorias
-          // ====================================
+          // Carrossel de categorias com acessibilidade
           BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
               final selectedIndex =
@@ -67,10 +66,15 @@ class HomePage extends StatelessWidget {
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: categoryTag(
-                          getCategoryNames()[index],
-                          index == selectedIndex,
-                          screenWidth: screenWidth,
+                        child: Semantics(
+                          label: 'Categoria ${getCategoryNames()[index]}'
+                              '${index == selectedIndex ? ', selecionada' : ''}',
+                          button: true,
+                          child: categoryTag(
+                            getCategoryNames()[index],
+                            index == selectedIndex,
+                            screenWidth: screenWidth,
+                          ),
                         ),
                       ),
                     ),
@@ -81,9 +85,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // ====================================
-          // Seção: Exibição de lugares no grid
-          // ====================================
+          // Grid de lugares com acessibilidade
           Expanded(
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
@@ -100,16 +102,21 @@ class HomePage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final place = state.filteredPlaces[index];
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlacePage(place: place),
-                            ),
-                          );
-                        },
-                        child: placeCard(place, isDesktop),
+                      return Semantics(
+                        label: 'Lugar: ${place.name}',
+                        hint: 'Toque para ver mais detalhes',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PlacePage(place: place),
+                              ),
+                            );
+                          },
+                          child: placeCard(place, isDesktop),
+                        ),
                       );
                     },
                   );

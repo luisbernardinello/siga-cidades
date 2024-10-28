@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // Espaçamento e dimensões configurados de acordo com o tipo de dispositivo
     double paddingHorizontal = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
-    double topPadding = isDesktop ? 120 : (isTablet ? 56 : 47);
+    double topPadding = isDesktop ? -60 : (isTablet ? 56 : 47);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -66,10 +66,11 @@ class _MainScreenState extends State<MainScreen> {
           // Usamos aqui o Semantics por questões de acessibilidade ao selecionar a cidade do drawer
           // SemanticsService é usada em contexto global
           // A cidade será lida pelo leitor de tela sem precisar ser inserido em um contexto de algum widget específico.
-          SemanticsService.announce(
-            'Cidade selecionada: $city',
-            TextDirection.ltr,
-          );
+
+          // SemanticsService.announce(
+          //   'Cidade selecionada: $city',
+          //   TextDirection.ltr,
+          // );
         },
       ),
 

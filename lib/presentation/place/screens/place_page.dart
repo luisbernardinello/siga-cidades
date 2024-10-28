@@ -122,20 +122,25 @@ class _PlacePageState extends State<PlacePage> {
                     Positioned(
                       top: 40,
                       left: 16,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context); // Botão para voltar
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 24,
+                      child: Semantics(
+                        label: "Botão voltar",
+                        hint: "Toque para voltar para a página anterior",
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.8),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),

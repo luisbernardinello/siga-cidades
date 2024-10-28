@@ -46,54 +46,69 @@ class _AppSearchBarState extends State<AppSearchBar> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        GestureDetector(
-          onTap: widget.onMenuTap,
-          child: Container(
-            width: isTablet ? 40 : 32,
-            height: isTablet ? 40 : 32,
-            alignment: Alignment.center,
-            child: const Icon(Icons.menu, color: Color(0xFF080808)),
+        Semantics(
+          label: 'Botão de menu',
+          hint: 'Clique para abrir o menu',
+          button: true,
+          child: GestureDetector(
+            onTap: widget.onMenuTap,
+            child: Container(
+              width: isTablet ? 40 : 32,
+              height: isTablet ? 40 : 32,
+              alignment: Alignment.center,
+              child: const Icon(Icons.menu, color: Color(0xFF080808)),
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            height: isTablet ? 64 : 56,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: const Color(0xFFE4E4E4),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    style: TextStyle(
-                      color: const Color(0xFF737373),
-                      fontSize: isTablet ? 14 : 12,
-                      fontWeight: FontWeight.w300,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Pesquise por locais em $selectedCity',
-                      hintStyle: TextStyle(
+          child: Semantics(
+            label: 'Campo de busca',
+            hint: 'Pesquisa de locais',
+            textField: true,
+            child: Container(
+              height: isTablet ? 64 : 56,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: const Color(0xFFE4E4E4),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      style: TextStyle(
                         color: const Color(0xFF737373),
                         fontSize: isTablet ? 14 : 12,
                         fontWeight: FontWeight.w300,
                       ),
-                      border: InputBorder.none,
+                      decoration: InputDecoration(
+                        hintText: 'Pesquise por locais em $selectedCity',
+                        hintStyle: TextStyle(
+                          color: const Color(0xFF737373),
+                          fontSize: isTablet ? 14 : 12,
+                          fontWeight: FontWeight.w300,
+                        ),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () {
-                    _showSearchModal(
-                        context, _searchController.text, selectedCity);
-                  },
-                  child: const Icon(Icons.search, color: Color(0xFF131313)),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Semantics(
+                    label: 'Botão de busca',
+                    hint: 'Clique para buscar locais',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: () {
+                        _showSearchModal(
+                            context, _searchController.text, selectedCity);
+                      },
+                      child: const Icon(Icons.search, color: Color(0xFF131313)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -120,54 +135,70 @@ class _AppSearchBarState extends State<AppSearchBar> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          height: MediaQuery.of(context).size.height * 0.4,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Resultados da Pesquisa para $selectedCity',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        return Semantics(
+          label: 'Resultados da pesquisa',
+          hint: 'Mostrando locais encontrados para $query',
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Resultados da Pesquisa para $selectedCity',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              if (searchResults.isEmpty)
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Local não encontrado',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 10),
+                if (searchResults.isEmpty)
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Local não encontrado',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: searchResults.length,
+                      itemBuilder: (context, index) {
+                        final place = searchResults[index];
+                        return ListTile(
+                          title: Text(
+                            place.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueAccent,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PlacePage(place: place),
+                              ),
+                            );
+                          },
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.blueAccent,
+                            size: 18,
+                          ),
+                        );
+                      },
                     ),
                   ),
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      final place = searchResults[index];
-                      return ListTile(
-                        title: Text(place.name),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlacePage(place: place),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },

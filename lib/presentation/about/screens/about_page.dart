@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -182,10 +183,14 @@ class AboutPage extends StatelessWidget {
 class Contacts extends StatelessWidget {
   const Contacts({super.key});
 
+  bool get isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  bool get isDesktop =>
+      kIsWeb ||
+      (!isMobile && Platform.isLinux || Platform.isMacOS || Platform.isWindows);
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final bool isMobile = Platform.isAndroid || Platform.isIOS;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -305,9 +310,7 @@ class Contacts extends StatelessWidget {
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.normal,
-              fontSize: Platform.isAndroid || Platform.isIOS
-                  ? (size.width * 0.042)
-                  : (size.width * 0.030),
+              fontSize: isMobile ? (size.width * 0.042) : (size.width * 0.030),
             ),
             maxLines: 1,
           ),

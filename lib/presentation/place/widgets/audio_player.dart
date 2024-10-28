@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -8,11 +10,10 @@ import 'package:audio_session/audio_session.dart';
 import 'package:uuid/uuid.dart';
 
 /// Widget responsável por reproduzir áudio
-/// Utiliza as bibliotecas just_audio, audio_session e rxdart.
 class SongPlayerWidget extends StatefulWidget {
-  final String audioUrl; // URL do áudio que será reproduzido
+  final String audioUrl; // URL do áudio
   final String audioTitle; // Título do áudio
-  final Function(AudioPlayer) onPlayerInit; // Callback para retornar o player
+  final Function(AudioPlayer) onPlayerInit; // Callback para retorno do player
 
   const SongPlayerWidget({
     Key? key,
@@ -27,7 +28,7 @@ class SongPlayerWidget extends StatefulWidget {
 
 class _SongPlayerWidgetState extends State<SongPlayerWidget> {
   late AudioPlayer _player; // Instância do player de áudio
-  late LockCachingAudioSource _audioSource;
+  late AudioSource _audioSource; // Fonte de áudio (com ou sem cache)
 
   @override
   void initState() {
@@ -35,16 +36,27 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
     _player = AudioPlayer();
     var uuid = const Uuid();
 
-    // Inicializa a fonte de áudio com suporte a cache e define um identificador único pelo hash gerado da URL com o plugin uuid
-    _audioSource = LockCachingAudioSource(
-      Uri.parse(widget.audioUrl),
-      tag: MediaItem(
-        id: uuid.v5(Namespace.url.value, widget.audioUrl),
-        title: widget.audioTitle,
-      ),
-    );
+    // Condicional para definir o tipo de fonte de áudio de acordo com a plataforma
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      // Cache para Android e iOS
+      _audioSource = LockCachingAudioSource(
+        Uri.parse(widget.audioUrl),
+        tag: MediaItem(
+          id: uuid.v5(Namespace.url.value, widget.audioUrl),
+          title: widget.audioTitle,
+        ),
+      );
+    } else {
+      // Sem cache para Web ou outras plataformas
+      _audioSource = AudioSource.uri(
+        Uri.parse(widget.audioUrl),
+        tag: MediaItem(
+          id: uuid.v5(Namespace.url.value, widget.audioUrl),
+          title: widget.audioTitle,
+        ),
+      );
+    }
 
-    // Passa o player instanciado via callback
     widget.onPlayerInit(_player);
     _initPlayer();
   }
@@ -55,45 +67,35 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
     await session.configure(const AudioSessionConfiguration.music());
 
     try {
-      // Listener para os eventos de interrupção de áudio (chamadas, navegação, etc.)
       session.interruptionEventStream.listen((event) {
         if (event.begin) {
           switch (event.type) {
             case AudioInterruptionType.duck:
-              // Outro app começou a reproduzir áudio, reduzimos o volume.
               _player.setVolume(0.3);
               break;
-            // fall-through de cases
             case AudioInterruptionType.pause:
             case AudioInterruptionType.unknown:
-              // Outro app pede que pausemos o áudio (ex: chamada recebida | obs: dois cases seguidos compartilham o mesmo _player.pause()).
               _player.pause();
               break;
           }
         } else {
-          // Interrupção terminou
           switch (event.type) {
             case AudioInterruptionType.duck:
-              // O app que gerou interrupção terminou, restauramos o volume.
               _player.setVolume(1.0);
               break;
             case AudioInterruptionType.pause:
-              // Retoma a reprodução depois de uma chamada ou outra interrupção.
               _player.play();
               break;
             case AudioInterruptionType.unknown:
-              // Sem ação adicional.
               break;
           }
         }
       });
 
-      // Listener para oc aso de desconexão de fones de ouvido
       session.becomingNoisyEventStream.listen((_) {
-        _player.pause(); // Pausa ao desconectar fones de ouvido
+        _player.pause();
       });
 
-      // Configuração da fonte de áudio e inicialização do player
       await _player.setAudioSource(_audioSource);
     } catch (e) {
       print("Erro ao carregar o áudio: $e");
@@ -113,16 +115,8 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0),
-          // child: Text(
-          //   widget.audioTitle,
-          //   style: const TextStyle(
-          //     fontSize: 18,
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          // ),
         ),
         ControlButtons(_player),
-        // Envia para a barra de progresso o stream do _positionDataStream
         StreamBuilder<PositionData>(
           stream: _positionDataStream,
           builder: (context, snapshot) {
@@ -139,8 +133,6 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
     );
   }
 
-  /// Combina as streams de posição, buffer e duração do player para
-  /// atualização em tempo real da barra de progresso.
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
         _player.positionStream,
@@ -154,7 +146,7 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
       );
 }
 
-/// Estrutura responsável por encapsular dados de posição, buffer e duração do player
+/// Classe para encapsular dados de posição, buffer e duração do player
 class PositionData {
   final Duration position;
   final Duration bufferedPosition;

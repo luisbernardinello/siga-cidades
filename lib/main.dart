@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -26,10 +29,18 @@ Future main() async {
 
   // Carrega o arquivo .env
   await dotenv.load(fileName: '.env');
+
   // Inicializa o backend de cache do FMTC (flutter_map_tile_caching)
-  await FMTCObjectBoxBackend().initialise();
-  // Cria o store para cache de tiles
-  await FMTCStore('mapStore').manage.create();
+  // Inicialização do FMTC apenas em plataformas com suporte FFI
+  if (!kIsWeb &&
+      (Platform.isAndroid ||
+          Platform.isIOS ||
+          Platform.isWindows ||
+          Platform.isLinux ||
+          Platform.isMacOS)) {
+    await FMTCObjectBoxBackend().initialise();
+    await FMTCStore('mapStore').manage.create();
+  }
 
   // Cria a configuração do Just Audio Background
   await JustAudioBackground.init(

@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/common/widgets/app_search_bar.dart';
 
 class CustomDesktopNavBar extends StatelessWidget {
-  final int currentPage; // Página selecionada.
-  final ValueChanged<int> onSelectPage; // Callback para trocar a página.
-  final VoidCallback onMenuTap; // Callback para abrir o Drawer.
-  final String? selectedCity; // Cidade selecionada para busca.
+  final int currentPage;
+  final ValueChanged<int> onSelectPage;
+  final VoidCallback onMenuTap;
+  final String? selectedCity;
 
   const CustomDesktopNavBar({
     Key? key,
@@ -19,27 +19,32 @@ class CustomDesktopNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2), // Cor de fundo da barra.
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade400,
-            offset: const Offset(0, 1),
-            blurRadius: 4,
+            color: Colors.grey.shade300,
+            offset: const Offset(0, 4),
+            blurRadius: 8,
           ),
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Ícone de menu para abrir o Drawer (mantido à esquerda).
-          GestureDetector(
-            onTap: onMenuTap,
-            child: const Icon(Icons.menu, color: Color(0xFF080808)),
+          Flexible(
+            flex: 2,
+            child: Semantics(
+              label: 'Barra de pesquisa',
+              hint: 'Pesquise locais',
+              child: AppSearchBar(
+                onMenuTap: onMenuTap,
+                placeRepository: context.read(),
+                selectedCity: selectedCity,
+              ),
+            ),
           ),
-
-          // Navegação principal no centro da barra.
+          const Spacer(flex: 1),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -50,56 +55,57 @@ class CustomDesktopNavBar extends StatelessWidget {
               _buildNavItem(context, 'Feedback', Icons.message, 4),
             ],
           ),
-
-          // Barra de busca alinhada à direita.
-          SizedBox(
-            width: 300,
-            child: AppSearchBar(
-              onMenuTap: onMenuTap, // Função que não será usada aqui.
-              placeRepository: context.read(), // Repositório de locais
-              selectedCity: selectedCity, // Cidade selecionada
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // ====================================
-  // _buildNavItem: Constrói os ícones e textos da barra de navegação desktop.
-  // ====================================
-  // Constrói o item de navegação com ícone e texto, com cor de destaque
-  // para o item selecionado.
   Widget _buildNavItem(
       BuildContext context, String label, IconData icon, int index) {
     final bool isSelected = currentPage == index;
 
-    return GestureDetector(
-      onTap: () => onSelectPage(index), // Troca a página ao clicar.
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? Colors.purple : Colors.black,
-            size: 24,
+    return Semantics(
+      label: label,
+      hint:
+          'Botão de navegação, no momento ${isSelected ? "selecionado" : "não selecionado"}',
+      button: true,
+      child: GestureDetector(
+        onTap: () => onSelectPage(index),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Icon(
+                  icon,
+                  color: isSelected ? Colors.deepPurple : Colors.grey[700],
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 4),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.deepPurple : Colors.grey[700],
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 2,
+                width: isSelected ? 24 : 0,
+                color: Colors.deepPurple,
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.purple : Colors.black,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          if (isSelected)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              height: 2,
-              width: 20,
-              color: Colors.purple,
-            ),
-        ],
+        ),
       ),
     );
   }

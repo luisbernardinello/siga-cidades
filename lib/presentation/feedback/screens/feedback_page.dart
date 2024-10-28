@@ -139,72 +139,92 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(padding),
-        child: SizedBox(
-          width: fieldWidth,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Envie o seu feedback:',
-                  style: TextStyle(
-                    color: const Color(0xFF080808),
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                // Campo Nome Completo
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome Completo',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: _validateName,
-                ),
-                const SizedBox(height: 16),
-
-                // Campo E-mail
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'E-mail',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: 16),
-
-                // Campo Mensagem
-                TextFormField(
-                  controller: _feedbackController,
-                  decoration: const InputDecoration(
-                    labelText: 'Mensagem',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 5,
-                  validator: _validateFeedback,
-                ),
-                const SizedBox(height: 16),
-
-                // Botão Enviar
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _sendFeedback,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 40 : 24, vertical: 12),
-                    ),
-                    child: Text(
-                      'Enviar Feedback',
-                      style: TextStyle(fontSize: buttonFontSize),
+        child: Semantics(
+          label:
+              "Página de feedback. Preencha os campos para enviar seu feedback",
+          child: SizedBox(
+            width: fieldWidth,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Envie o seu feedback:',
+                    style: TextStyle(
+                      color: const Color(0xFF080808),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 15),
+
+                  // Campo Nome Completo
+                  Semantics(
+                    label: 'Campo para digitar o seu nome completo',
+                    hint: 'Obrigatório. Somente letras',
+                    child: TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome Completo',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validateName,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Campo E-mail
+                  Semantics(
+                    label: 'Campo para digitar o seu e-mail',
+                    hint: 'Obrigatório. Informe um e-mail válido',
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validateEmail,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Campo Mensagem
+                  Semantics(
+                    label: 'Campo para digitar a sua mensagem de feedback',
+                    hint: 'Obrigatório. Digite sua mensagem ou sugestão',
+                    child: TextFormField(
+                      controller: _feedbackController,
+                      decoration: const InputDecoration(
+                        labelText: 'Mensagem',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 5,
+                      validator: _validateFeedback,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Botão Enviar com Semantics
+                  Center(
+                    child: Semantics(
+                      label: 'Botão enviar feedback',
+                      hint: 'Clique para enviar a mensagem',
+                      child: ElevatedButton(
+                        onPressed: _sendFeedback,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 40 : 24, vertical: 12),
+                        ),
+                        child: Text(
+                          'Enviar Feedback',
+                          style: TextStyle(fontSize: buttonFontSize),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

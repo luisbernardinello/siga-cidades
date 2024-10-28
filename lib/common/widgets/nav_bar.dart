@@ -33,67 +33,81 @@ class CustomNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildNavItem(context, Icons.home, 0, isTablet),
-          _buildNavItem(context, Icons.list, 1, isTablet),
+          _buildNavItem(context, Icons.home, 0, isTablet, 'Início'),
+          _buildNavItem(context, Icons.list, 1, isTablet, 'Distâncias'),
           _buildCenterItem(context, 2, isTablet),
-          _buildNavItem(context, Icons.info, 3, isTablet),
-          _buildNavItem(context, Icons.message, 4, isTablet),
+          _buildNavItem(context, Icons.info, 3, isTablet, 'Sobre'),
+          _buildNavItem(context, Icons.message, 4, isTablet, 'Feedback'),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(
-      BuildContext context, IconData icon, int index, bool isTablet) {
-    return GestureDetector(
-      onTap: () => onSelectPage(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: isTablet ? 28 : 24,
-            height: isTablet ? 28 : 24,
-            decoration: BoxDecoration(
-              color: currentPage == index ? Colors.purple : Colors.transparent,
-              shape: BoxShape.circle,
+  Widget _buildNavItem(BuildContext context, IconData icon, int index,
+      bool isTablet, String label) {
+    return Semantics(
+      label: label,
+      hint:
+          'Botão do menu, no momento ${currentPage == index ? "selecionado" : "não selecionado"}',
+      button: true,
+      child: GestureDetector(
+        onTap: () => onSelectPage(index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: isTablet ? 28 : 24,
+              height: isTablet ? 28 : 24,
+              decoration: BoxDecoration(
+                color:
+                    currentPage == index ? Colors.purple : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: isTablet ? 28 : 24,
+                color: currentPage == index ? Colors.white : Colors.black,
+              ),
             ),
-            child: Icon(
-              icon,
-              size: isTablet ? 28 : 24,
-              color: currentPage == index ? Colors.white : Colors.black,
+            const SizedBox(height: 4),
+            Container(
+              width: 4,
+              height: 4,
+              decoration: ShapeDecoration(
+                color: currentPage == index
+                    ? const Color(0xFFEFDF58)
+                    : const Color(0xFFA2A2A2),
+                shape: const OvalBorder(),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            width: 4,
-            height: 4,
-            decoration: ShapeDecoration(
-              color: currentPage == index
-                  ? const Color(0xFFEFDF58)
-                  : const Color(0xFFA2A2A2),
-              shape: const OvalBorder(),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCenterItem(BuildContext context, int index, bool isTablet) {
-    return GestureDetector(
-      onTap: () => onSelectPage(index),
-      child: Container(
-        width: isTablet ? 70 : 60,
-        height: isTablet ? 70 : 60,
-        decoration: ShapeDecoration(
-          color: currentPage == index ? Colors.purple : const Color(0xFFC6C6C6),
-          shape: const CircleBorder(),
-        ),
-        child: Icon(
-          Icons.location_on_outlined,
-          size: isTablet ? 48 : 40,
-          color: currentPage == index ? Colors.white : Colors.black,
+    return Semantics(
+      label: 'Mapa interativo',
+      hint:
+          'Botão central do menu, no momento ${currentPage == index ? "selecionado" : "não selecionado"}',
+      button: true,
+      child: GestureDetector(
+        onTap: () => onSelectPage(index),
+        child: Container(
+          width: isTablet ? 70 : 60,
+          height: isTablet ? 70 : 60,
+          decoration: ShapeDecoration(
+            color:
+                currentPage == index ? Colors.purple : const Color(0xFFC6C6C6),
+            shape: const CircleBorder(),
+          ),
+          child: Icon(
+            Icons.location_on_outlined,
+            size: isTablet ? 48 : 40,
+            color: currentPage == index ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );

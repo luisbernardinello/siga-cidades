@@ -32,6 +32,8 @@ migrate_working_dir/
 .env
 /lib/firebase_options.dart
 /build/
+firebase.json
+cors.json
 
 # Symbolication related
 app.*.symbols
