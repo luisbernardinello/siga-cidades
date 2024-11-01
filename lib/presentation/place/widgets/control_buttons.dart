@@ -76,15 +76,24 @@ class ControlButtons extends StatelessWidget {
           stream: player.speedStream,
           builder: (context, snapshot) {
             final speed = snapshot.data ?? 1.0;
-            return IconButton(
-              icon: Text(
-                "${speed.toStringAsFixed(1)}x",
-                style: const TextStyle(fontWeight: FontWeight.bold),
+            return Semantics(
+              //label: "Botão Velocidade de Reprodução",
+              value:
+                  "Botão Velocidade de Reprodução. Velocidade de Reprodução Atual: ${speed.toStringAsFixed(1)}x",
+              hint: "Tocar duas vezes para ativar",
+              //button: true,
+              excludeSemantics: true,
+              child: IconButton(
+                icon: Text(
+                  "${speed.toStringAsFixed(1)}x",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  _changePlaybackSpeed(context, player, speed);
+                },
+                tooltip:
+                    'Velocidade de reprodução ${speed.toStringAsFixed(1)}x',
               ),
-              onPressed: () {
-                _changePlaybackSpeed(context, player, speed);
-              },
-              tooltip: 'Velocidade de reprodução ${speed.toStringAsFixed(1)}x',
             );
           },
         ),
@@ -126,6 +135,7 @@ class ControlButtons extends StatelessWidget {
         SnackBar(
           content: Semantics(
             label: 'Velocidade de reprodução ${newSpeed.toStringAsFixed(1)}x',
+            excludeSemantics: true,
             child: Text('Velocidade ${newSpeed.toStringAsFixed(1)}x'),
           ),
         ),

@@ -21,13 +21,11 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // Controla a página atual que foi selecionada no IndexedStack (definido na seção conteúdo dinâmico)
   int _selectedIndex = 0;
-
-  // Cidade atualmente selecionada para ser usada no AppSearchBar
   String? selectedCity;
+  final FocusNode _contentFocusNode = FocusNode();
+  final FocusNode _navBarFocusNode = FocusNode();
 
-  // Lista com todas as páginas que serão carregadas dinamicamente
   final List<Widget> _pages = [
     const HomePage(),
     const DistancesPage(),
@@ -36,41 +34,42 @@ class _MainScreenState extends State<MainScreen> {
     const FeedbackPage(),
   ];
 
+  final Map<int, String> _pageTitles = {
+    0: 'Explorar',
+    1: 'Distâncias',
+    2: 'Mapa Interativo',
+    3: 'Sobre o Aplicativo',
+    4: 'Feedback'
+  };
+
+  @override
+  void dispose() {
+    _contentFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // GlobalKey para o controle do Drawer
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-    // Pega as dimensões da tela
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
 
-    // Espaçamento e dimensões configurados de acordo com o tipo de dispositivo
     double paddingHorizontal = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
     double topPadding = isDesktop ? -60 : (isTablet ? 56 : 47);
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF2F2F2),
-
-      // ====================================
-      // Seção: Drawer Menu
-      // ====================================
       drawer: DrawerMenu(
         onCitySelected: (city) {
-          // Atualiza a cidade selecionada na MainScreen
           setState(() {
-            selectedCity = city; // Atualiza a cidade para o AppSearchBar
+            selectedCity = city;
           });
-          // Usamos aqui o Semantics por questões de acessibilidade ao selecionar a cidade do drawer
-          // SemanticsService é usada em contexto global
-          // A cidade será lida pelo leitor de tela sem precisar ser inserido em um contexto de algum widget específico.
-
-          // SemanticsService.announce(
-          //   'Cidade selecionada: $city',
-          //   TextDirection.ltr,
-          // );
+          SemanticsService.announce(
+            'Cidade selecionada: $city',
+            TextDirection.ltr,
+          );
         },
       ),
 
@@ -80,17 +79,29 @@ class _MainScreenState extends State<MainScreen> {
       body: Column(
         children: [
           if (isDesktop)
-            CustomDesktopNavBar(
-              currentPage: _selectedIndex,
-              onSelectPage: (index) {
-                setState(() {
-                  _selectedIndex = index; // Atualiza a página selecionada
-                });
-              },
-              onMenuTap: () {
-                _scaffoldKey.currentState?.openDrawer();
-              },
-              selectedCity: selectedCity,
+            Semantics(
+              label: 'Barra de navegação principal',
+              focusable: true,
+              child: Focus(
+                focusNode: _navBarFocusNode,
+                child: CustomDesktopNavBar(
+                  currentPage: _selectedIndex,
+                  onSelectPage: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                      _contentFocusNode.requestFocus();
+                    });
+                    SemanticsService.announce(
+                      'Página ${_pageTitles[index]} selecionada.',
+                      TextDirection.ltr,
+                    );
+                  },
+                  onMenuTap: () {
+                    _scaffoldKey.currentState?.openDrawer();
+                  },
+                  selectedCity: selectedCity,
+                ),
+              ),
             ),
           Expanded(
             child: Stack(
@@ -110,46 +121,28 @@ class _MainScreenState extends State<MainScreen> {
                         onMenuTap: () {
                           _scaffoldKey.currentState?.openDrawer();
                         },
-                        placeRepository:
-                            context.read(), // Repositório de locais
-                        selectedCity:
-                            selectedCity, // Passa a cidade selecionada
+                        placeRepository: context.read(),
+                        selectedCity: selectedCity,
                       ),
                     ),
                   ),
 
-                // ====================================
-                // Seção: Linha divisória abaixo da barra de busca
-                // ====================================
+                // Seção de conteúdo dinâmico
                 Positioned(
-                  top: topPadding + 64, // Alinha logo abaixo da AppSearchBar
-                  left: paddingHorizontal,
-                  right: paddingHorizontal,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 2,
-                        color: const Color(0xFFE4E4E4),
-                      ),
-                      const SizedBox(height: 16), // Espaçamento depois da linha
-                    ],
-                  ),
-                ),
-
-                // ====================================
-                // Seção: Conteúdo dinâmico
-                // ====================================
-                Positioned(
-                  top: topPadding +
-                      65, // Alinha o conteúdo após a linha divisória e o padding
+                  top: topPadding + 65,
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  // Aqui temos a IndexedStack que carrega as páginas da lista e passa o index da página selecionada
-                  child: IndexedStack(
-                    index: _selectedIndex, // Carrega a página selecionada
-                    children: _pages, // Carrega todas as páginas
+                  child: Semantics(
+                    label: 'Conteúdo da página ${_pageTitles[_selectedIndex]}',
+                    focusable: true,
+                    child: Focus(
+                      focusNode: _contentFocusNode,
+                      child: IndexedStack(
+                        index: _selectedIndex,
+                        children: _pages,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -162,15 +155,26 @@ class _MainScreenState extends State<MainScreen> {
       // Seção: Barra de Navegação Inferior (CustomNavBar) em Dispositivos Móveis e Tablet
       // ====================================
       bottomNavigationBar: isDesktop
-          ? null // Ocultar barra de navegação em desktop
-          : CustomNavBar(
-              currentPage: _selectedIndex,
-              onSelectPage: (index) {
-                setState(() {
-                  _selectedIndex =
-                      index; // Aqui recebemos o index da página e fazemos a atualização da página selecionada na NavBar pelo usuário
-                });
-              },
+          ? null
+          : Semantics(
+              label: 'Barra de navegação principal',
+              focusable: true,
+              child: Focus(
+                focusNode: _navBarFocusNode,
+                child: CustomNavBar(
+                  currentPage: _selectedIndex,
+                  onSelectPage: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                      _contentFocusNode.requestFocus();
+                    });
+                    SemanticsService.announce(
+                      'Página ${_pageTitles[index]} selecionada.',
+                      TextDirection.ltr,
+                    );
+                  },
+                ),
+              ),
             ),
     );
   }

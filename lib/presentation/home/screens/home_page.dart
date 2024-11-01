@@ -8,6 +8,13 @@ import 'package:sigacidades/presentation/home/widgets/place_card.dart';
 import 'package:sigacidades/presentation/place/screens/place_page.dart';
 import 'package:sigacidades/core/utils/category_list.dart';
 
+// ====================================
+// HomePage: Tela inicial com categorias e lugares
+// ====================================
+// A HomePage exibe categorias e os lugares disponíveis para uma cidade
+// selecionada. Ela utiliza o CategoryBloc para gerenciar o estado das
+// categorias e dos lugares. O usuário consegue ir para a screen de detalhes
+// de um lugar ao clicar em um card.
 class HomePage extends StatelessWidget {
   static const routeName = '/home';
 
@@ -33,6 +40,7 @@ class HomePage extends StatelessWidget {
           // Título da seção "Explore"
           Semantics(
             header: true,
+            label: 'Conteúdo principal de seleção de lugares por categoria',
             child: const Text(
               'Explore',
               style: TextStyle(

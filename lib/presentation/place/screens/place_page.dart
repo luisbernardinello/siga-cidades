@@ -4,13 +4,14 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
+import 'package:flutter/semantics.dart';
 
 /// Página responsável por exibir informações de um local específico e permitir
 /// ao usuário reproduzir o áudio de Informações Gerais e Audiodescrição mesmo com app minimizado.
 class PlacePage extends StatefulWidget {
   final Place place; // Entidade que contém as informações do local
 
-  const PlacePage({Key? key, required this.place}) : super(key: key);
+  const PlacePage({super.key, required this.place});
 
   @override
   _PlacePageState createState() => _PlacePageState();
@@ -20,6 +21,16 @@ class _PlacePageState extends State<PlacePage> {
   AudioPlayerType _selectedPlayer =
       AudioPlayerType.informacoesGerais; // Player inicial
   AudioPlayer? _activePlayer; // Player ativo para controle
+
+  // Adiciona este método para anunciar a mudança de áudio
+  void _announceAudioChange(AudioPlayerType newType) {
+    final String audioName = newType == AudioPlayerType.informacoesGerais
+        ? 'Informações Gerais'
+        : 'Audiodescrição';
+
+    SemanticsService.announce(
+        "Áudio alterado para $audioName", TextDirection.ltr);
+  }
 
   /// Função responsável por alternar entre os dois players de áudio, garantindo
   /// que o player anterior seja pausado e liberado antes de inicializar o novo.
@@ -123,8 +134,8 @@ class _PlacePageState extends State<PlacePage> {
                       top: 40,
                       left: 16,
                       child: Semantics(
-                        label: "Botão voltar",
-                        hint: "Toque para voltar para a página anterior",
+                        //hint: "Toque para voltar para a página anterior",
+                        label: "Voltar",
                         button: true,
                         child: GestureDetector(
                           onTap: () {
@@ -185,14 +196,8 @@ class _PlacePageState extends State<PlacePage> {
                         children: [
                           // Semantics para "Informações Gerais"
                           Semantics(
+                            excludeSemantics: true,
                             label: "Informações Gerais",
-                            selected: _selectedPlayer ==
-                                AudioPlayerType.informacoesGerais,
-                            hint: _selectedPlayer ==
-                                    AudioPlayerType.informacoesGerais
-                                ? "Selecionado, toque para alternar para Audiodescrição"
-                                : "Toque para selecionar Informações Gerais",
-                            button: true,
                             child: GestureDetector(
                               onTap: () => setState(() {
                                 _selectedPlayer =
@@ -201,7 +206,6 @@ class _PlacePageState extends State<PlacePage> {
                               child: Text(
                                 "Informações Gerais",
                                 style: TextStyle(
-                                  // fontSize: 15,
                                   fontWeight: _selectedPlayer ==
                                           AudioPlayerType.informacoesGerais
                                       ? FontWeight.bold
@@ -217,76 +221,93 @@ class _PlacePageState extends State<PlacePage> {
                           const SizedBox(width: 8),
 
                           // Container para o botão de alternância estilizado
-                          GestureDetector(
-                            onTap: () => setState(() {
-                              _selectedPlayer = _selectedPlayer ==
-                                      AudioPlayerType.informacoesGerais
-                                  ? AudioPlayerType.audiodescricao
-                                  : AudioPlayerType.informacoesGerais;
-                            }),
-                            child: Container(
-                              width: 80,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(40),
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Indicador animado para alternância entre opções
-                                  AnimatedPositioned(
-                                    duration: const Duration(milliseconds: 200),
-                                    left: _selectedPlayer ==
+                          MergeSemantics(
+                            child: Semantics(
+                              value:
+                                  "Botão para Alternar Áudio. Áudio atualmente selecionado ${_selectedPlayer == AudioPlayerType.informacoesGerais ? 'Informações Gerais' : 'Audiodescrição'}",
+                              onTap: () {
+                                setState(() {
+                                  _selectedPlayer = _selectedPlayer ==
+                                          AudioPlayerType.informacoesGerais
+                                      ? AudioPlayerType.audiodescricao
+                                      : AudioPlayerType.informacoesGerais;
+                                });
+                                _announceAudioChange(_selectedPlayer);
+                              },
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedPlayer = _selectedPlayer ==
                                             AudioPlayerType.informacoesGerais
-                                        ? 4
-                                        : 40,
-                                    top: 2,
-                                    child: Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: _selectedPlayer ==
-                                                AudioPlayerType
-                                                    .informacoesGerais
-                                            ? const LinearGradient(
-                                                colors: [
-                                                  Color(0xFFFF9D44),
-                                                  Color(0xFFFFC453)
-                                                  // Color(0xFF804FB3),
-                                                  // Color(0xFFB589D6)
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              )
-                                            : const LinearGradient(
-                                                colors: [
-                                                  Color(0xFFFFDA59),
-                                                  Color(0xFFFFE4AF)
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.25),
-                                            blurRadius: 6,
-                                            offset: const Offset(2, 1),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(
-                                        _selectedPlayer ==
-                                                AudioPlayerType
-                                                    .informacoesGerais
-                                            ? Icons.library_books
-                                            : Icons.hearing,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                                        ? AudioPlayerType.audiodescricao
+                                        : AudioPlayerType.informacoesGerais;
+                                  });
+                                  _announceAudioChange(_selectedPlayer);
+                                },
+                                child: Container(
+                                  width: 80,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(40),
                                   ),
-                                ],
+                                  child: Stack(
+                                    children: [
+                                      AnimatedPositioned(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        left: _selectedPlayer ==
+                                                AudioPlayerType
+                                                    .informacoesGerais
+                                            ? 4
+                                            : 40,
+                                        top: 2,
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: _selectedPlayer ==
+                                                    AudioPlayerType
+                                                        .informacoesGerais
+                                                ? const LinearGradient(
+                                                    colors: [
+                                                      Color(0xFFFF9D44),
+                                                      Color(0xFFFFC453)
+                                                    ],
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                  )
+                                                : const LinearGradient(
+                                                    colors: [
+                                                      Color(0xFFFFDA59),
+                                                      Color(0xFFFFE4AF)
+                                                    ],
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                  ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.25),
+                                                blurRadius: 6,
+                                                offset: const Offset(2, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            _selectedPlayer ==
+                                                    AudioPlayerType
+                                                        .informacoesGerais
+                                                ? Icons.library_books
+                                                : Icons.hearing,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -294,14 +315,8 @@ class _PlacePageState extends State<PlacePage> {
 
                           // Semantics para "Audiodescrição"
                           Semantics(
+                            excludeSemantics: true,
                             label: "Audiodescrição",
-                            selected: _selectedPlayer ==
-                                AudioPlayerType.audiodescricao,
-                            hint: _selectedPlayer ==
-                                    AudioPlayerType.audiodescricao
-                                ? "Selecionado, toque para alternar para Informações Gerais"
-                                : "Toque para selecionar Audiodescrição",
-                            button: true,
                             child: GestureDetector(
                               onTap: () => setState(() {
                                 _selectedPlayer =
@@ -310,7 +325,6 @@ class _PlacePageState extends State<PlacePage> {
                               child: Text(
                                 "Audiodescrição",
                                 style: TextStyle(
-                                  // fontSize: 15,
                                   fontWeight: _selectedPlayer ==
                                           AudioPlayerType.audiodescricao
                                       ? FontWeight.bold

@@ -49,7 +49,7 @@ class CustomNavBar extends StatelessWidget {
       label: label,
       hint:
           'Botão do menu, no momento ${currentPage == index ? "selecionado" : "não selecionado"}',
-      button: true,
+      button: false,
       child: GestureDetector(
         onTap: () => onSelectPage(index),
         child: Column(
@@ -92,7 +92,7 @@ class CustomNavBar extends StatelessWidget {
       label: 'Mapa interativo',
       hint:
           'Botão central do menu, no momento ${currentPage == index ? "selecionado" : "não selecionado"}',
-      button: true,
+      button: false,
       child: GestureDetector(
         onTap: () => onSelectPage(index),
         child: Container(

@@ -32,7 +32,6 @@ class DrawerMenu extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
-                label: 'Título do aplicativo SIGA CIDADES',
                 header: true,
                 child: Text(
                   'SIGA CIDADES',
