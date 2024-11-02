@@ -150,7 +150,7 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   void initState() {
     super.initState();
 
-    // Inicia um timer para definir _animationCompleted como true depois da animação
+    // Inicia um timer para colocar _animationCompleted como true depois da animação
     Timer(const Duration(seconds: 2), () {
       setState(() {
         _animationCompleted = true;
@@ -162,8 +162,8 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Bem vindo ao SIGA CIDADES. A próxima tela está dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. O menu superior possui um botão de escolha de cidades e a caixa de pesquisa. O conteúdo principal da página é atualizado conforme a escolha da página no menu inferior de navegação.',
-      hint: '.Logotipo do Biblioteca Falada. ',
+          'Bem vindo ao SIGA CIDADES. Nosso aplicativo possui a tela principal dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. O menu superior possui um botão de escolha de cidades e a caixa de pesquisa. O conteúdo principal da página é atualizado conforme a escolha da página no menu inferior de navegação.',
+      hint: '.Animação do Logotipo do Biblioteca Falada. ',
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -180,21 +180,32 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
             Positioned(
               bottom: 60,
               child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const MainScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                ),
+                child: Semantics(
+                  label: 'Botão de continuar',
+                  hint: 'Clique para prosseguir para a tela principal',
+                  button: false,
+                  child: const Text(
+                    'Continuar',
+                    style: TextStyle(
+                      color: Colors.white, // Cor do texto branca
+                      fontSize: 18, // Aumenta o tamanho do texto
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  child: Semantics(
-                    label: 'Botão de continuar para prosseguir',
-                    button: false,
-                    child: const Text('Continuar'),
-                  )),
+                ),
+              ),
             ),
         ],
       ),

@@ -157,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: isDesktop
           ? null
           : Semantics(
-              label: 'Barra de navegação principal',
+              label: 'Barra de navegação principal inferior',
               focusable: true,
               child: Focus(
                 focusNode: _navBarFocusNode,

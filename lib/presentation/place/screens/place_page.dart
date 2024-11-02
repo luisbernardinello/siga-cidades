@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -208,8 +211,8 @@ class _PlacePageState extends State<PlacePage> {
                       top: 40,
                       left: 16,
                       child: Semantics(
-                        //hint: "Toque para voltar para a página anterior",
                         label: "Voltar",
+                        hint: "Toque para voltar para a página anterior",
                         button: true,
                         child: GestureDetector(
                           onTap: () {
@@ -238,13 +241,18 @@ class _PlacePageState extends State<PlacePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.place.name, // Nome do local
-                        style: TextStyle(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
+                      Semantics(
+                        label: widget.place.name,
+                        hint: widget.place.imageDescription,
+                        child: Text(
+                          widget.place.name, // Nome do local
+                          style: TextStyle(
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+
                       const SizedBox(height: 8),
                       Text(
                         widget.place.adress, // Endereço do local
@@ -442,19 +450,21 @@ class _PlacePageState extends State<PlacePage> {
 
                       const SizedBox(height: 24),
 
-                      // Botão para abrir a localização no mapa
-                      Center(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _openInMapLauncher(context),
-                          icon: const Icon(Icons.map),
-                          label: const Text('Abrir localização'),
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
+                      // Botão para abrir a localização no mapa, visível apenas em dispositivos móveis
+                      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _openInMapLauncher(context),
+                            icon: const Icon(Icons.map),
+                            label: const Text('Abrir localização'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
                                 horizontal: buttonPadding,
-                                vertical: buttonPadding / 2),
+                                vertical: buttonPadding / 2,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),

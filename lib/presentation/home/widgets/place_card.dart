@@ -35,14 +35,16 @@ Widget placeCard(Place place, bool isDesktop) {
 
         const SizedBox(height: 8),
 
-        // Exibe a imagem do lugar com descrição para acessibilidade
+        // Exibe a imagem do lugar para acessibilidade
         ClipRRect(
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(12),
             bottomRight: Radius.circular(12),
           ),
           child: Semantics(
-            label: 'Imagem do lugar: ${place.name}. ${place.imageDescription}',
+            label: '${place.city}. Toque para mais detalhes',
+            hint: place.name,
+            button: true,
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: Image.network(

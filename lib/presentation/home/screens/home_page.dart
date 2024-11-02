@@ -74,15 +74,10 @@ class HomePage extends StatelessWidget {
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: Semantics(
-                          // label: 'Categoria ${getCategoryNames()[index]}'
-                          //     '${index == selectedIndex ? ', selecionada' : ''}',
-                          button: false,
-                          child: categoryTag(
-                            getCategoryNames()[index],
-                            index == selectedIndex,
-                            screenWidth: screenWidth,
-                          ),
+                        child: categoryTag(
+                          getCategoryNames()[index],
+                          index == selectedIndex,
+                          screenWidth: screenWidth,
                         ),
                       ),
                     ),
@@ -112,7 +107,7 @@ class HomePage extends StatelessWidget {
 
                       return Semantics(
                         label: 'Lugar: ${place.name}',
-                        hint: 'Toque para ver mais detalhes',
+                        hint: 'Toque para mais detalhes',
                         button: true,
                         child: GestureDetector(
                           onTap: () {
