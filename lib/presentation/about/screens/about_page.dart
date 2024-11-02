@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:sigacidades/core/utils/privacy_policy_text.dart';
 import 'package:sigacidades/core/utils/terms_of_use_text.dart';
@@ -75,12 +76,12 @@ class AboutPage extends StatelessWidget {
 
             // Botões de Política de Privacidade e Termos de Uso
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildPolicyButton(
+                _buildButton(
                   context,
                   title: "Política de Privacidade",
-                  onPressed: () => _showPolicyModal(
+                  onPressed: () => _showModal(
                     context,
                     "Política de Privacidade",
                     privacyPolicyText,
@@ -88,10 +89,10 @@ class AboutPage extends StatelessWidget {
                   fontSize: buttonFontSize,
                 ),
                 const SizedBox(width: 8),
-                _buildPolicyButton(
+                _buildButton(
                   context,
                   title: "Termos de Uso",
-                  onPressed: () => _showPolicyModal(
+                  onPressed: () => _showModal(
                     context,
                     "Termos de Uso",
                     termsOfUseText,
@@ -107,35 +108,60 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPolicyButton(
+  Widget _buildButton(
     BuildContext context, {
     required String title,
     required VoidCallback onPressed,
     required double fontSize,
   }) {
-    return Expanded(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    // Definir a largura do botão de acordo com o tipo de dispositivo
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isDesktop = screenWidth >= 1024;
+
+    double buttonWidth;
+    if (isDesktop) {
+      buttonWidth = 200; // largura fixa para desktop
+    } else if (isTablet) {
+      buttonWidth = 180; // largura fixa para tablet
+    } else {
+      buttonWidth = 160; // largura fixa para celular
+    }
+
+    return Center(
+      child: SizedBox(
+        width: buttonWidth,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.purple,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 14),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
+          onPressed: onPressed,
+          child: Center(
+            child: AutoSizeText(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              minFontSize: fontSize - 2,
+              overflow:
+                  TextOverflow.ellipsis, // Texto fica do mesmo tamanho do botão
+            ),
           ),
         ),
       ),
     );
   }
 
-  void _showPolicyModal(BuildContext context, String title, String content) {
+  void _showModal(BuildContext context, String title, String content) {
+    final FocusNode modalFocusNode = FocusNode(); // Define o _modalFocusNode
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -143,40 +169,71 @@ class AboutPage extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          maxChildSize: 0.9,
-          minChildSize: 0.3,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Text(
-                        content,
-                        style: const TextStyle(fontSize: 16),
+        // Anuncia o título ao abrir a modal
+        SemanticsService.announce(
+          'Mostrando janela de $title',
+          TextDirection.ltr,
+        );
+
+        return FocusScope(
+          autofocus: true,
+          node: FocusScopeNode(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Botão de fechar com foco
+                    Focus(
+                      focusNode: modalFocusNode,
+                      child: Semantics(
+                        label: 'Botão de fechar',
+                        hint: 'Clique para voltar para a página Sobre',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(Icons.close),
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 15),
+                    // Título da modal
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Conteúdo do texto
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      content,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
-                ],
-              ),
-            );
-          },
+                ),
+              ],
+            ),
+          ),
         );
       },
-    );
+    ).then((_) =>
+        modalFocusNode.dispose()); // Dispose o FocusNode depois de fechar
   }
 }
 

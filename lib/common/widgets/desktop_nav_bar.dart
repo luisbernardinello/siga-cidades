@@ -52,7 +52,6 @@ class CustomDesktopNavBar extends StatelessWidget {
               _buildNavItem(context, 'Distâncias', Icons.list, 1),
               _buildNavItem(context, 'Mapa', Icons.map, 2),
               _buildNavItem(context, 'Sobre', Icons.info, 3),
-              _buildNavItem(context, 'Feedback', Icons.message, 4),
             ],
           ),
         ],

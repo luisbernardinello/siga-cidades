@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,10 +21,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
+  final FocusNode _contentFocusNode = FocusNode();
 
   static final RegExp namePattern = RegExp('[a-zA-Z]');
   static final RegExp emailPattern = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _feedbackController.dispose();
+    _contentFocusNode.dispose();
+    super.dispose();
+  }
 
   String? _validateName(String? name) {
     if (name == null || name.isEmpty) {
@@ -50,17 +62,33 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   Future<void> _sendEmail(String name, String email, String message) async {
+    // Verifica se estamos em um ambiente Web ou Desktop
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Envio de e-mail não suportado neste dispositivo.')),
+      );
+      return;
+    }
+
     String? username = dotenv.env['EMAIL_USERNAME'];
     String? password = dotenv.env['EMAIL_PASSWORD'];
 
     if (username == null || password == null) {
-      print("Credenciais de e-mail não carregadas corretamente.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text("Credenciais de e-mail não carregadas corretamente.")),
+      );
       return;
     }
 
-    String device = Platform.isAndroid
+    String device = !kIsWeb && Platform.isAndroid
         ? 'Android'
-        : Platform.isIOS
+        : !kIsWeb && Platform.isIOS
             ? 'iOS'
             : 'Outro';
 
@@ -93,7 +121,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final String feedback = _feedbackController.text;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enviando feedback...')),
+        const SnackBar(content: Text('Enviando feedback, por favor aguarde.')),
       );
 
       await _sendEmail(name, email, feedback);
@@ -105,21 +133,48 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   Future<void> _showSuccessDialog() async {
+    SemanticsService.announce(
+      'Feedback enviado com sucesso. Janela de confirmação aberta.',
+      TextDirection.ltr,
+    );
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Obrigado!'),
+          titlePadding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Focus(
+                focusNode: _contentFocusNode,
+                child: Semantics(
+                  label: 'Botão de fechar janela de confirmação',
+                  hint: 'Clique para voltar à página de feedback',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Icon(Icons.close),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Text(
+                  'Obrigado!',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+            ],
+          ),
           content: const Text('Seu feedback foi enviado com sucesso!'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );
@@ -136,107 +191,106 @@ class _FeedbackPageState extends State<FeedbackPage> {
     double buttonFontSize = isDesktop ? 18 : 16;
     double fieldWidth = isDesktop ? 600 : double.infinity;
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(padding),
-        child: Semantics(
-          label:
-              "Página de feedback. Preencha os campos para enviar seu feedback",
-          child: SizedBox(
-            width: fieldWidth,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Envie o seu feedback:',
-                    style: TextStyle(
-                      color: const Color(0xFF080808),
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Campo Nome Completo
-                  Semantics(
-                    label: 'Campo para digitar o seu nome completo',
-                    hint: 'Obrigatório. Somente letras',
-                    child: TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nome Completo',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: _validateName,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Campo E-mail
-                  Semantics(
-                    label: 'Campo para digitar o seu e-mail',
-                    hint: 'Obrigatório. Informe um e-mail válido',
-                    child: TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'E-mail',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: _validateEmail,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Campo Mensagem
-                  Semantics(
-                    label: 'Campo para digitar a sua mensagem de feedback',
-                    hint: 'Obrigatório. Digite sua mensagem ou sugestão',
-                    child: TextFormField(
-                      controller: _feedbackController,
-                      decoration: const InputDecoration(
-                        labelText: 'Mensagem',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                      validator: _validateFeedback,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Botão Enviar com Semantics
-                  Center(
-                    child: Semantics(
-                      label: 'Botão enviar feedback',
-                      hint: 'Clique para enviar a mensagem',
-                      child: ElevatedButton(
-                        onPressed: _sendFeedback,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: isDesktop ? 40 : 24, vertical: 12),
-                        ),
-                        child: Text(
-                          'Enviar Feedback',
-                          style: TextStyle(fontSize: buttonFontSize),
+    return Semantics(
+      label:
+          'Página de Feedback, preencha os campos para enviar o seu feedback',
+      focusable: true,
+      child: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(padding),
+            child: Container(
+              width: fieldWidth,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(
+                      label: 'Página de Feedback',
+                      child: Text(
+                        'Envie o seu feedback:',
+                        style: TextStyle(
+                          color: const Color(0xFF080808),
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 15),
+
+                    // Campo Nome Completo
+                    Semantics(
+                      label: 'Campo para digitar o seu nome completo',
+                      hint: 'Obrigatório. Somente letras',
+                      child: TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nome Completo',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: _validateName,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Campo E-mail
+                    Semantics(
+                      label: 'Campo para digitar o seu e-mail',
+                      hint: 'Obrigatório. Informe um e-mail válido',
+                      child: TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'E-mail',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: _validateEmail,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Campo Mensagem
+                    Semantics(
+                      label: 'Campo para digitar a sua mensagem de feedback',
+                      hint: 'Obrigatório. Digite sua mensagem ou sugestão',
+                      child: TextFormField(
+                        controller: _feedbackController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mensagem',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 5,
+                        validator: _validateFeedback,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Botão Enviar
+                    Align(
+                      alignment: Alignment.center,
+                      child: Semantics(
+                        label: 'Botão enviar feedback',
+                        hint: 'Clique para enviar a mensagem',
+                        child: ElevatedButton(
+                          onPressed: _sendFeedback,
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isDesktop ? 40 : 24, vertical: 12),
+                          ),
+                          child: Text(
+                            'Enviar Feedback',
+                            style: TextStyle(fontSize: buttonFontSize),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _feedbackController.dispose();
-    super.dispose();
   }
 }

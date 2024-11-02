@@ -52,8 +52,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Semantics(
-          label: 'Botão de menu',
-          hint: 'Clique para abrir o menu de cidades',
+          label: 'Botão do menu de cidades',
+          hint: 'Clique para escolher a cidade',
           button: false,
           child: GestureDetector(
             onTap: widget.onMenuTap,
@@ -127,6 +127,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   void _executeSearch(BuildContext context, String selectedCity) {
     final query = _searchController.text;
     if (query.isNotEmpty) {
+      _modalFocusNode.requestFocus();
       _showSearchModal(context, query, selectedCity);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -137,11 +138,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
 
   void _showSearchModal(
       BuildContext context, String query, String selectedCity) async {
-    // Adiciona anúncio
+    // Anúncio inicial da busca
     SemanticsService.announce(
-      'Abrindo resultados de busca para "$query" em $selectedCity',
+      'Mostrando locais encontrados para "$query" em $selectedCity',
       TextDirection.ltr,
     );
+
     final normalizedQuery = removeDiacritics(query).toLowerCase();
     final allPlaces =
         await widget.placeRepository.fetchPlacesByCity(selectedCity);
@@ -155,96 +157,102 @@ class _AppSearchBarState extends State<AppSearchBar> {
       isScrollControlled: true,
       builder: (BuildContext bc) {
         return FocusScope(
-          child: Focus(
-            focusNode: _modalFocusNode,
-            autofocus: true,
-            child: Semantics(
-              label:
-                  'Mostrando locais encontrados para "$query" em $selectedCity',
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.topLeft,
+          autofocus: true,
+          node: FocusScopeNode(),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Botão de fechar
+                    Focus(
+                      focusNode: _modalFocusNode,
                       child: Semantics(
-                        button: false,
                         label: 'Botão de fechar janela de pesquisa',
                         hint: 'Clique para voltar ao campo de busca',
-                        child: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
                             Navigator.pop(context);
                             _searchFocusNode.requestFocus();
                           },
+                          child: const Icon(Icons.close),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Resultados da Pesquisa para "$query"',
-                      style: const TextStyle(
-                        fontSize: 18,
+                    const SizedBox(width: 15),
+                    // Título da pesquisa
+                    Expanded(
+                      child: Text(
+                        'Resultados da Pesquisa para "$query"',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (searchResults.isEmpty)
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Local não encontrado',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    if (searchResults.isEmpty)
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Local não encontrado',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    else
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: searchResults.length,
-                          itemBuilder: (context, index) {
-                            final place = searchResults[index];
-                            return Semantics(
-                              label: 'Local encontrado: ${place.name}',
-                              hint:
-                                  'Clique para ver mais detalhes de ${place.name}',
-                              child: ListTile(
-                                title: Text(
-                                  place.name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blueAccent,
-                                  ),
-                                ),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PlacePage(place: place),
-                                    ),
-                                  );
-                                },
-                                trailing: const Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Colors.blueAccent,
-                                  size: 18,
-                                ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: searchResults.length,
+                      itemBuilder: (context, index) {
+                        final place = searchResults[index];
+                        return Semantics(
+                          label: 'Local encontrado: ${place.name}',
+                          hint:
+                              'Clique para ver mais detalhes de ${place.name}',
+                          child: ListTile(
+                            title: Text(
+                              place.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PlacePage(place: place),
+                                ),
+                              );
+                            },
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.blueAccent,
+                              size: 18,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
           ),
         );

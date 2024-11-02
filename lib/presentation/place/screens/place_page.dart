@@ -21,6 +21,13 @@ class _PlacePageState extends State<PlacePage> {
   AudioPlayerType _selectedPlayer =
       AudioPlayerType.informacoesGerais; // Player inicial
   AudioPlayer? _activePlayer; // Player ativo para controle
+  final FocusNode _modalFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _modalFocusNode.dispose();
+    super.dispose();
+  }
 
   // Adiciona este método para anunciar a mudança de áudio
   void _announceAudioChange(AudioPlayerType newType) {
@@ -54,36 +61,103 @@ class _PlacePageState extends State<PlacePage> {
   /// O MapLauncher lista os aplicativos de mapa disponíveis no dispositivo.
   Future<void> _openInMapLauncher(BuildContext context) async {
     final availableMaps = await MapLauncher.installedMaps;
+
     if (availableMaps.isNotEmpty) {
+      _modalFocusNode.requestFocus();
+      SemanticsService.announce(
+        'Mostrando aplicativos de localização externos encontrados',
+        TextDirection.ltr,
+      );
+
       await showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
         builder: (BuildContext context) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              child: Wrap(
-                // Lista todos os aplicativos de mapas instalados no dispositivo
-                children: availableMaps.map((map) {
-                  return ListTile(
-                    onTap: () {
-                      // Abre o marcador no app de mapa escolhido
-                      map.showMarker(
-                        coords: Coords(
-                          widget.place.coordinates.latitude,
-                          widget.place.coordinates.longitude,
+          return FocusScope(
+            autofocus: true,
+            node: FocusScopeNode(),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Botão de fechar com foco ao abrir a modal
+                      Focus(
+                        focusNode: _modalFocusNode,
+                        child: Semantics(
+                          label: 'Botão de fechar janela de mapas',
+                          hint: 'Clique para voltar à página do local',
+                          button: true,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Icon(Icons.close),
+                          ),
                         ),
-                        title: widget.place.name,
-                        description: widget.place.adress,
-                      );
-                      Navigator.pop(context);
-                    },
-                    title: Text(map.mapName),
-                    leading: SvgPicture.asset(
-                      map.icon, // Ícone do app de mapa
-                      height: 30,
-                      width: 30,
+                      ),
+                      const SizedBox(width: 15),
+                      // Título da modal
+                      Expanded(
+                        child: Text(
+                          'Abrir localização externamente com',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Lista de aplicativos de mapas instalados
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: availableMaps.length,
+                      itemBuilder: (context, index) {
+                        final map = availableMaps[index];
+                        return Semantics(
+                          label: 'Abrir localização com ${map.mapName}',
+                          hint: 'Clique para abrir o aplicativo ${map.mapName}',
+                          child: ListTile(
+                            title: Text(
+                              map.mapName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            leading: SvgPicture.asset(
+                              map.icon,
+                              height: 30,
+                              width: 30,
+                            ),
+                            onTap: () {
+                              map.showMarker(
+                                coords: Coords(
+                                  widget.place.coordinates.latitude,
+                                  widget.place.coordinates.longitude,
+                                ),
+                                title: widget.place.name,
+                                description: widget.place.adress,
+                              );
+                              Navigator.pop(context);
+                            },
+                          ),
+                        );
+                      },
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
             ),
           );
