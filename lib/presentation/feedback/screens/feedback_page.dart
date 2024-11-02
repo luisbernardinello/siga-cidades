@@ -62,7 +62,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   Future<void> _sendEmail(String name, String email, String message) async {
-    // Verifica se estamos em um ambiente Web ou Desktop
     if (kIsWeb ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows ||
@@ -188,7 +187,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     double padding = isDesktop ? 32.0 : 16.0;
     double fontSize = isDesktop ? 19 : (isTablet ? 17 : 15);
-    double buttonFontSize = isDesktop ? 18 : 16;
+    double buttonPadding = isDesktop ? 16 : 12;
     double fieldWidth = isDesktop ? 600 : double.infinity;
 
     return Semantics(
@@ -196,97 +195,98 @@ class _FeedbackPageState extends State<FeedbackPage> {
           'Página de Feedback, preencha os campos para enviar o seu feedback',
       focusable: true,
       child: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(padding),
-            child: Container(
-              width: fieldWidth,
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(
-                      label: 'Página de Feedback',
-                      child: Text(
-                        'Envie o seu feedback:',
-                        style: TextStyle(
-                          color: const Color(0xFF080808),
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+        child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  label: 'Página de Feedback',
+                  child: Text(
+                    'Envie o seu feedback:',
+                    style: TextStyle(
+                      color: const Color(0xFF080808),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 15),
-
-                    // Campo Nome Completo
-                    Semantics(
-                      label: 'Campo para digitar o seu nome completo',
-                      hint: 'Obrigatório. Somente letras',
-                      child: TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nome Completo',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: _validateName,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Campo E-mail
-                    Semantics(
-                      label: 'Campo para digitar o seu e-mail',
-                      hint: 'Obrigatório. Informe um e-mail válido',
-                      child: TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'E-mail',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: _validateEmail,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Campo Mensagem
-                    Semantics(
-                      label: 'Campo para digitar a sua mensagem de feedback',
-                      hint: 'Obrigatório. Digite sua mensagem ou sugestão',
-                      child: TextFormField(
-                        controller: _feedbackController,
-                        decoration: const InputDecoration(
-                          labelText: 'Mensagem',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 5,
-                        validator: _validateFeedback,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Botão Enviar
-                    Align(
-                      alignment: Alignment.center,
-                      child: Semantics(
-                        label: 'Botão enviar feedback',
-                        hint: 'Clique para enviar a mensagem',
-                        child: ElevatedButton(
-                          onPressed: _sendFeedback,
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 40 : 24, vertical: 12),
-                          ),
-                          child: Text(
-                            'Enviar Feedback',
-                            style: TextStyle(fontSize: buttonFontSize),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 15),
+
+                // Campo Nome Completo
+                Semantics(
+                  label: 'Campo para digitar o seu nome completo',
+                  hint: 'Obrigatório. Somente letras',
+                  child: SizedBox(
+                    width: fieldWidth,
+                    child: TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome Completo',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validateName,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Campo E-mail
+                Semantics(
+                  label: 'Campo para digitar o seu e-mail',
+                  hint: 'Obrigatório. Informe um e-mail válido',
+                  child: SizedBox(
+                    width: fieldWidth,
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validateEmail,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Campo Mensagem
+                Semantics(
+                  label: 'Campo para digitar a sua mensagem de feedback',
+                  hint: 'Obrigatório. Digite sua mensagem ou sugestão',
+                  child: SizedBox(
+                    width: fieldWidth,
+                    child: TextFormField(
+                      controller: _feedbackController,
+                      decoration: const InputDecoration(
+                        labelText: 'Mensagem',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 5,
+                      validator: _validateFeedback,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Botão Enviar
+                Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    child: ElevatedButton.icon(
+                      onPressed: _sendFeedback,
+                      icon: const Icon(Icons.send),
+                      label: const Text('Enviar Feedback'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: buttonPadding,
+                            vertical: buttonPadding / 2),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -75,9 +75,9 @@ class HomePage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: Semantics(
-                          label: 'Categoria ${getCategoryNames()[index]}'
-                              '${index == selectedIndex ? ', selecionada' : ''}',
-                          button: true,
+                          // label: 'Categoria ${getCategoryNames()[index]}'
+                          //     '${index == selectedIndex ? ', selecionada' : ''}',
+                          button: false,
                           child: categoryTag(
                             getCategoryNames()[index],
                             index == selectedIndex,

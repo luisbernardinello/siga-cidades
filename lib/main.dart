@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -114,19 +115,89 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// SplashScreen para exibir o logo do BF
-class LogoSplashScreen extends StatelessWidget {
+// // SplashScreen para exibir o logo do BF
+// class LogoSplashScreen extends StatelessWidget {
+//   const LogoSplashScreen({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Semantics(
+//       label: 'Logotipo do Biblioteca Falada. Tela inicial.',
+//       image: false,
+//       child: AnimatedSplashScreen(
+//         duration: 2000, // Duração de 2.0 segundos
+//         splash: 'assets/logo_bf.png', // Logo do BF
+//         nextScreen: const MainScreen(),
+//         splashTransition: SplashTransition.sizeTransition,
+//         splashIconSize: 200,
+//         backgroundColor: Colors.white,
+//       ),
+//     );
+//   }
+// }
+
+class LogoSplashScreen extends StatefulWidget {
   const LogoSplashScreen({super.key});
 
   @override
+  State<LogoSplashScreen> createState() => _LogoSplashScreenState();
+}
+
+class _LogoSplashScreenState extends State<LogoSplashScreen> {
+  bool _animationCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Inicia um timer para definir _animationCompleted como true depois da animação
+    Timer(const Duration(seconds: 2), () {
+      setState(() {
+        _animationCompleted = true;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedSplashScreen(
-      duration: 1500, // Duração de 1 segundo
-      splash: 'assets/logo_bf.png', // Logo do BF
-      nextScreen: const MainScreen(),
-      splashTransition: SplashTransition.sizeTransition,
-      splashIconSize: 200,
-      backgroundColor: Colors.white,
+    return Semantics(
+      label:
+          'Bem vindo ao SIGA CIDADES. A próxima tela está dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. O menu superior possui um botão de escolha de cidades e a caixa de pesquisa. O conteúdo principal da página é atualizado conforme a escolha da página no menu inferior de navegação.',
+      hint: '.Logotipo do Biblioteca Falada. ',
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedSplashScreen(
+            duration: 2000, // Duração de 2 segundos
+            splash: 'assets/logo_bf.png', // Logo do BF
+            nextScreen: const MainScreen(),
+            splashTransition: SplashTransition.sizeTransition,
+            splashIconSize: 200,
+            backgroundColor: Colors.white,
+            disableNavigation: true, // Desativa a navegação automática
+          ),
+          if (_animationCompleted)
+            Positioned(
+              bottom: 60,
+              child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const MainScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                  ),
+                  child: Semantics(
+                    label: 'Botão de continuar para prosseguir',
+                    button: false,
+                    child: const Text('Continuar'),
+                  )),
+            ),
+        ],
+      ),
     );
   }
 }
