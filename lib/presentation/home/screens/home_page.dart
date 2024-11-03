@@ -105,24 +105,39 @@ class HomePage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final place = state.filteredPlaces[index];
 
-                      return Semantics(
-                        label: 'Lugar: ${place.name}',
-                        hint: 'Toque para mais detalhes',
-                        button: true,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PlacePage(place: place),
-                              ),
-                            );
-                          },
-                          child: placeCard(place, isDesktop),
-                        ),
+                      // PlaceCard com um FutureBuilder para o CircularProgressIndicator ser mostrado
+                      // enquanto cada placeCard ainda está sendo processado na construção do grid
+                      return FutureBuilder(
+                        future: Future.delayed(Duration.zero),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+
+                          return Semantics(
+                            label: 'Lugar: ${place.name}',
+                            hint: 'Toque para mais detalhes',
+                            button: true,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PlacePage(place: place),
+                                  ),
+                                );
+                              },
+                              child: placeCard(place, isDesktop),
+                            ),
+                          );
+                        },
                       );
                     },
                   );
+                } else if (state is CategoryLoading) {
+                  return Center(child: CircularProgressIndicator());
                 } else if (state is CategoryError) {
                   return Center(child: Text(state.message));
                 } else {
@@ -130,7 +145,7 @@ class HomePage extends StatelessWidget {
                 }
               },
             ),
-          ),
+          )
         ],
       ),
     );

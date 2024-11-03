@@ -115,27 +115,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// // SplashScreen para exibir o logo do BF
-// class LogoSplashScreen extends StatelessWidget {
-//   const LogoSplashScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Semantics(
-//       label: 'Logotipo do Biblioteca Falada. Tela inicial.',
-//       image: false,
-//       child: AnimatedSplashScreen(
-//         duration: 2000, // Duração de 2.0 segundos
-//         splash: 'assets/logo_bf.png', // Logo do BF
-//         nextScreen: const MainScreen(),
-//         splashTransition: SplashTransition.sizeTransition,
-//         splashIconSize: 200,
-//         backgroundColor: Colors.white,
-//       ),
-//     );
-//   }
-// }
-
 class LogoSplashScreen extends StatefulWidget {
   const LogoSplashScreen({super.key});
 
@@ -150,7 +129,7 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   void initState() {
     super.initState();
 
-    // Inicia um timer para colocar _animationCompleted como true depois da animação
+    // Dá inicio a um timer para colocar _animationCompleted como true depois da animação
     Timer(const Duration(seconds: 2), () {
       setState(() {
         _animationCompleted = true;
@@ -162,8 +141,9 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Bem vindo ao SIGA CIDADES. Nosso aplicativo possui a tela principal dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. O menu superior possui um botão de escolha de cidades e a caixa de pesquisa. O conteúdo principal da página é atualizado conforme a escolha da página no menu inferior de navegação.',
-      hint: '.Animação do Logotipo do Biblioteca Falada. ',
+          'Bem vindo ao SIGA CIDADES. Notas para o uso do aplicativo. A tela principal está dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. Use o menu superior para escolher a cidade e pesquisar pontos turísticos. O menu inferior navega pelas páginas, atualizando o conteúdo principal da página automaticamente.',
+      hint:
+          '.Animação do Logotipo do Biblioteca Falada, reproduzida ao abrir a página',
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -174,7 +154,7 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
             splashTransition: SplashTransition.sizeTransition,
             splashIconSize: 200,
             backgroundColor: Colors.white,
-            disableNavigation: true, // Desativa a navegação automática
+            disableNavigation: true, // Desativa a navegação automatica
           ),
           if (_animationCompleted)
             Positioned(
@@ -199,8 +179,8 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
                   child: const Text(
                     'Continuar',
                     style: TextStyle(
-                      color: Colors.white, // Cor do texto branca
-                      fontSize: 18, // Aumenta o tamanho do texto
+                      color: Colors.white,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -32,10 +32,9 @@ Widget placeCard(Place place, bool isDesktop) {
             ),
           ),
         ),
-
         const SizedBox(height: 8),
 
-        // Exibe a imagem do lugar para acessibilidade
+        // Exibe a imagem do lugar ou um loading enquanto carrega a imagem
         ClipRRect(
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(12),
@@ -52,6 +51,14 @@ Widget placeCard(Place place, bool isDesktop) {
                 width: double.infinity,
                 height: imageHeight,
                 fit: BoxFit.cover,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(child: Icon(Icons.error));
+                },
               ),
             ),
           ),
