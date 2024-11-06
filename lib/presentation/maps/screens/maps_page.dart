@@ -19,10 +19,10 @@ class MapsPage extends StatefulWidget {
   const MapsPage({super.key});
 
   @override
-  _MapsPageState createState() => _MapsPageState();
+  MapsPageState createState() => MapsPageState();
 }
 
-class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
+class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
   // Controller do mapa
   late MapController _mapController;
 
@@ -34,8 +34,8 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
 
   // Limites da América do Sul
   final LatLngBounds _southAmericaBounds = LatLngBounds(
-    LatLng(-56.0, -81.0), // Ponto no extremo sudoeste (Chile)
-    LatLng(13.0, -34.0), // Ponto no extremo nordeste (Venezuela)
+    const LatLng(-56.0, -81.0), // Ponto no extremo sudoeste (Chile)
+    const LatLng(13.0, -34.0), // Ponto no extremo nordeste (Venezuela)
   );
   OverlayEntry? _overlayEntry;
   // ====================================
@@ -113,113 +113,142 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
 // Função para abrir aplicativos externos de mapas usando map_launcher e direcionar para a página de lugares
 // ====================================
   /// Função que adapta a exibição do modal para todas as plataformas
-  Future<void> _showPlaceDetailsModal(BuildContext context, Place place) async {
+  Future<void> _showPlaceDetailsModal(Place place) async {
     final availableMaps = await MapLauncher.installedMaps;
+
+    // Verifica se o widget ainda está montado após o await.
+    if (!mounted) return;
+
+    // Seleciona a função correta com base na plataforma
     if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Detalhes do Lugar'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Nome: ${place.name}'),
-                Text('Endereço: ${place.adress}'),
-                if (availableMaps.isNotEmpty)
-                  ...availableMaps.map((map) {
-                    return ListTile(
-                      onTap: () {
-                        map.showMarker(
-                          coords: Coords(
-                            place.coordinates.latitude,
-                            place.coordinates.longitude,
-                          ),
-                          title: place.name,
-                          description: place.adress,
-                        );
-                        Navigator.pop(context);
-                      },
-                      title: Text(map.mapName),
-                      leading:
-                          SvgPicture.asset(map.icon, height: 30, width: 30),
-                    );
-                  }).toList(),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Fechar'),
-              ),
-            ],
-          );
-        },
-      );
+      _showDialog(place, availableMaps);
     } else {
-      await showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              child: Wrap(
-                children: [
-                  ListTile(
+      _showBottomSheet(place, availableMaps);
+    }
+  }
+
+// Função auxiliar para o diálogo (ex: para Web)
+  void _showDialog(Place place, List<AvailableMap> availableMaps) {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Detalhes do Lugar'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Nome: ${place.name}'),
+              Text('Endereço: ${place.adress}'),
+              if (availableMaps.isNotEmpty)
+                ...availableMaps.map((map) {
+                  return ListTile(
                     onTap: () {
-                      Navigator.pop(context);
+                      map.showMarker(
+                        coords: Coords(
+                          place.coordinates.latitude,
+                          place.coordinates.longitude,
+                        ),
+                        title: place.name,
+                        description: place.adress,
+                      );
+                      Navigator.pop(dialogContext);
+                    },
+                    title: Text(map.mapName),
+                    leading: SvgPicture.asset(map.icon, height: 30, width: 30),
+                  );
+                }),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Função auxiliar para o modal (ex: para Android/iOS)
+  void _showBottomSheet(Place place, List<AvailableMap> availableMaps) {
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bottomSheetContext) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Wrap(
+              children: [
+                ListTile(
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    if (mounted) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PlacePage(place: place)),
+                          builder: (context) => PlacePage(place: place),
+                        ),
                       );
-                    },
-                    title: const Text(
-                      "Mais Detalhes",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent),
+                    }
+                  },
+                  title: const Text(
+                    "Mais Detalhes",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
                     ),
-                    leading: const Icon(Icons.info_outline,
-                        color: Colors.blueAccent),
-                    trailing: const Icon(Icons.arrow_forward_ios,
-                        color: Colors.blueAccent, size: 18),
                   ),
-                  const Divider(thickness: 1),
-                  const Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: Text("Abrir com",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey)),
+                  leading: const Icon(
+                    Icons.info_outline,
+                    color: Colors.blueAccent,
                   ),
-                  ...availableMaps.map((map) {
-                    return ListTile(
-                      onTap: () {
-                        map.showMarker(
-                          coords: Coords(
-                            place.coordinates.latitude,
-                            place.coordinates.longitude,
-                          ),
-                          title: place.name,
-                          description: place.adress,
-                        );
-                        Navigator.pop(context);
-                      },
-                      title: Text(map.mapName),
-                      leading:
-                          SvgPicture.asset(map.icon, height: 30, width: 30),
-                    );
-                  }).toList(),
-                ],
-              ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.blueAccent,
+                    size: 18,
+                  ),
+                ),
+                const Divider(thickness: 1),
+                const Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    "Abrir com",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+                ...availableMaps.map((map) {
+                  return ListTile(
+                    onTap: () {
+                      map.showMarker(
+                        coords: Coords(
+                          place.coordinates.latitude,
+                          place.coordinates.longitude,
+                        ),
+                        title: place.name,
+                        description: place.adress,
+                      );
+                      Navigator.pop(bottomSheetContext);
+                    },
+                    title: Text(map.mapName),
+                    leading: SvgPicture.asset(map.icon, height: 30, width: 30),
+                  );
+                }),
+              ],
             ),
-          );
-        },
-      );
-    }
+          ),
+        );
+      },
+    );
   }
 
   void _showOverlay(Place place) {
@@ -261,21 +290,21 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                           builder: (context) => PlacePage(place: place)),
                     );
                   },
-                  child: Container(
+                  child: const SizedBox(
                     width: 300,
                     height: 80,
-                    child: const ListTile(
+                    child: ListTile(
                       title: Text(
                         "Ver Detalhes",
                         style: TextStyle(
-                          color: Color(0xFFFFA500),
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 26,
                         ),
                       ),
                       trailing: Icon(
                         Icons.arrow_forward_ios,
-                        color: Color(0xFFFFA500),
+                        color: Colors.white,
                         size: 26,
                       ),
                     ),
@@ -347,6 +376,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
           );
 
           // Adiciona os marcadores de posição dos lugares carregados
+          // Adiciona os marcadores de posição dos lugares carregados
           for (Place place in state.places) {
             _markers.add(
               Marker(
@@ -375,14 +405,22 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                               size: locationPinIcon,
                             ),
                             Container(
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(64, 239, 223,
+                                    88), // Fundo com contraste alto
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              constraints: const BoxConstraints(maxWidth: 300),
                               padding: const EdgeInsets.all(2.0),
-                              child: FittedBox(
-                                child: Text(
-                                  place.name,
-                                  style: TextStyle(
-                                    fontSize: placeText,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                              child: Text(
+                                place.name,
+                                maxLines: 3,
+                                overflow: TextOverflow.clip,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 12, // desktop/web
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ),
@@ -390,7 +428,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                         ),
                       )
                     : GestureDetector(
-                        onTap: () => _showPlaceDetailsModal(context, place),
+                        onTap: () => _showPlaceDetailsModal(place),
                         child: Column(
                           children: [
                             Icon(
@@ -403,7 +441,8 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                               child: Text(
                                 place.name,
                                 style: TextStyle(
-                                  fontSize: placeText,
+                                  fontSize:
+                                      placeText, // Usa o tamanho padrão em mobile
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
@@ -420,7 +459,7 @@ class _MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
               children: [
                 Semantics(
                   label:
-                      'Mapa visual interativo para pessoas com baixa visão. Para saber as distâncias aos locais, vá para a página de locais próximos.',
+                      'Conteúdo com Mapa visual interativo para pessoas com baixa visão. Para saber as distâncias aos locais, vá para a página de locais próximos.',
                   child: // ====================================
                       // FlutterMap
                       // ====================================

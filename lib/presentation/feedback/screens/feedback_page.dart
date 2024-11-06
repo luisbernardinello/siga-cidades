@@ -6,23 +6,25 @@ import 'package:mailer/smtp_server.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sigacidades/core/utils/feedback_email_text.dart';
 import 'dart:io';
+import 'package:logging/logging.dart';
 
 class FeedbackPage extends StatefulWidget {
   static const routeName = '/feedback';
 
-  const FeedbackPage({Key? key}) : super(key: key);
+  const FeedbackPage({super.key});
 
   @override
-  _FeedbackPageState createState() => _FeedbackPageState();
+  FeedbackPageState createState() => FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> {
+class FeedbackPageState extends State<FeedbackPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
   final FocusNode _contentFocusNode = FocusNode();
 
+  final _logger = Logger('FeedbackEmail');
   static final RegExp namePattern = RegExp('[a-zA-Z]');
   static final RegExp emailPattern = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
@@ -66,10 +68,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.linux) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Envio de e-mail não suportado neste dispositivo.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Envio de e-mail não suportado neste dispositivo.'),
+          ),
+        );
+      }
       return;
     }
 
@@ -77,11 +82,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
     String? password = dotenv.env['EMAIL_PASSWORD'];
 
     if (username == null || password == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text("Credenciais de e-mail não carregadas corretamente.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Credenciais de e-mail não carregadas corretamente."),
+          ),
+        );
+      }
       return;
     }
 
@@ -95,19 +102,25 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     final emailMessage = Message()
       ..from = Address(username, 'Sigacidades Feedback')
-      ..recipients.add('luisbernardinello@gmail.com')
+      ..recipients.add('nuvembf@gmail.com')
       ..subject = 'Feedback enviado por $name'
       ..html = generateFeedbackEmailHTML(name, email, message, device);
 
     try {
       final sendReport = await send(emailMessage, smtpServer);
-      print('E-mail enviado: ' + sendReport.toString());
-      _showSuccessDialog();
+      _logger.info('E-mail enviado: $sendReport');
+
+      if (mounted) {
+        _showSuccessDialog();
+      }
     } on MailerException catch (e) {
-      print('Erro ao enviar e-mail: ${e.toString()}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao enviar feedback.')),
-      );
+      _logger.severe('Erro ao enviar e-mail', e);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao enviar feedback.')),
+        );
+      }
     }
   }
 
@@ -161,10 +174,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 ),
               ),
               const SizedBox(width: 15),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Obrigado!',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -192,7 +205,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     return Semantics(
       label:
-          'Página de Feedback, preencha os campos para enviar o seu feedback',
+          'Conteúdo para envio de feedback sobre o aplicativo, preencha os campos para enviar o seu feedback',
       focusable: true,
       child: SingleChildScrollView(
         child: Padding(

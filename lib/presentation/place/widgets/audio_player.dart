@@ -16,17 +16,17 @@ class SongPlayerWidget extends StatefulWidget {
   final Function(AudioPlayer) onPlayerInit; // Callback para retorno do player
 
   const SongPlayerWidget({
-    Key? key,
+    super.key,
     required this.audioUrl,
     required this.audioTitle,
     required this.onPlayerInit,
-  }) : super(key: key);
+  });
 
   @override
-  _SongPlayerWidgetState createState() => _SongPlayerWidgetState();
+  SongPlayerWidgetState createState() => SongPlayerWidgetState();
 }
 
-class _SongPlayerWidgetState extends State<SongPlayerWidget> {
+class SongPlayerWidgetState extends State<SongPlayerWidget> {
   late AudioPlayer _player; // Instância do player de áudio
   late AudioSource _audioSource; // Fonte de áudio (com ou sem cache)
 
@@ -98,7 +98,17 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
 
       await _player.setAudioSource(_audioSource);
     } catch (e) {
-      print("Erro ao carregar o áudio: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Semantics(
+              label: 'Erro ao carregar o áudio',
+              excludeSemantics: true,
+              child: Text('Erro ao carregar o áudio $e'),
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -113,8 +123,8 @@ class _SongPlayerWidgetState extends State<SongPlayerWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 2.0),
         ),
         ControlButtons(_player),
         StreamBuilder<PositionData>(

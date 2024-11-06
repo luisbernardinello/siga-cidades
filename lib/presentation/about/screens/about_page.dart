@@ -21,88 +21,96 @@ class AboutPage extends StatelessWidget {
     double paddingHorizontal = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
     double fontSize = isDesktop ? 18 : 16;
     double buttonFontSize = isDesktop ? 16 : 14;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              'Sobre',
-              style: TextStyle(
-                color: const Color(0xFF080808),
-                fontSize: fontSize,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Text(
-              "O SIGA - Guia Acessível da Cidade é um aplicativo mobile que visa oferecer informações de pontos de interesse do município, como praças, ruas, avenidas, prédios, equipamentos públicos e espaços de lazer. O seu diferencial é apresentar os dados por meio de áudios com informações gerais e, principalmente, audiodescrição detalhada de aspectos físicos e estéticos de cada local, como estilo arquitetônico, características estruturais e dimensões. Cada arquivo pode ser acessado em um mapa, o que permite ao usuário relacionar os pontos de interesse e sua localização na cidade.",
-              style: TextStyle(
-                color: const Color(0xFF080808),
-                fontSize: fontSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "O aplicativo busca oferecer informação acessível e diversificada e, dessa maneira, contribuir para que as pessoas conheçam melhor a cidade e possam experienciá-la com mais autonomia e independência. Nesse sentido, tem como público preferencial (mas não exclusivo) o de pessoas com deficiência visual, principalmente porque oferece o diferencial da audiodescrição e do formato sonoro dos arquivos.",
-              style: TextStyle(
-                color: const Color(0xFF080808),
-                fontSize: fontSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "O SIGA Guia Acessível da Cidade é uma iniciativa do projeto de extensão universitária Biblioteca Falada, da Faculdade de Arquitetura, Artes, Comunicação e Design (FAAC), da Universidade Estadual Paulista “Júlio de Mesquita Filho” (Unesp), câmpus Bauru (SP). O projeto desenvolve ações no campo da acessibilidade à comunicação e à informação, em especial voltadas às pessoas com deficiência visual. Para tanto, produz mídia sonora acessível e audiodescrição, bem como atua na difusão do conhecimento sobre deficiência, tecnologias assistivas, Desenho Universal e comunicação acessível.",
-              style: TextStyle(
-                color: const Color(0xFF080808),
-                fontSize: fontSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 15),
-            const Divider(color: Color(0xFFE4E4E4)),
-            const SizedBox(height: 8),
-            const Contacts(),
-            const SizedBox(height: 15),
-
-            // Linha divisória
-            const Divider(color: Color(0xFFE4E4E4)),
-            const SizedBox(height: 15),
-
-            // Botões de Política de Privacidade e Termos de Uso
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildButton(
-                  context,
-                  title: "Política de Privacidade",
-                  onPressed: () => _showModal(
-                    context,
-                    "Política de Privacidade",
-                    privacyPolicyText,
+    return Semantics(
+      label:
+          'Conteúdo com informações gerais sobre o aplicativo, e formas de contato com o laboratório biblioteca falada',
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              Semantics(
+                header: true,
+                label: "Página Sobre Nós",
+                child: Text(
+                  'Sobre nós',
+                  style: TextStyle(
+                    color: const Color(0xFF080808),
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w800,
                   ),
-                  fontSize: buttonFontSize,
                 ),
-                const SizedBox(width: 8),
-                _buildButton(
-                  context,
-                  title: "Termos de Uso",
-                  onPressed: () => _showModal(
+              ),
+
+              const SizedBox(height: 15),
+              Text(
+                "O SIGA - Guia Acessível da Cidade é um aplicativo mobile que visa oferecer informações de pontos de interesse do município, como praças, ruas, avenidas, prédios, equipamentos públicos e espaços de lazer. O seu diferencial é apresentar os dados por meio de áudios com informações gerais e, principalmente, audiodescrição detalhada de aspectos físicos e estéticos de cada local, como estilo arquitetônico, características estruturais e dimensões. Cada arquivo pode ser acessado em um mapa, o que permite ao usuário relacionar os pontos de interesse e sua localização na cidade.",
+                style: TextStyle(
+                  color: const Color(0xFF080808),
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "O aplicativo busca oferecer informação acessível e diversificada e, dessa maneira, contribuir para que as pessoas conheçam melhor a cidade e possam experienciá-la com mais autonomia e independência. Nesse sentido, tem como público preferencial (mas não exclusivo) o de pessoas com deficiência visual, principalmente porque oferece o diferencial da audiodescrição e do formato sonoro dos arquivos.",
+                style: TextStyle(
+                  color: const Color(0xFF080808),
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "O SIGA Guia Acessível da Cidade é uma iniciativa do projeto de extensão universitária Biblioteca Falada, da Faculdade de Arquitetura, Artes, Comunicação e Design (FAAC), da Universidade Estadual Paulista “Júlio de Mesquita Filho” (Unesp), câmpus Bauru (SP). O projeto desenvolve ações no campo da acessibilidade à comunicação e à informação, em especial voltadas às pessoas com deficiência visual. Para tanto, produz mídia sonora acessível e audiodescrição, bem como atua na difusão do conhecimento sobre deficiência, tecnologias assistivas, Desenho Universal e comunicação acessível.",
+                style: TextStyle(
+                  color: const Color(0xFF080808),
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Divider(color: Color(0xFFE4E4E4)),
+              const SizedBox(height: 8),
+              const Contacts(),
+              const SizedBox(height: 15),
+
+              // Linha divisória
+              const Divider(color: Color(0xFFE4E4E4)),
+              const SizedBox(height: 15),
+
+              // Botões de Política de Privacidade e Termos de Uso
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildButton(
                     context,
-                    "Termos de Uso",
-                    termsOfUseText,
+                    title: "Política de Privacidade",
+                    onPressed: () => _showModal(
+                      context,
+                      "Política de Privacidade",
+                      privacyPolicyText,
+                    ),
+                    fontSize: buttonFontSize,
                   ),
-                  fontSize: buttonFontSize,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
+                  const SizedBox(width: 8),
+                  _buildButton(
+                    context,
+                    title: "Termos de Uso",
+                    onPressed: () => _showModal(
+                      context,
+                      "Termos de Uso",
+                      termsOfUseText,
+                    ),
+                    fontSize: buttonFontSize,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -377,24 +385,34 @@ class Contacts extends StatelessWidget {
   }
 
   void _launchMail(BuildContext context) async {
+    // Referência ao ScaffoldMessengerState antes do await (para não usar o context depois de execução assíncrona)
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     const mail = 'mailto:bibliotecafalada@gmail.com';
     if (await canLaunchUrlString(mail)) {
       await launchUrlString(mail, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         const SnackBar(
-            content: Text(
-                'Não encontrado aplicativo de envio de e-mail no dispositivo.')),
+          content: Text(
+            'Não encontrado aplicativo de envio de e-mail no dispositivo.',
+          ),
+        ),
       );
     }
   }
 
   void _launchUrl(BuildContext context, String url) async {
+    // Referência ao ScaffoldMessengerState antes do await (para não usar o context depois de execução assíncrona)
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     if (await canLaunchUrlString(url)) {
       await launchUrlString(url, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível abrir o link.')),
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível abrir o link.'),
+        ),
       );
     }
   }

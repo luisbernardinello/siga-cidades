@@ -40,7 +40,7 @@ Future main() async {
           Platform.isLinux ||
           Platform.isMacOS)) {
     await FMTCObjectBoxBackend().initialise();
-    await FMTCStore('mapStore').manage.create();
+    await const FMTCStore('mapStore').manage.create();
   }
 
   // Cria a configuração do Just Audio Background
@@ -54,10 +54,12 @@ Future main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Dá inicio ao app depois dos carregamentos iniciais
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Inicializa o PlaceRepositoryImpl.
@@ -74,7 +76,7 @@ class MyApp extends StatelessWidget {
           // CategoryBloc para gerenciar o estado da HomePage e categorias.
           BlocProvider<CategoryBloc>(
             create: (context) => CategoryBloc(placeRepository)
-              ..add(SelectCategoryEvent(0)), // Evento inicial de categoria.
+              ..add(SelectCategoryEvent(-1)), // Evento inicial de categoria.
           ),
           // MapsBloc para gerenciar o estado do MapsPage.
           BlocProvider<MapsBloc>(
@@ -129,7 +131,7 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   void initState() {
     super.initState();
 
-    // Dá inicio a um timer para colocar _animationCompleted como true depois da animação
+    //Timer para colocar _animationCompleted como true depois da animação
     Timer(const Duration(seconds: 2), () {
       setState(() {
         _animationCompleted = true;
@@ -141,20 +143,20 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Bem vindo ao SIGA CIDADES. Notas para o uso do aplicativo. A tela principal está dividida em: menu superior, conteúdo principal da página, e menu de navegação inferior. Use o menu superior para escolher a cidade e pesquisar pontos turísticos. O menu inferior navega pelas páginas, atualizando o conteúdo principal da página automaticamente.',
+          'Bem vindo ao SIGA CIDADES. Notas para o uso do aplicativo. A tela principal está dividida em: menu superior, conteúdo principal da página, e menu de navegação. Use o menu superior para escolher a cidade e pesquisar pontos turísticos. O menu de navegação permite a troca de páginas, atualizando o conteúdo principal da página automaticamente.',
       hint:
-          '.Animação do Logotipo do Biblioteca Falada, reproduzida ao abrir a página',
+          '.Animação do Logotipo do SIGA Cidades, reproduzida ao abrir a página',
       child: Stack(
         alignment: Alignment.center,
         children: [
           AnimatedSplashScreen(
-            duration: 2000, // Duração de 2 segundos
-            splash: 'assets/logo_bf.png', // Logo do BF
+            duration: 2000,
+            splash: 'assets/marca_siga.png',
             nextScreen: const MainScreen(),
             splashTransition: SplashTransition.sizeTransition,
-            splashIconSize: 200,
+            splashIconSize: 150,
             backgroundColor: Colors.white,
-            disableNavigation: true, // Desativa a navegação automatica
+            disableNavigation: true,
           ),
           if (_animationCompleted)
             Positioned(

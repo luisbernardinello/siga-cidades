@@ -11,7 +11,7 @@ import 'package:sigacidades/presentation/place/screens/place_page.dart';
 class DistancesPage extends StatelessWidget {
   static const routeName = '/distances';
 
-  const DistancesPage({Key? key}) : super(key: key);
+  const DistancesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,8 @@ class DistancesPage extends StatelessWidget {
           const SizedBox(height: 16),
           Semantics(
             header: true,
+            label:
+                'Conteúdo de localização, contendo os lugares mais próximos por distância',
             child: Text(
               'Locais próximos',
               style: TextStyle(
@@ -63,7 +65,7 @@ class DistancesPage extends StatelessWidget {
                       child: Semantics(
                         label: 'Erro ao carregar locais próximos: $message',
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -84,7 +86,7 @@ class DistancesPage extends StatelessWidget {
                                       .add(FetchNearbyPlacesEvent());
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       horizontal: 24, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),

@@ -14,13 +14,13 @@ import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
 class MainScreen extends StatefulWidget {
   static const routeName = '/main';
 
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   String? selectedCity;
   final FocusNode _contentFocusNode = FocusNode();
@@ -37,8 +37,8 @@ class _MainScreenState extends State<MainScreen> {
   final Map<int, String> _pageTitles = {
     0: 'Explorar',
     1: 'Distâncias',
-    2: 'Mapa Interativo',
-    3: 'Sobre o Aplicativo',
+    2: 'Mapa',
+    3: 'Sobre',
     4: 'Feedback'
   };
 
@@ -50,16 +50,15 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
 
     double paddingHorizontal = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
     double topPadding = isDesktop ? -60 : (isTablet ? 56 : 47);
-
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       backgroundColor: const Color(0xFFF2F2F2),
       drawer: DrawerMenu(
         onCitySelected: (city) {
@@ -97,7 +96,7 @@ class _MainScreenState extends State<MainScreen> {
                     );
                   },
                   onMenuTap: () {
-                    _scaffoldKey.currentState?.openDrawer();
+                    scaffoldKey.currentState?.openDrawer();
                   },
                   selectedCity: selectedCity,
                 ),
@@ -119,7 +118,7 @@ class _MainScreenState extends State<MainScreen> {
                           EdgeInsets.symmetric(horizontal: paddingHorizontal),
                       child: AppSearchBar(
                         onMenuTap: () {
-                          _scaffoldKey.currentState?.openDrawer();
+                          scaffoldKey.currentState?.openDrawer();
                         },
                         placeRepository: context.read(),
                         selectedCity: selectedCity,
@@ -157,10 +156,12 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: isDesktop
           ? null
           : Semantics(
-              label: 'Barra de navegação principal inferior',
+              label: 'Barra de navegação principal',
               focusable: true,
+              // focused: true,
               child: Focus(
                 focusNode: _navBarFocusNode,
+                autofocus: true,
                 child: CustomNavBar(
                   currentPage: _selectedIndex,
                   onSelectPage: (index) {

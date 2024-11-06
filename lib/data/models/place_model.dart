@@ -1,31 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
 // O PlaceModel extende a entidade Place e faz a conversão de JSON para o PlaceModel e do PlaceModel para JSON.
 class PlaceModel extends Place {
   PlaceModel({
-    required String name,
-    required String city,
-    required String category,
-    required String description,
-    required String adress,
-    required String imageUrl,
-    required String imageDescription,
-    required String audioDescriptionUrl,
-    required String audioPlaceInfoUrl,
-    required GeoPoint coordinates,
-  }) : super(
-          name: name,
-          city: city,
-          category: category,
-          description: description,
-          adress: adress,
-          imageUrl: imageUrl,
-          imageDescription: imageDescription,
-          audioDescriptionUrl: audioDescriptionUrl,
-          audioPlaceInfoUrl: audioPlaceInfoUrl,
-          coordinates: coordinates,
-        );
+    required super.name,
+    required super.city,
+    required super.category,
+    required super.description,
+    required super.adress,
+    required super.imageUrl,
+    required super.imageDescription,
+    required super.audioDescriptionUrl,
+    required super.audioPlaceInfoUrl,
+    required super.coordinates,
+  });
 
   // Converte um objeto JSON para um PlaceModel.
   factory PlaceModel.fromJson(Map<String, dynamic> json) {

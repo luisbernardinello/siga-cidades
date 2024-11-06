@@ -9,12 +9,12 @@ class CustomDesktopNavBar extends StatelessWidget {
   final String? selectedCity;
 
   const CustomDesktopNavBar({
-    Key? key,
+    super.key,
     required this.currentPage,
     required this.onSelectPage,
     required this.onMenuTap,
     required this.selectedCity,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

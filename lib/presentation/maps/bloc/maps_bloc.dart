@@ -69,7 +69,7 @@ class MapsBloc extends Bloc<MapsEvent, MapsState> {
       }
 
       // Define as configurações de localização
-      final LocationSettings locationSettings = LocationSettings(
+      const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high, // Precisão máxima da localização
         distanceFilter:
             100, // Faz a atualização da localização quando o usuário andar 100 metros

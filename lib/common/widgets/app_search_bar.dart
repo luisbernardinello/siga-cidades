@@ -20,10 +20,10 @@ class AppSearchBar extends StatefulWidget {
   });
 
   @override
-  _AppSearchBarState createState() => _AppSearchBarState();
+  AppSearchBarState createState() => AppSearchBarState();
 }
 
-class _AppSearchBarState extends State<AppSearchBar> {
+class AppSearchBarState extends State<AppSearchBar> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final FocusNode _modalFocusNode = FocusNode();
@@ -52,7 +52,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Semantics(
-          label: 'Botão do menu de cidades',
+          label: 'Botão do menu superior para escolha de cidades.',
           hint: 'Clique para escolher a cidade',
           button: false,
           child: GestureDetector(
@@ -67,20 +67,19 @@ class _AppSearchBarState extends State<AppSearchBar> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Semantics(
-            label: 'Campo de busca',
-            hint: 'Pesquisa de locais',
-            textField: true,
-            child: Container(
-              height: isTablet ? 64 : 56,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: const Color(0xFFE4E4E4),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
+          child: Container(
+            height: isTablet ? 64 : 56,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: const Color(0xFFE4E4E4),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    focusable: true,
+                    label: 'Campo de busca do menu superior',
                     child: TextField(
                       focusNode: _searchFocusNode,
                       controller: _searchController,
@@ -103,20 +102,20 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Semantics(
-                    label: 'Botão de busca',
-                    hint: 'Clique para buscar locais',
-                    button: false,
-                    child: GestureDetector(
-                      onTap: () {
-                        _executeSearch(context, selectedCity);
-                      },
-                      child: const Icon(Icons.search, color: Color(0xFF131313)),
-                    ),
+                ),
+                Semantics(
+                  label: 'Botão de pesquisa do menu superior',
+                  hint: 'Clique para buscar locais em $selectedCity',
+                  button: false,
+                  child: GestureDetector(
+                    onTap: () {
+                      _executeSearch(context, selectedCity);
+                    },
+                    child: const Icon(Icons.search, color: Color(0xFF131313)),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+              ],
             ),
           ),
         ),
@@ -127,8 +126,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   void _executeSearch(BuildContext context, String selectedCity) {
     final query = _searchController.text;
     if (query.isNotEmpty) {
-      _modalFocusNode.requestFocus();
-      _showSearchModal(context, query, selectedCity);
+      _showSearchModal(query, selectedCity);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Digite algo para pesquisar.')),
@@ -136,14 +134,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
     }
   }
 
-  void _showSearchModal(
-      BuildContext context, String query, String selectedCity) async {
-    // Anúncio inicial da busca
-    SemanticsService.announce(
-      'Mostrando locais encontrados para "$query" em $selectedCity',
-      TextDirection.ltr,
-    );
-
+  void _showSearchModal(String query, String selectedCity) async {
     final normalizedQuery = removeDiacritics(query).toLowerCase();
     final allPlaces =
         await widget.placeRepository.fetchPlacesByCity(selectedCity);
@@ -152,108 +143,123 @@ class _AppSearchBarState extends State<AppSearchBar> {
             .contains(normalizedQuery))
         .toList();
 
+    if (!mounted) return;
+
+    // Exibe o modal
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext bc) {
         return FocusScope(
-          autofocus: true,
           node: FocusScopeNode(),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Botão de fechar
-                    Focus(
-                      focusNode: _modalFocusNode,
-                      child: Semantics(
-                        label: 'Botão de fechar janela de pesquisa',
-                        hint: 'Clique para voltar ao campo de busca',
-                        button: true,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                            _searchFocusNode.requestFocus();
-                          },
-                          child: const Icon(Icons.close),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    // Título da pesquisa
-                    Expanded(
-                      child: Text(
-                        'Resultados da Pesquisa para "$query"',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ),
-                  ],
+          child: Builder(
+            builder: (BuildContext innerContext) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (searchResults.isNotEmpty) {
+                  _modalFocusNode.requestFocus();
+                  SemanticsService.announce(
+                    'Mostrando locais encontrados para "$query" em $selectedCity',
+                    TextDirection.ltr,
+                  );
+                }
+              });
+
+              return Container(
+                padding: const EdgeInsets.all(16),
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(innerContext).size.height * 0.5,
                 ),
-                const SizedBox(height: 10),
-                if (searchResults.isEmpty)
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Local não encontrado',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: searchResults.length,
-                      itemBuilder: (context, index) {
-                        final place = searchResults[index];
-                        return Semantics(
-                          label: 'Local encontrado: ${place.name}',
-                          hint:
-                              'Clique para ver mais detalhes de ${place.name}',
-                          child: ListTile(
-                            title: Text(
-                              place.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PlacePage(place: place),
-                                ),
-                              );
-                            },
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              color: Colors.blueAccent,
-                              size: 18,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Focus(
+                          focusNode: _modalFocusNode,
+                          autofocus: true,
+                          child: Semantics(
+                            label: 'Botão de fechar janela de pesquisa',
+                            hint: 'Clique para voltar ao campo de busca',
+                            button: true,
+                            child: GestureDetector(
+                              onTap: () {
+                                _searchFocusNode.requestFocus();
+                                Navigator.pop(innerContext);
+                              },
+                              child: const Icon(Icons.close),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            'Resultados da Pesquisa para "$query"',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-              ],
-            ),
+                    const SizedBox(height: 10),
+                    if (searchResults.isEmpty)
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Local não encontrado',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: searchResults.length,
+                          itemBuilder: (innerContext, index) {
+                            final place = searchResults[index];
+                            return Semantics(
+                              label: 'Local encontrado: ${place.name}',
+                              hint: 'Toque para mais detalhes',
+                              child: ListTile(
+                                title: Text(
+                                  place.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.pop(innerContext);
+                                  Navigator.push(
+                                    innerContext,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PlacePage(place: place),
+                                    ),
+                                  );
+                                },
+                                trailing: const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.blueAccent,
+                                  size: 18,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },

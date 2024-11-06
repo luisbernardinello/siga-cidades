@@ -17,12 +17,12 @@ class PlacePage extends StatefulWidget {
   const PlacePage({super.key, required this.place});
 
   @override
-  _PlacePageState createState() => _PlacePageState();
+  PlacePageState createState() => PlacePageState();
 }
 
-class _PlacePageState extends State<PlacePage> {
+class PlacePageState extends State<PlacePage> {
   AudioPlayerType _selectedPlayer =
-      AudioPlayerType.informacoesGerais; // Player inicial
+      AudioPlayerType.audiodescricao; // Player inicial
   AudioPlayer? _activePlayer; // Player ativo para controle
   final FocusNode _modalFocusNode = FocusNode();
 
@@ -62,16 +62,12 @@ class _PlacePageState extends State<PlacePage> {
 
   /// Função que permite ao usuário abrir a localização no aplicativo de mapas de sua escolha.
   /// O MapLauncher lista os aplicativos de mapa disponíveis no dispositivo.
-  Future<void> _openInMapLauncher(BuildContext context) async {
+  Future<void> _openInMapLauncher() async {
     final availableMaps = await MapLauncher.installedMaps;
 
-    if (availableMaps.isNotEmpty) {
-      _modalFocusNode.requestFocus();
-      SemanticsService.announce(
-        'Mostrando aplicativos de localização externos encontrados',
-        TextDirection.ltr,
-      );
+    if (!mounted) return; // Verifica se o widget está montado
 
+    if (availableMaps.isNotEmpty) {
       await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -79,100 +75,117 @@ class _PlacePageState extends State<PlacePage> {
           return FocusScope(
             autofocus: true,
             node: FocusScopeNode(),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.5,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Botão de fechar com foco ao abrir a modal
-                      Focus(
-                        focusNode: _modalFocusNode,
-                        child: Semantics(
-                          label: 'Botão de fechar janela de mapas',
-                          hint: 'Clique para voltar à página do local',
-                          button: true,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Icon(Icons.close),
+            child: Builder(
+              builder: (BuildContext innerContext) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _modalFocusNode.requestFocus();
+                  SemanticsService.announce(
+                    'Mostrando aplicativos de localização externos encontrados',
+                    TextDirection.ltr,
+                  );
+                });
+
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(innerContext).size.height * 0.5,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Botão de fechar com foco ao abrir a modal
+                          Focus(
+                            focusNode: _modalFocusNode,
+                            child: Semantics(
+                              label: 'Botão de fechar janela de mapas',
+                              hint: 'Clique para voltar à página do local',
+                              button: true,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(innerContext);
+                                },
+                                child: const Icon(Icons.close),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 15),
+                          // Título da modal
+                          Expanded(
+                            child: Semantics(
+                              excludeSemantics: true,
+                              child: const Text(
+                                'Abrir localização externamente com',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 15),
-                      // Título da modal
+                      const SizedBox(height: 10),
+                      // Lista de aplicativos de mapas instalados
                       Expanded(
-                        child: Text(
-                          'Abrir localização externamente com',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.start,
+                        child: ListView.builder(
+                          itemCount: availableMaps.length,
+                          itemBuilder: (context, index) {
+                            final map = availableMaps[index];
+                            return Semantics(
+                              label: 'Abrir localização com ${map.mapName}',
+                              hint:
+                                  'Clique para abrir a localização externamente.',
+                              child: ListTile(
+                                title: Text(
+                                  map.mapName,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                                leading: SvgPicture.asset(
+                                  map.icon,
+                                  height: 30,
+                                  width: 30,
+                                ),
+                                onTap: () {
+                                  map.showMarker(
+                                    coords: Coords(
+                                      widget.place.coordinates.latitude,
+                                      widget.place.coordinates.longitude,
+                                    ),
+                                    title: widget.place.name,
+                                    description: widget.place.adress,
+                                  );
+                                  Navigator.pop(innerContext);
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  // Lista de aplicativos de mapas instalados
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: availableMaps.length,
-                      itemBuilder: (context, index) {
-                        final map = availableMaps[index];
-                        return Semantics(
-                          label: 'Abrir localização com ${map.mapName}',
-                          hint: 'Clique para abrir o aplicativo ${map.mapName}',
-                          child: ListTile(
-                            title: Text(
-                              map.mapName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            leading: SvgPicture.asset(
-                              map.icon,
-                              height: 30,
-                              width: 30,
-                            ),
-                            onTap: () {
-                              map.showMarker(
-                                coords: Coords(
-                                  widget.place.coordinates.latitude,
-                                  widget.place.coordinates.longitude,
-                                ),
-                                title: widget.place.name,
-                                description: widget.place.adress,
-                              );
-                              Navigator.pop(context);
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           );
         },
       );
     } else {
-      // Exibe mensagem se nenhum aplicativo de mapas for encontrado
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nenhum aplicativo de mapas encontrado.'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nenhum aplicativo de mapas encontrado.'),
+          ),
+        );
+      }
     }
   }
 
@@ -272,29 +285,28 @@ class _PlacePageState extends State<PlacePage> {
 
                       // --------------- Início do Toggle button
 
-                      // Toggle button para escolha entre "Informações Gerais" e "Audiodescrição"
+                      // Toggle button para escolha entre "Audiodescrição" e "Informações Gerais"
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Semantics para "Informações Gerais"
+                          // Semantics para não deixar o foco texto "Audiodescrição"
                           Semantics(
                             excludeSemantics: true,
-                            label: "Informações Gerais",
                             child: GestureDetector(
                               onTap: () => setState(() {
                                 _selectedPlayer =
-                                    AudioPlayerType.informacoesGerais;
+                                    AudioPlayerType.audiodescricao;
                               }),
                               child: Text(
-                                "Informações Gerais",
+                                "Audiodescrição",
                                 style: TextStyle(
                                   fontWeight: _selectedPlayer ==
-                                          AudioPlayerType.informacoesGerais
+                                          AudioPlayerType.audiodescricao
                                       ? FontWeight.bold
                                       : FontWeight.normal,
                                   color: _selectedPlayer ==
-                                          AudioPlayerType.informacoesGerais
-                                      ? Colors.deepPurple
+                                          AudioPlayerType.audiodescricao
+                                      ? Colors.black
                                       : Colors.grey.withOpacity(0.5),
                                 ),
                               ),
@@ -306,7 +318,7 @@ class _PlacePageState extends State<PlacePage> {
                           MergeSemantics(
                             child: Semantics(
                               value:
-                                  "Botão para Alternar Áudio. Áudio atualmente selecionado ${_selectedPlayer == AudioPlayerType.informacoesGerais ? 'Informações Gerais' : 'Audiodescrição'}",
+                                  "Botão para Alternar Áudio. Áudio atualmente selecionado: ${_selectedPlayer == AudioPlayerType.informacoesGerais ? 'Informações Gerais' : 'Audiodescrição'}",
                               onTap: () {
                                 setState(() {
                                   _selectedPlayer = _selectedPlayer ==
@@ -339,8 +351,7 @@ class _PlacePageState extends State<PlacePage> {
                                         duration:
                                             const Duration(milliseconds: 200),
                                         left: _selectedPlayer ==
-                                                AudioPlayerType
-                                                    .informacoesGerais
+                                                AudioPlayerType.audiodescricao
                                             ? 4
                                             : 40,
                                         top: 2,
@@ -351,19 +362,19 @@ class _PlacePageState extends State<PlacePage> {
                                             shape: BoxShape.circle,
                                             gradient: _selectedPlayer ==
                                                     AudioPlayerType
-                                                        .informacoesGerais
+                                                        .audiodescricao
                                                 ? const LinearGradient(
                                                     colors: [
-                                                      Color(0xFFFF9D44),
-                                                      Color(0xFFFFC453)
+                                                      Color(0xFFFFDA59),
+                                                      Color(0xFFFFE4AF)
                                                     ],
                                                     begin: Alignment.topLeft,
                                                     end: Alignment.bottomRight,
                                                   )
                                                 : const LinearGradient(
                                                     colors: [
-                                                      Color(0xFFFFDA59),
-                                                      Color(0xFFFFE4AF)
+                                                      Color(0xFF9C27B0),
+                                                      Color(0xFFD05CE3),
                                                     ],
                                                     begin: Alignment.topLeft,
                                                     end: Alignment.bottomRight,
@@ -380,10 +391,14 @@ class _PlacePageState extends State<PlacePage> {
                                           child: Icon(
                                             _selectedPlayer ==
                                                     AudioPlayerType
-                                                        .informacoesGerais
-                                                ? Icons.library_books
-                                                : Icons.hearing,
-                                            color: Colors.white,
+                                                        .audiodescricao
+                                                ? Icons.hearing
+                                                : Icons.library_books,
+                                            color: _selectedPlayer ==
+                                                    AudioPlayerType
+                                                        .audiodescricao
+                                                ? Colors.black
+                                                : Colors.white,
                                           ),
                                         ),
                                       ),
@@ -395,25 +410,24 @@ class _PlacePageState extends State<PlacePage> {
                           ),
                           const SizedBox(width: 8),
 
-                          // Semantics para "Audiodescrição"
+                          // Semantics para não deixar o foco no texto "Informações Gerais"
                           Semantics(
                             excludeSemantics: true,
-                            label: "Audiodescrição",
                             child: GestureDetector(
                               onTap: () => setState(() {
                                 _selectedPlayer =
-                                    AudioPlayerType.audiodescricao;
+                                    AudioPlayerType.informacoesGerais;
                               }),
                               child: Text(
-                                "Audiodescrição",
+                                "Informações Gerais",
                                 style: TextStyle(
                                   fontWeight: _selectedPlayer ==
-                                          AudioPlayerType.audiodescricao
+                                          AudioPlayerType.informacoesGerais
                                       ? FontWeight.bold
                                       : FontWeight.normal,
                                   color: _selectedPlayer ==
-                                          AudioPlayerType.audiodescricao
-                                      ? Colors.deepPurple
+                                          AudioPlayerType.informacoesGerais
+                                      ? Colors.black
                                       : Colors.grey.withOpacity(0.5),
                                 ),
                               ),
@@ -454,7 +468,7 @@ class _PlacePageState extends State<PlacePage> {
                       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
                         Center(
                           child: ElevatedButton.icon(
-                            onPressed: () => _openInMapLauncher(context),
+                            onPressed: () => _openInMapLauncher(),
                             icon: const Icon(Icons.map),
                             label: const Text('Abrir localização'),
                             style: ElevatedButton.styleFrom(

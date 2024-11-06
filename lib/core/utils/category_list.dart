@@ -1,6 +1,7 @@
 // lista com o nome dos locais
 List<String> getCategoryNames() {
   return [
+    'Todos',
     'Bosques e parques',
     'Comércio',
     'Cultura, Lazer e Esporte',

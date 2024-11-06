@@ -31,7 +31,7 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
 
       // Verifica se o serviço de localização está habilitado
       if (!await _checkLocationService()) {
-        emit(DistancesError(
+        emit(const DistancesError(
             "Serviço de localização está desativado. Por favor, ative-o nas configurações."));
         return;
       }
@@ -41,20 +41,20 @@ class DistancesBloc extends Bloc<DistancesEvent, DistancesState> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          emit(DistancesPermissionRequired(
+          emit(const DistancesPermissionRequired(
               "Permissão de localização é necessária para buscar lugares próximos."));
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        emit(DistancesError(
+        emit(const DistancesError(
             "Permissão de localização foi negada permanentemente. Habilite nas configurações."));
         return;
       }
 
       // Definindo as configurações de localização
-      final LocationSettings locationSettings = LocationSettings(
+      const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.medium, // Precisão máxima da localização
         distanceFilter:
             100, // Atualizar a localização quando o usuário mover 100 metros

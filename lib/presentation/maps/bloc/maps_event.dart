@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 // ====================================
-// Classe abstrata MapsEvent
+// Classe MapsEvent
 // ====================================
 // Define a base para todos os eventos que o MapsBloc pode lidar.
 // Usamos Equatable para facilitar a comparação entre eventos.

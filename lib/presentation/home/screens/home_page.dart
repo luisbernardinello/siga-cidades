@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
@@ -38,17 +39,26 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Título da seção "Explore"
-          Semantics(
-            header: true,
-            label: 'Conteúdo principal de seleção de lugares por categoria',
-            child: const Text(
-              'Explore',
-              style: TextStyle(
-                color: Color(0xFF080808),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+          BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+              final cityName = context.read<CategoryBloc>().selectedCity;
+              return Semantics(
+                header: false,
+                label:
+                    'Conteúdo principal de seleção de lugares com opção de filtros de categoria.',
+                hint:
+                    'Explore locais em $cityName ou escolha uma nova cidade no menu superior',
+                excludeSemantics: true,
+                child: const Text(
+                  'Explore',
+                  style: TextStyle(
+                    color: Color(0xFF080808),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 15),
 
@@ -56,12 +66,12 @@ class HomePage extends StatelessWidget {
           BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
               final selectedIndex =
-                  (state is CategoryLoaded) ? state.selectedIndex : 0;
+                  (state is CategoryLoaded) ? state.selectedIndex : -1;
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 controller: ScrollController(
-                  initialScrollOffset: selectedIndex * categoryTagWidth,
+                  initialScrollOffset: (selectedIndex + 1) * categoryTagWidth,
                 ),
                 child: Row(
                   children: List.generate(
@@ -70,13 +80,18 @@ class HomePage extends StatelessWidget {
                       onTap: () {
                         context
                             .read<CategoryBloc>()
-                            .add(SelectCategoryEvent(index));
+                            .add(SelectCategoryEvent(index - 1));
+
+                        SemanticsService.announce(
+                          '${getCategoryNames()[index]} selecionada',
+                          TextDirection.ltr,
+                        );
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: categoryTag(
                           getCategoryNames()[index],
-                          index == selectedIndex,
+                          index - 1 == selectedIndex,
                           screenWidth: screenWidth,
                         ),
                       ),
@@ -105,14 +120,14 @@ class HomePage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final place = state.filteredPlaces[index];
 
-                      // PlaceCard com um FutureBuilder para o CircularProgressIndicator ser mostrado
-                      // enquanto cada placeCard ainda está sendo processado na construção do grid
+                      // PlaceCard com FutureBuilder para exibir CircularProgressIndicator enquanto carrega
                       return FutureBuilder(
                         future: Future.delayed(Duration.zero),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
 
                           return Semantics(
@@ -137,7 +152,7 @@ class HomePage extends StatelessWidget {
                     },
                   );
                 } else if (state is CategoryLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (state is CategoryError) {
                   return Center(child: Text(state.message));
                 } else {

@@ -9,7 +9,7 @@ class ControlButtons extends StatelessWidget {
       milliseconds:
           500); // Debouncer para trabalhar com as mensagens atrasadas que podem ser geradas pelo botão de velocidade
 
-  ControlButtons(this.player, {Key? key}) : super(key: key);
+  ControlButtons(this.player, {super.key});
 
   @override
   Widget build(BuildContext context) {

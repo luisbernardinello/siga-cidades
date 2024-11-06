@@ -8,12 +8,12 @@ class PlaceDistanceWidget extends StatelessWidget {
   final bool isDesktop;
 
   const PlaceDistanceWidget({
-    Key? key,
+    super.key,
     required this.place,
     required this.distance,
     required this.isTablet,
     required this.isDesktop,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,38 +25,59 @@ class PlaceDistanceWidget extends StatelessWidget {
     return Card(
       margin:
           EdgeInsets.symmetric(vertical: cardVerticalPadding, horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 2,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: cardVerticalPadding),
         child: ListTile(
-          // Informações completas de acessibilidade do lugar
           title: Semantics(
-            label: 'Nome do local: ${place.name}',
+            label: 'Nome do local: ',
             child: Text(
-              place.name,
+              place.name, // Nome do local
               style: TextStyle(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
           ),
           subtitle: Semantics(
             label:
-                '${place.category}, ${place.city}, a uma distância de ${_formatDistance(distance)}',
+                '${place.category}, ${place.city}, a uma distância de ${_formatDistance(distance)}.',
+            hint: 'Toque para mais detalhes',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${place.category} - ${place.city}',
-                  style: TextStyle(
-                    fontSize: subtitleFontSize,
+                Semantics(
+                  excludeSemantics: true,
+                  child: Text(
+                    '${place.category} - ${place.city}',
+                    style: TextStyle(
+                      fontSize: subtitleFontSize,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-                Text(
-                  _formatDistance(distance),
-                  style: TextStyle(
-                    color: const Color(0xFFFFA500),
-                    fontWeight: FontWeight.w600,
-                    fontSize: distanceFontSize,
+                const SizedBox(height: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFDF58), // Fundo com contraste alto
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Semantics(
+                    excludeSemantics: true,
+                    child: Text(
+                      _formatDistance(distance),
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: distanceFontSize,
+                      ),
+                    ),
                   ),
                 ),
               ],
