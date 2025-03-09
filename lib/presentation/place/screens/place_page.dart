@@ -97,12 +97,12 @@ class PlacePageState extends State<PlacePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Botão de fechar com foco ao abrir a modal
                           Focus(
                             focusNode: _modalFocusNode,
                             child: Semantics(
-                              label: 'Botão de fechar janela de mapas',
-                              hint: 'Clique para voltar à página do local',
+                              label: 'Voltar',
+                              hint:
+                                  'Toque para fechar a janela de abrir localização externamente',
                               button: true,
                               child: GestureDetector(
                                 onTap: () {
@@ -139,7 +139,7 @@ class PlacePageState extends State<PlacePage> {
                             return Semantics(
                               label: 'Abrir localização com ${map.mapName}',
                               hint:
-                                  'Clique para abrir a localização externamente.',
+                                  'Toque para abrir a localização externamente.',
                               child: ListTile(
                                 title: Text(
                                   map.mapName,
@@ -201,10 +201,13 @@ class PlacePageState extends State<PlacePage> {
 
         double padding = isDesktop ? 32.0 : 16.0;
         double imageHeight = isDesktop ? 400 : (isTablet ? 300 : 250);
-        double titleFontSize = isDesktop ? 28 : (isTablet ? 22 : 24);
+        double titleFontSize = isDesktop ? 28 : (isTablet ? 30 : 28);
         double subtitleFontSize = isDesktop ? 20 : 18;
         double descriptionFontSize = isDesktop ? 18 : 16;
-        double buttonPadding = isDesktop ? 16 : 12;
+        double buttonPadding = isDesktop ? 18 : 16;
+        double toggleTextFontSize = isDesktop ? 20 : 18;
+        final double buttonFontSize = isDesktop ? 20 : 18;
+        final double buttonWidth = isDesktop ? 200 : 180;
 
         return Scaffold(
           body: SingleChildScrollView(
@@ -225,7 +228,7 @@ class PlacePageState extends State<PlacePage> {
                       left: 16,
                       child: Semantics(
                         label: "Voltar",
-                        hint: "Toque para voltar para a página anterior",
+                        hint: "Toque duas vezes para voltar à página anterior",
                         button: true,
                         child: GestureDetector(
                           onTap: () {
@@ -300,6 +303,7 @@ class PlacePageState extends State<PlacePage> {
                               child: Text(
                                 "Audiodescrição",
                                 style: TextStyle(
+                                  fontSize: toggleTextFontSize,
                                   fontWeight: _selectedPlayer ==
                                           AudioPlayerType.audiodescricao
                                       ? FontWeight.bold
@@ -312,7 +316,7 @@ class PlacePageState extends State<PlacePage> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
 
                           // Container para o botão de alternância estilizado
                           MergeSemantics(
@@ -365,7 +369,8 @@ class PlacePageState extends State<PlacePage> {
                                                         .audiodescricao
                                                 ? const LinearGradient(
                                                     colors: [
-                                                      Color(0xFFFFDA59),
+                                                      Color(
+                                                          0xFFFFDA59), // Seguindo WCAG
                                                       Color(0xFFFFE4AF)
                                                     ],
                                                     begin: Alignment.topLeft,
@@ -373,7 +378,8 @@ class PlacePageState extends State<PlacePage> {
                                                   )
                                                 : const LinearGradient(
                                                     colors: [
-                                                      Color(0xFF9C27B0),
+                                                      Color(
+                                                          0xFF9C27B0), // Seguindo WCAG
                                                       Color(0xFFD05CE3),
                                                     ],
                                                     begin: Alignment.topLeft,
@@ -408,7 +414,7 @@ class PlacePageState extends State<PlacePage> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
 
                           // Semantics para não deixar o foco no texto "Informações Gerais"
                           Semantics(
@@ -419,8 +425,9 @@ class PlacePageState extends State<PlacePage> {
                                     AudioPlayerType.informacoesGerais;
                               }),
                               child: Text(
-                                "Informações Gerais",
+                                "Informações",
                                 style: TextStyle(
+                                  fontSize: toggleTextFontSize,
                                   fontWeight: _selectedPlayer ==
                                           AudioPlayerType.informacoesGerais
                                       ? FontWeight.bold
@@ -433,6 +440,7 @@ class PlacePageState extends State<PlacePage> {
                               ),
                             ),
                           ),
+                          const SizedBox(width: 22),
                         ],
                       ),
 
@@ -467,14 +475,35 @@ class PlacePageState extends State<PlacePage> {
                       // Botão para abrir a localização no mapa, visível apenas em dispositivos móveis
                       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
                         Center(
-                          child: ElevatedButton.icon(
-                            onPressed: () => _openInMapLauncher(),
-                            icon: const Icon(Icons.map),
-                            label: const Text('Abrir localização'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: buttonPadding,
-                                vertical: buttonPadding / 2,
+                          child: SizedBox(
+                            width: buttonWidth,
+                            child: Semantics(
+                              label: 'Abrir localização.',
+                              excludeSemantics: true,
+                              button: true,
+                              child: ElevatedButton.icon(
+                                onPressed: () => _openInMapLauncher(),
+                                icon: const Icon(
+                                  Icons.map,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Localização',
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: buttonFontSize,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(
+                                      0xFFae35c1), // Cor atualizada para #ae35c1 que segue o WCAG
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: buttonPadding,
+                                    vertical: buttonPadding / 2,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

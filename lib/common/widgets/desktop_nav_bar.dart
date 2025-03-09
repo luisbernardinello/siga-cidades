@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/common/widgets/app_search_bar.dart';
 
-class CustomDesktopNavBar extends StatelessWidget {
+class CustomDesktopNavBar extends StatefulWidget {
   final int currentPage;
   final ValueChanged<int> onSelectPage;
   final VoidCallback onMenuTap;
@@ -15,6 +15,19 @@ class CustomDesktopNavBar extends StatelessWidget {
     required this.onMenuTap,
     required this.selectedCity,
   });
+
+  @override
+  CustomDesktopNavBarState createState() => CustomDesktopNavBarState();
+}
+
+class CustomDesktopNavBarState extends State<CustomDesktopNavBar> {
+  final FocusNode _navBarFocusNode = FocusNode(); // Define o FocusNode
+
+  @override
+  void dispose() {
+    _navBarFocusNode.dispose(); // Libera o FocusNode ao descartar o widget
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +51,29 @@ class CustomDesktopNavBar extends StatelessWidget {
               label: 'Barra de pesquisa',
               hint: 'Pesquise locais',
               child: AppSearchBar(
-                onMenuTap: onMenuTap,
+                onMenuTap: widget.onMenuTap,
                 placeRepository: context.read(),
-                selectedCity: selectedCity,
+                selectedCity: widget.selectedCity,
+                onCloseModal: () {
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    _navBarFocusNode.requestFocus();
+                  });
+                },
               ),
             ),
           ),
           const Spacer(flex: 1),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildNavItem(context, 'Início', Icons.home, 0),
-              _buildNavItem(context, 'Distâncias', Icons.list, 1),
-              _buildNavItem(context, 'Mapa', Icons.map, 2),
-              _buildNavItem(context, 'Sobre', Icons.info, 3),
-            ],
+          Focus(
+            focusNode: _navBarFocusNode,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildNavItem(context, 'Início', Icons.home, 0),
+                _buildNavItem(context, 'Distâncias', Icons.list, 1),
+                _buildNavItem(context, 'Mapa', Icons.map, 2),
+                _buildNavItem(context, 'Sobre', Icons.info, 3),
+              ],
+            ),
           ),
         ],
       ),
@@ -61,15 +82,15 @@ class CustomDesktopNavBar extends StatelessWidget {
 
   Widget _buildNavItem(
       BuildContext context, String label, IconData icon, int index) {
-    final bool isSelected = currentPage == index;
+    final bool isSelected = widget.currentPage == index;
 
     return Semantics(
       label: label,
       hint:
           'Botão de navegação, no momento ${isSelected ? "selecionado" : "não selecionado"}',
-      button: true,
+      button: false,
       child: GestureDetector(
-        onTap: () => onSelectPage(index),
+        onTap: () => widget.onSelectPage(index),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(

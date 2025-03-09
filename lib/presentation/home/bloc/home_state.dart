@@ -29,6 +29,8 @@ class CategoryLoaded extends CategoryState {
 
   @override
   List<Object?> get props => [selectedIndex, filteredPlaces];
+
+  get selectedCity => null;
 }
 
 // Estado de erro.

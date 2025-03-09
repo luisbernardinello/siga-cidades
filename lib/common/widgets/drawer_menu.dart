@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
@@ -16,10 +18,12 @@ class DrawerMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth >= 600;
+    // busca a cidade atual diretamente do bloc
+    final currentCity = context.read<CategoryBloc>().selectedCity;
 
     return Drawer(
       child: Semantics(
-        label: 'Menu lateral',
+        focusable: true,
         child: Container(
           padding: EdgeInsets.only(
             top: isTablet ? 120 : 100,
@@ -33,6 +37,7 @@ class DrawerMenu extends StatelessWidget {
             children: [
               Semantics(
                 header: true,
+                focusable: true,
                 child: Text(
                   'SIGA CIDADES',
                   style: TextStyle(
@@ -46,20 +51,18 @@ class DrawerMenu extends StatelessWidget {
               const SizedBox(height: 40),
               Semantics(
                 label: 'Selecione a cidade para explorar',
-                child: BlocBuilder<CategoryBloc, CategoryState>(
-                  builder: (context, state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildCityOption(context, 'Bauru', isTablet),
-                        const SizedBox(height: 24),
-                        _buildCityOption(context, 'Botucatu', isTablet),
-                        const SizedBox(height: 24),
-                        _buildCityOption(
-                            context, 'Presidente Prudente', isTablet),
-                      ],
-                    );
-                  },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCityOption(
+                        context, 'Bauru', isTablet, currentCity == 'Bauru'),
+                    const SizedBox(height: 24),
+                    _buildCityOption(
+                        context, 'Marília', isTablet, currentCity == 'Marília'),
+                    const SizedBox(height: 24),
+                    _buildCityOption(context, 'Botucatu', isTablet,
+                        currentCity == 'Botucatu'),
+                  ],
                 ),
               ),
             ],
@@ -70,15 +73,23 @@ class DrawerMenu extends StatelessWidget {
   }
 
   Widget _buildCityOption(
-      BuildContext context, String cityName, bool isTablet) {
+      BuildContext context, String cityName, bool isTablet, bool isSelected) {
     return Semantics(
-      label: 'Cidade $cityName. Toque para selecionar',
+      label:
+          'Cidade $cityName. ${isSelected ? 'Selecionada' : 'Toque para selecionar'}',
       button: true,
       child: GestureDetector(
         onTap: () {
-          context.read<CategoryBloc>().add(SelectCityEvent(cityName));
-          onCitySelected(cityName);
-          Navigator.pop(context);
+          // usa uma cópia do valor para evitar problema de referência
+          final selectedCityName = cityName;
+
+          // atualiza o BLoC primeiro
+          final bloc = context.read<CategoryBloc>();
+          bloc.add(SelectCityEvent(selectedCityName));
+
+          // chama o callback que notifica o MainScreen
+          // que por sua vez vai redirecionar para a HomePage
+          onCitySelected(selectedCityName);
         },
         child: Text(
           cityName,
@@ -86,7 +97,7 @@ class DrawerMenu extends StatelessWidget {
             color: const Color(0xFF131313),
             fontSize: isTablet ? 20 : 18,
             fontFamily: 'Sora',
-            fontWeight: FontWeight.w400,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -141,6 +142,7 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double fontSize = MediaQuery.of(context).size.height * 0.045;
     return Semantics(
       label:
           'Bem vindo ao SIGA CIDADES. Notas para o uso do aplicativo. A tela principal está dividida em: menu superior, conteúdo principal da página, e menu de navegação. Use o menu superior para escolher a cidade e pesquisar pontos turísticos. O menu de navegação permite a troca de páginas, atualizando o conteúdo principal da página automaticamente.',
@@ -158,31 +160,48 @@ class _LogoSplashScreenState extends State<LogoSplashScreen> {
             backgroundColor: Colors.white,
             disableNavigation: true,
           ),
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.6, // 60% from top
+            left: 18.0,
+            right: 18.0,
+            child: AutoSizeText(
+              "Explore o mapa e ouça informações e audiodescrição de parques, ruas, praças e edifícios.",
+              style: TextStyle(
+                color: Colors.black.withOpacity(0.8),
+                fontWeight: FontWeight.w300,
+                fontSize: fontSize,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+            ),
+          ),
           if (_animationCompleted)
             Positioned(
-              bottom: 60,
+              bottom: 80,
               child: ElevatedButton(
                 onPressed: () {
+                  // Para enviar o foco para a navbar
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => const MainScreen(),
+                      builder: (context) =>
+                          const MainScreen(initialFocus: true),
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: const Color(0xFFae35c1),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 ),
                 child: Semantics(
-                  label: 'Botão de continuar',
-                  hint: 'Clique para prosseguir para a tela principal',
-                  button: false,
+                  label: 'Continuar',
+                  hint: 'Toque para prosseguir para a tela principal',
+                  button: true,
                   child: const Text(
                     'Continuar',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

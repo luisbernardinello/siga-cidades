@@ -1,15 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sigacidades/core/debouncer.dart';
 
 class ControlButtons extends StatelessWidget {
   final AudioPlayer player;
+  final String audioUrl;
   final Debouncer _snackbarDebouncer = Debouncer(
       milliseconds:
           500); // Debouncer para trabalhar com as mensagens atrasadas que podem ser geradas pelo botão de velocidade
 
-  ControlButtons(this.player, {super.key});
+  ControlButtons(this.player, {required this.audioUrl, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,25 +84,39 @@ class ControlButtons extends StatelessWidget {
           builder: (context, snapshot) {
             final speed = snapshot.data ?? 1.0;
             return Semantics(
-              //label: "Botão Velocidade de Reprodução",
               value:
-                  "Botão Velocidade de Reprodução. Velocidade de Reprodução Atual: ${speed.toStringAsFixed(1)}x",
-              hint: "Tocar duas vezes para ativar",
-              //button: true,
+                  "Botão Velocidade de Reprodução. Velocidade Atual: ${speed.toStringAsFixed(1)}",
+              hint: "Toque para alterar",
               excludeSemantics: true,
               child: IconButton(
                 icon: Text(
                   "${speed.toStringAsFixed(1)}x",
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                iconSize: 24.0,
                 onPressed: () {
                   _changePlaybackSpeed(context, player, speed);
                 },
-                tooltip:
-                    'Velocidade de reprodução ${speed.toStringAsFixed(1)}x',
               ),
             );
           },
+        ),
+
+        // Botão para fazer download
+        Semantics(
+          label: 'Botão para download do áudio selecionado.',
+          child: IconButton(
+            icon: const Icon(Icons.download),
+            iconSize: 25.0,
+            onPressed: () {
+              SemanticsService.announce(
+                'Download selecionado, baixando o arquivo.',
+                TextDirection.ltr,
+              );
+              _downloadAudio(context, audioUrl);
+            },
+            tooltip: 'Download do áudio atual',
+          ),
         ),
       ],
     );
@@ -123,6 +144,8 @@ class ControlButtons extends StatelessWidget {
       newSpeed = 2.0;
     } else if (currentSpeed == 2.0) {
       newSpeed = 2.5;
+    } else if (currentSpeed == 2.5) {
+      newSpeed = 3.0;
     } else {
       newSpeed = 1.0;
     }
@@ -134,12 +157,59 @@ class ControlButtons extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Semantics(
-            label: 'Velocidade de reprodução ${newSpeed.toStringAsFixed(1)}x',
+            label: 'Velocidade ${newSpeed.toStringAsFixed(1)}',
             excludeSemantics: true,
             child: Text('Velocidade ${newSpeed.toStringAsFixed(1)}x'),
           ),
         ),
       );
     });
+  }
+
+  // Função para baixar o áudio
+  Future<void> _downloadAudio(BuildContext context, String url) async {
+    final Dio dio = Dio();
+    if (await _requestStoragePermission()) {
+      final downloadsDir = await getExternalStorageDirectory();
+      final fileName = url.split('/').last;
+      final filePath = '${downloadsDir?.path}/$fileName';
+
+      try {
+        await dio.download(url, filePath);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Áudio baixado com sucesso.")),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Erro ao baixar o áudio.")),
+          );
+        }
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Permissão de armazenamento necessária.")),
+        );
+      }
+    }
+  }
+
+  /// Solicita a permissão de armazenamento
+  Future<bool> _requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      // Solicita permissões específicas conforme a API do Android
+      if (await Permission.audio.request().isGranted ||
+          await Permission.manageExternalStorage.request().isGranted ||
+          await Permission.storage.request().isGranted) {
+        return true;
+      }
+      return false;
+    }
+    // iOS não precisa de permissão para downloads de audio
+    return true;
   }
 }

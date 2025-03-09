@@ -1,7 +1,10 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sigacidades/core/place_invalid_fields.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 
 // O PlaceModel extende a entidade Place e faz a conversão de JSON para o PlaceModel e do PlaceModel para JSON.
+/// Lida com o mapeamento e a validação das informações vindas do Firestore para um objeto do tipo Place
+
 class PlaceModel extends Place {
   PlaceModel({
     required super.name,
@@ -16,35 +19,29 @@ class PlaceModel extends Place {
     required super.coordinates,
   });
 
+  /// Construtor factory que cria um PlaceModel a partir de um Map JSON.
   // Converte um objeto JSON para um PlaceModel.
+  /// No caso de dados ausentes ou inválidos, campos padrão são atribuídos.
+  /// Objetivo é a camada de dados se manter independente do restante do sistema.
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
-      name: json['name'],
-      city: json['city'],
-      category: json['category'],
-      description: json['description'],
-      adress: json['adress'],
-      imageUrl: json['imageUrl'],
-      imageDescription: json['imageDescription'],
-      audioDescriptionUrl: json['audioDescriptionUrl'],
-      audioPlaceInfoUrl: json['audioPlaceInfoUrl'],
-      coordinates: json['coordinates'],
+      name: json['name'] ?? 'Nome não disponível',
+      city: json['city'] ?? 'Cidade não especificada',
+      category: json['category'] ?? 'Categoria não especificada',
+      description: json['description'] ?? 'Descrição indisponível',
+      adress: json['adress'] ?? 'Endereço indisponível',
+      imageUrl: json['imageUrl'] ?? '',
+      imageDescription: json['imageDescription'] ?? 'Imagem não disponível',
+      audioDescriptionUrl: json['audioDescriptionUrl'] ?? '',
+      audioPlaceInfoUrl: json['audioPlaceInfoUrl'] ?? '',
+      coordinates: json['coordinates'] ?? const GeoPoint(0, 0),
     );
   }
 
-  // Converte o PlaceModel para um objeto JSON.
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'city': city,
-      'category': category,
-      'description': description,
-      'adress': adress,
-      'imageUrl': imageUrl,
-      'imageDescription': imageDescription,
-      'audioDescriptionUrl': audioDescriptionUrl,
-      'audioPlaceInfoUrl': audioPlaceInfoUrl,
-      'coordinates': coordinates,
-    };
+  /// Método para obter a lista de campos inválidos de uma instância de PlaceModel.
+  /// Usa a fetchInvalidFields, que faz a validação dos campos
+  /// Se vier errado do objeto Place, são marcados como inválidos.
+  List<String> getInvalidFields() {
+    return fetchInvalidFields(this);
   }
 }

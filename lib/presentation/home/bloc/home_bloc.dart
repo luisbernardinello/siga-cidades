@@ -15,13 +15,16 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final Map<String, Map<int, List<Place>>> _placesCache = {};
 
   CategoryBloc(this.placeRepository) : super(CategoryLoading()) {
-    // Evento para seleção de categoria, incluindo a lógica para categoria "Todos"
+    // Evento de seleção de categoria, incluindo a lógica para categoria Todos
     on<SelectCategoryEvent>((event, emit) async {
+      emit(CategoryLoading()); // Sempre emite o estado de carregamento
+
       currentCategoryIndex = event.selectedIndex;
 
       // Verifica se o cache possui a cidade e categoria selecionada
       if (_placesCache[selectedCity] != null &&
           _placesCache[selectedCity]!.containsKey(event.selectedIndex)) {
+        // Usa cache se disponível
         emit(CategoryLoaded(
           selectedIndex: event.selectedIndex,
           filteredPlaces: _placesCache[selectedCity]![event.selectedIndex]!,
@@ -51,7 +54,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
     // Evento para seleção de cidade
     on<SelectCityEvent>((event, emit) async {
-      selectedCity = event.city; // Atualiza a cidade selecionada
+      selectedCity = event.city;
       add(SelectCategoryEvent(
           -1)); // Atualiza para a categoria "Todos" ao mudar de cidade
     });

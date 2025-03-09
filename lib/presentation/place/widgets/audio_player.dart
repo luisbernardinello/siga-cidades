@@ -1,3 +1,4 @@
+import 'dart:async'; // Import para StreamSubscription
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:audio_service/audio_service.dart';
@@ -29,6 +30,8 @@ class SongPlayerWidget extends StatefulWidget {
 class SongPlayerWidgetState extends State<SongPlayerWidget> {
   late AudioPlayer _player; // Instância do player de áudio
   late AudioSource _audioSource; // Fonte de áudio (com ou sem cache)
+  StreamSubscription<PlayerState>?
+      _playerStateSubscription; // Observa o estado do player
 
   @override
   void initState() {
@@ -59,6 +62,17 @@ class SongPlayerWidgetState extends State<SongPlayerWidget> {
 
     widget.onPlayerInit(_player);
     _initPlayer();
+
+    // Observa o estado do player e reinicia o áudio quando concluído
+    _playerStateSubscription = _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Reinicia o áudio direto se for web
+        if (kIsWeb) {
+          _player.seek(Duration.zero);
+          _player.pause();
+        }
+      }
+    });
   }
 
   /// Inicializa o player e configura o audio_session para lidar com interrupções
@@ -96,7 +110,11 @@ class SongPlayerWidgetState extends State<SongPlayerWidget> {
         _player.pause();
       });
 
-      await _player.setAudioSource(_audioSource);
+      await _player.setAudioSource(
+        _audioSource,
+        preload:
+            false, // Preload false para não carregar o player ao iniciar a pagina (Evita mensagem do sistema operacional "Controle de mídia" ao inciar a página)
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -114,6 +132,7 @@ class SongPlayerWidgetState extends State<SongPlayerWidget> {
 
   @override
   void dispose() {
+    _playerStateSubscription?.cancel(); // Cancela a assinatura ao sair
     _player.dispose();
     super.dispose();
   }
@@ -126,16 +145,26 @@ class SongPlayerWidgetState extends State<SongPlayerWidget> {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 2.0),
         ),
-        ControlButtons(_player),
+        ControlButtons(_player, audioUrl: widget.audioUrl),
         StreamBuilder<PositionData>(
           stream: _positionDataStream,
           builder: (context, snapshot) {
             final positionData = snapshot.data;
-            return ProgressBar(
-              progress: positionData?.position ?? Duration.zero,
-              buffered: positionData?.bufferedPosition ?? Duration.zero,
-              total: positionData?.duration ?? Duration.zero,
-              onSeek: _player.seek,
+            final progress = positionData?.position ?? Duration.zero;
+            final buffered = positionData?.bufferedPosition ?? Duration.zero;
+            final total = positionData?.duration ?? Duration.zero;
+
+            return Semantics(
+              label:
+                  'Tempo decorrido: ${_formatDurationForSemantics(progress)}, de um total de ${_formatDurationForSemantics(total)}.',
+              hint: 'Barra de progresso de áudio',
+              excludeSemantics: true,
+              child: ProgressBar(
+                progress: progress,
+                buffered: buffered,
+                total: total,
+                onSeek: _player.seek,
+              ),
             );
           },
         ),
@@ -154,6 +183,13 @@ class SongPlayerWidgetState extends State<SongPlayerWidget> {
           duration ?? Duration.zero,
         ),
       );
+
+  /// Formata a duração do áudio do semantics da progress bar
+  String _formatDurationForSemantics(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds.remainder(60);
+    return '$minutes minutos e $seconds segundos';
+  }
 }
 
 /// Classe para encapsular dados de posição, buffer e duração do player

@@ -3,14 +3,59 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart'; // Adicionado para SemanticsService
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:sigacidades/core/utils/privacy_policy_text.dart';
 import 'package:sigacidades/core/utils/terms_of_use_text.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
+  // Alterado para StatefulWidget
   static const routeName = '/about';
 
-  const AboutPage({super.key});
+  // Adicionando o parâmetro focusNode
+  final FocusNode? focusNode;
+
+  const AboutPage({super.key, this.focusNode});
+
+  @override
+  AboutPageState createState() => AboutPageState();
+}
+
+class AboutPageState extends State<AboutPage> {
+  // Adicionando FocusNode para o conteúdo principal
+  final FocusNode _contentFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Configura para inicializar o foco no conteúdo quando a página recebe foco
+    if (widget.focusNode != null) {
+      widget.focusNode?.addListener(_handlePageFocus);
+    }
+  }
+
+  void _handlePageFocus() {
+    // Quando a página recebe foco da navegação, transfere o foco para o conteúdo
+    if (widget.focusNode != null && widget.focusNode!.hasFocus) {
+      Future.microtask(() {
+        if (mounted) {
+          _contentFocusNode.requestFocus();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // Removendo o listener do focusNode da página
+    if (widget.focusNode != null) {
+      widget.focusNode?.removeListener(_handlePageFocus);
+    }
+
+    _contentFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,95 +66,104 @@ class AboutPage extends StatelessWidget {
     double paddingHorizontal = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
     double fontSize = isDesktop ? 18 : 16;
     double buttonFontSize = isDesktop ? 16 : 14;
-    return Semantics(
-      label:
-          'Conteúdo com informações gerais sobre o aplicativo, e formas de contato com o laboratório biblioteca falada',
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              Semantics(
-                header: true,
-                label: "Página Sobre Nós",
-                child: Text(
-                  'Sobre nós',
-                  style: TextStyle(
-                    color: const Color(0xFF080808),
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
 
-              const SizedBox(height: 15),
-              Text(
-                "O SIGA - Guia Acessível da Cidade é um aplicativo mobile que visa oferecer informações de pontos de interesse do município, como praças, ruas, avenidas, prédios, equipamentos públicos e espaços de lazer. O seu diferencial é apresentar os dados por meio de áudios com informações gerais e, principalmente, audiodescrição detalhada de aspectos físicos e estéticos de cada local, como estilo arquitetônico, características estruturais e dimensões. Cada arquivo pode ser acessado em um mapa, o que permite ao usuário relacionar os pontos de interesse e sua localização na cidade.",
-                style: TextStyle(
-                  color: const Color(0xFF080808),
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "O aplicativo busca oferecer informação acessível e diversificada e, dessa maneira, contribuir para que as pessoas conheçam melhor a cidade e possam experienciá-la com mais autonomia e independência. Nesse sentido, tem como público preferencial (mas não exclusivo) o de pessoas com deficiência visual, principalmente porque oferece o diferencial da audiodescrição e do formato sonoro dos arquivos.",
-                style: TextStyle(
-                  color: const Color(0xFF080808),
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "O SIGA Guia Acessível da Cidade é uma iniciativa do projeto de extensão universitária Biblioteca Falada, da Faculdade de Arquitetura, Artes, Comunicação e Design (FAAC), da Universidade Estadual Paulista “Júlio de Mesquita Filho” (Unesp), câmpus Bauru (SP). O projeto desenvolve ações no campo da acessibilidade à comunicação e à informação, em especial voltadas às pessoas com deficiência visual. Para tanto, produz mídia sonora acessível e audiodescrição, bem como atua na difusão do conhecimento sobre deficiência, tecnologias assistivas, Desenho Universal e comunicação acessível.",
-                style: TextStyle(
-                  color: const Color(0xFF080808),
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              const SizedBox(height: 15),
-              const Divider(color: Color(0xFFE4E4E4)),
-              const SizedBox(height: 8),
-              const Contacts(),
-              const SizedBox(height: 15),
-
-              // Linha divisória
-              const Divider(color: Color(0xFFE4E4E4)),
-              const SizedBox(height: 15),
-
-              // Botões de Política de Privacidade e Termos de Uso
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return Focus(
+      focusNode: widget.focusNode,
+      child: Semantics(
+        label:
+            'Conteúdo com informações gerais sobre o aplicativo, e formas de contato com o laboratório biblioteca falada',
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+          child: SingleChildScrollView(
+            child: Focus(
+              // Adicionando Focus wrapper para o conteúdo principal
+              focusNode: _contentFocusNode,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildButton(
-                    context,
-                    title: "Política de Privacidade",
-                    onPressed: () => _showModal(
-                      context,
-                      "Política de Privacidade",
-                      privacyPolicyText,
+                  const SizedBox(height: 16),
+                  Semantics(
+                    header: true,
+                    label: "Sobre Nós",
+                    excludeSemantics: true,
+                    child: Text(
+                      'Sobre nós',
+                      style: TextStyle(
+                        color: const Color(0xFF080808),
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                    fontSize: buttonFontSize,
                   ),
-                  const SizedBox(width: 8),
-                  _buildButton(
-                    context,
-                    title: "Termos de Uso",
-                    onPressed: () => _showModal(
-                      context,
-                      "Termos de Uso",
-                      termsOfUseText,
+
+                  const SizedBox(height: 15),
+                  Text(
+                    "O SIGA - Guia Acessível da Cidade é um aplicativo mobile que visa oferecer informações de pontos de interesse do município, como praças, ruas, avenidas, prédios, equipamentos públicos e espaços de lazer. O seu diferencial é apresentar os dados por meio de áudios com informações gerais e, principalmente, audiodescrição detalhada de aspectos físicos e estéticos de cada local, como estilo arquitetônico, características estruturais e dimensões. Cada arquivo pode ser acessado em um mapa, o que permite ao usuário relacionar os pontos de interesse e sua localização na cidade.",
+                    style: TextStyle(
+                      color: const Color(0xFF080808),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.normal,
                     ),
-                    fontSize: buttonFontSize,
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "O aplicativo busca oferecer informação acessível e diversificada e, dessa maneira, contribuir para que as pessoas conheçam melhor a cidade e possam experienciá-la com mais autonomia e independência. Nesse sentido, tem como público preferencial (mas não exclusivo) o de pessoas com deficiência visual, principalmente porque oferece o diferencial da audiodescrição e do formato sonoro dos arquivos.",
+                    style: TextStyle(
+                      color: const Color(0xFF080808),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "O SIGA Guia Acessível da Cidade é uma iniciativa do projeto de extensão universitária Biblioteca Falada, da Faculdade de Arquitetura, Artes, Comunicação e Design (FAAC), da Universidade Estadual Paulista 'Júlio de Mesquita Filho' (Unesp), câmpus Bauru (SP). O projeto desenvolve ações no campo da acessibilidade à comunicação e à informação, em especial voltadas às pessoas com deficiência visual. Para tanto, produz mídia sonora acessível e audiodescrição, bem como atua na difusão do conhecimento sobre deficiência, tecnologias assistivas, Desenho Universal e comunicação acessível.",
+                    style: TextStyle(
+                      color: const Color(0xFF080808),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  const Divider(color: Color(0xFFE4E4E4)),
+                  const SizedBox(height: 8),
+                  const Contacts(),
+                  const SizedBox(height: 15),
+
+                  // Linha divisória
+                  const Divider(color: Color(0xFFE4E4E4)),
+                  const SizedBox(height: 15),
+
+                  // Botões de Política de Privacidade e Termos de Uso
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildButton(
+                        context,
+                        title: "Política de Privacidade",
+                        onPressed: () => _showModal(
+                          context,
+                          "Política de Privacidade",
+                          privacyPolicyText,
+                        ),
+                        fontSize: buttonFontSize,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildButton(
+                        context,
+                        title: "Termos de Uso",
+                        onPressed: () => _showModal(
+                          context,
+                          "Termos de Uso",
+                          termsOfUseText,
+                        ),
+                        fontSize: buttonFontSize,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
         ),
       ),
@@ -141,7 +195,8 @@ class AboutPage extends StatelessWidget {
         width: buttonWidth,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,
+            backgroundColor: const Color(
+                0xFFae35c1), // Cor atualizada para #ae35c1 que segue o WCAG
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -154,12 +209,11 @@ class AboutPage extends StatelessWidget {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontSize,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
               maxLines: 1,
               minFontSize: fontSize - 2,
-              overflow:
-                  TextOverflow.ellipsis, // Texto fica do mesmo tamanho do botão
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
@@ -168,7 +222,7 @@ class AboutPage extends StatelessWidget {
   }
 
   void _showModal(BuildContext context, String title, String content) {
-    final FocusNode modalFocusNode = FocusNode(); // Define o _modalFocusNode
+    final FocusNode modalFocusNode = FocusNode();
 
     showModalBottomSheet(
       context: context,
@@ -199,8 +253,8 @@ class AboutPage extends StatelessWidget {
                     Focus(
                       focusNode: modalFocusNode,
                       child: Semantics(
-                        label: 'Botão de fechar',
-                        hint: 'Clique para voltar para a página Sobre',
+                        label: 'Voltar.',
+                        hint: 'Toque para voltar para a página Sobre.',
                         button: true,
                         child: GestureDetector(
                           onTap: () {
@@ -240,10 +294,11 @@ class AboutPage extends StatelessWidget {
           ),
         );
       },
-    ).then((_) =>
-        modalFocusNode.dispose()); // Dispose o FocusNode depois de fechar
+    ).then((_) => modalFocusNode.dispose());
   }
 }
+
+// Mantenha a classe Contacts como está
 
 class Contacts extends StatelessWidget {
   const Contacts({super.key});
@@ -272,28 +327,34 @@ class Contacts extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              _buildContactIcon(
-                icon: Icons.email_outlined,
-                color: Colors.purple,
-                size: isMobile ? 32 : 40,
-                onTap: () => _launchMail(context),
-              ),
-              const SizedBox(width: 21.0),
-              InkWell(
-                child: Text(
-                  "bibliotecafalada@gmail.com",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.normal,
-                    fontSize: isMobile ? 16 : 18,
-                  ),
+          Semantics(
+            label: 'Link para contatar o Biblioteca Falada por e-mail.',
+            hint: 'Toque para enviar-nos um e-mail',
+            excludeSemantics: true,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _buildContactIcon(
+                  icon: Icons.email_outlined,
+                  color: const Color(
+                      0xFFae35c1), // Cor de contraste ajustada #ae35c1 seguindo o WCAG
+                  size: isMobile ? 36 : 42,
+                  onTap: () => _launchMail(context),
                 ),
-                onTap: () => _launchMail(context),
-              ),
-            ],
+                const SizedBox(width: 21.0),
+                InkWell(
+                  child: Text(
+                    "bibliotecafalada@gmail.com",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal,
+                      fontSize: isMobile ? 16 : 18,
+                    ),
+                  ),
+                  onTap: () => _launchMail(context),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 2),
           GridView.count(
@@ -303,36 +364,56 @@ class Contacts extends StatelessWidget {
             mainAxisSpacing: 8,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              _buildGridItem(
-                title: "Site Biblioteca Falada",
-                imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_bf.png?alt=media&token=82c974cd-e14f-4b4b-b221-9ee4737f3cd3',
-                onTap: () =>
-                    _launchUrl(context, 'https://bibliotecafalada.unesp.br/'),
-                size: size,
+              Semantics(
+                label: 'Link para o site Biblioteca Falada.',
+                hint: 'Toque para abrir o site do Biblioteca Falada',
+                excludeSemantics: true,
+                child: _buildGridItem(
+                  title: "Site Biblioteca Falada",
+                  imageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_bf.png?alt=media&token=82c974cd-e14f-4b4b-b221-9ee4737f3cd3',
+                  onTap: () =>
+                      _launchUrl(context, 'https://bibliotecafalada.unesp.br/'),
+                  size: size,
+                ),
               ),
-              _buildGridItem(
-                title: "Instagram",
-                imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_instagram.png?alt=media&token=12ee4900-0279-45f3-a62b-3660fb4fc652',
-                onTap: () =>
-                    _launchUrl(context, 'https://www.instagram.com/bfalada/'),
-                size: size,
+              Semantics(
+                label: 'Link para o perfil do Instagram do Biblioteca Falada.',
+                hint: 'Toque para abrir o perfil no Instagram',
+                excludeSemantics: true,
+                child: _buildGridItem(
+                  title: "Instagram",
+                  imageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_instagram.png?alt=media&token=12ee4900-0279-45f3-a62b-3660fb4fc652',
+                  onTap: () =>
+                      _launchUrl(context, 'https://www.instagram.com/bfalada/'),
+                  size: size,
+                ),
               ),
-              _buildGridItem(
-                title: "Facebook",
-                imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_facebook.png?alt=media&token=d210d8ca-bcb4-4d93-8eeb-85710533f261',
-                onTap: () => _launchUrl(
-                    context, 'https://www.facebook.com/bibliotecafalada/'),
-                size: size,
+              Semantics(
+                label: 'Link para a página do Facebook do Biblioteca Falada.',
+                hint: 'Toque para abrir a página no Facebook',
+                excludeSemantics: true,
+                child: _buildGridItem(
+                  title: "Facebook",
+                  imageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_facebook.png?alt=media&token=d210d8ca-bcb4-4d93-8eeb-85710533f261',
+                  onTap: () => _launchUrl(
+                      context, 'https://www.facebook.com/bibliotecafalada/'),
+                  size: size,
+                ),
               ),
-              _buildGridItem(
-                title: "Twitter",
-                imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_twitter.PNG?alt=media&token=6c1cf947-d622-46e9-9656-8e866b0831f8',
-                onTap: () => _launchUrl(context, 'https://twitter.com/BFalada'),
-                size: size,
+              Semantics(
+                label: 'Link para o perfil do Twitter do Biblioteca Falada.',
+                hint: 'Toque para abrir o perfil no Twitter',
+                excludeSemantics: true,
+                child: _buildGridItem(
+                  title: "Twitter",
+                  imageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/sigacidades.appspot.com/o/image%2Flogos%2Flogo_x.png?alt=media&token=0b6aeab8-2279-4a05-b331-5b2687797e91',
+                  onTap: () => _launchUrl(context, 'https://x.com/BFalada'),
+                  size: size,
+                ),
               ),
             ],
           ),

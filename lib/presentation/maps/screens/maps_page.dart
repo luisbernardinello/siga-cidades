@@ -16,7 +16,10 @@ import 'package:sigacidades/presentation/place/screens/place_page.dart';
 class MapsPage extends StatefulWidget {
   static const routeName = '/maps';
 
-  const MapsPage({super.key});
+  // Adicionando o FocusNode como parâmetro opcional
+  final FocusNode? focusNode;
+
+  const MapsPage({super.key, this.focusNode});
 
   @override
   MapsPageState createState() => MapsPageState();
@@ -48,7 +51,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     // Inicializa o MapController
     _mapController = MapController();
 
-    // ENvia o evento Bloc para carregar a localização do usuário e os lugares
+    // Envia o evento Bloc para carregar a localização do usuário e os lugares
     context.read<MapsBloc>().add(LoadUserLocationAndPlaces());
   }
 
@@ -135,12 +138,16 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Detalhes do Lugar'),
+          backgroundColor: const Color(0xFFae35c1),
+          title: const Text('Detalhes do Lugar',
+              style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Nome: ${place.name}'),
-              Text('Endereço: ${place.adress}'),
+              Text('Nome: ${place.name}',
+                  style: const TextStyle(color: Colors.white)),
+              Text('Endereço: ${place.adress}',
+                  style: const TextStyle(color: Colors.white)),
               if (availableMaps.isNotEmpty)
                 ...availableMaps.map((map) {
                   return ListTile(
@@ -155,7 +162,8 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                       );
                       Navigator.pop(dialogContext);
                     },
-                    title: Text(map.mapName),
+                    title: Text(map.mapName,
+                        style: const TextStyle(color: Colors.white)),
                     leading: SvgPicture.asset(map.icon, height: 30, width: 30),
                   );
                 }),
@@ -178,55 +186,107 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (BuildContext bottomSheetContext) {
-        return SafeArea(
-          child: SingleChildScrollView(
-            child: Wrap(
-              children: [
-                ListTile(
-                  onTap: () {
-                    Navigator.pop(bottomSheetContext);
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlacePage(place: place),
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.75, // 75% da altura
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 12,
+                offset: Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Color(0xFF444444)),
+                    onPressed: () => Navigator.pop(bottomSheetContext),
+                  ),
+                  Expanded(
+                    child: Text(
+                      place.name,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  if (mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PlacePage(place: place),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF4F4F6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Color(0xFFae35c1)),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Mais Detalhes",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFae35c1),
+                          ),
                         ),
-                      );
-                    }
-                  },
-                  title: const Text(
-                    "Mais Detalhes",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                  leading: const Icon(
-                    Icons.info_outline,
-                    color: Colors.blueAccent,
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.blueAccent,
-                    size: 18,
+                      ),
+                      Icon(Icons.arrow_forward_ios,
+                          color: Color(0xFFae35c1), size: 20),
+                    ],
                   ),
                 ),
-                const Divider(thickness: 1),
-                const Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Text(
-                    "Abrir com",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
-                  ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Abrir com",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF666666),
                 ),
-                ...availableMaps.map((map) {
+              ),
+              const SizedBox(height: 8),
+              ListView.separated(
+                shrinkWrap: true,
+                itemCount: availableMaps.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(color: Color(0xFFE0E0E0), height: 1),
+                itemBuilder: (context, index) {
+                  final map = availableMaps[index];
                   return ListTile(
                     onTap: () {
                       map.showMarker(
@@ -239,12 +299,25 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                       );
                       Navigator.pop(bottomSheetContext);
                     },
-                    title: Text(map.mapName),
-                    leading: SvgPicture.asset(map.icon, height: 30, width: 30),
+                    title: Text(
+                      map.mapName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF444444),
+                      ),
+                    ),
+                    leading: SvgPicture.asset(
+                      map.icon,
+                      height: 28,
+                      width: 28,
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios,
+                        color: Color(0xFF444444), size: 20),
                   );
-                }),
-              ],
-            ),
+                },
+              ),
+            ],
           ),
         );
       },
@@ -342,7 +415,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     double titlePosition = isDesktop ? 30 : (isTablet ? 20 : 10);
     double markerSize = isDesktop ? 100 : (isTablet ? 90 : 80);
     double locationPinIcon = isDesktop ? 60 : (isTablet ? 50 : 40);
-    double placeText = isDesktop ? 16 : (isTablet ? 16 : 12);
+    double placeText = isDesktop ? 13 : (isTablet ? 12 : 12);
 
     return BlocBuilder<MapsBloc, MapsState>(
       builder: (context, state) {
@@ -361,22 +434,47 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
             _currentPosition = _southAmericaBounds.center;
           }
 
-          // Adiciona o marcador da posição atual do usuário no mapa
+          // Marcador da Posição do Usuário
+          _markers.clear(); // Limpa os marcadores antes de adicionar novamente
           _markers.add(
             Marker(
               point: _currentPosition,
               width: markerSize,
               height: markerSize,
-              child: Icon(
-                Icons.my_location,
-                color: Colors.blue,
-                size: locationPinIcon,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: markerSize * 0.5,
+                    height: markerSize * 0.5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          Colors.white.withOpacity(0.5), // Círculo translucido
+                    ),
+                  ),
+                  Container(
+                    width: markerSize * 0.3,
+                    height: markerSize * 0.3,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white, // Círculo sólido
+                    ),
+                  ),
+                  Container(
+                    width: markerSize * 0.3,
+                    height: markerSize * 0.3,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
 
-          // Adiciona os marcadores de posição dos lugares carregados
-          // Adiciona os marcadores de posição dos lugares carregados
+          // Adiciona os marcadores de lugares carregados no Mapa
           for (Place place in state.places) {
             _markers.add(
               Marker(
@@ -384,8 +482,9 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                   place.coordinates.latitude,
                   place.coordinates.longitude,
                 ),
-                width: markerSize,
-                height: markerSize,
+                width: markerSize * 1.15, // 15% a mais do tamanho do container
+                height: markerSize *
+                    1.3, // 30% a mais de altura em relação ao markerSize para não criar outra variável
                 child: kIsWeb ||
                         defaultTargetPlatform == TargetPlatform.macOS ||
                         defaultTargetPlatform == TargetPlatform.windows ||
@@ -398,6 +497,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                           shadowColor: Colors.transparent,
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.location_pin,
@@ -405,22 +505,25 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                               size: locationPinIcon,
                             ),
                             Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6.0, vertical: 4.0),
                               decoration: BoxDecoration(
-                                color: const Color.fromARGB(64, 239, 223,
-                                    88), // Fundo com contraste alto
+                                color: const Color.fromARGB(153, 0, 0, 0),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              constraints: const BoxConstraints(maxWidth: 300),
-                              padding: const EdgeInsets.all(2.0),
+                              constraints: const BoxConstraints(
+                                maxWidth: 160,
+                                maxHeight: 80,
+                              ),
                               child: Text(
                                 place.name,
                                 maxLines: 3,
-                                overflow: TextOverflow.clip,
+                                overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 12, // desktop/web
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w900,
+                                style: TextStyle(
+                                  fontSize: placeText,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -430,6 +533,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                     : GestureDetector(
                         onTap: () => _showPlaceDetailsModal(place),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.location_pin,
@@ -437,13 +541,25 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                               size: locationPinIcon,
                             ),
                             Container(
-                              padding: const EdgeInsets.all(2.0),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6.0, vertical: 4.0),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              constraints: const BoxConstraints(
+                                maxWidth: 160,
+                                maxHeight: 80,
+                              ),
                               child: Text(
                                 place.name,
+                                maxLines: 3, // 3 linhas de texto no máximo
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize:
-                                      placeText, // Usa o tamanho padrão em mobile
-                                  fontWeight: FontWeight.w900,
+                                  fontSize: placeText,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -454,130 +570,146 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
             );
           }
 
-          return Scaffold(
-            body: Stack(
-              children: [
-                Semantics(
-                  label:
-                      'Conteúdo com Mapa visual interativo para pessoas com baixa visão. Para saber as distâncias aos locais, vá para a página de locais próximos.',
-                  child: // ====================================
-                      // FlutterMap
-                      // ====================================
-                      // Componente principal que renderiza o mapa.
-                      FlutterMap(
-                    mapController: _mapController, // Controlador do mapa.
-                    // Opções do mapa
-                    options: MapOptions(
-                      initialCenter:
-                          _currentPosition, // Posição inicial do usuário
-                      initialZoom: 15, // Zoom inicial
-                      maxZoom: 18, // Zoom máximo permitido
-                      cameraConstraint: CameraConstraint.contain(
-                        bounds:
-                            _southAmericaBounds, // Limita a área de navegação do mapa
-                      ),
-                      interactionOptions: const InteractionOptions(
-                        flags: InteractiveFlag.all &
-                            ~InteractiveFlag
-                                .rotate, // Permite todas as interações e desativa somente a rotação do mapa
-                      ),
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        tileProvider: (kIsWeb ||
-                                Platform.isWindows ||
-                                Platform.isMacOS ||
-                                Platform.isLinux)
-                            ? NetworkTileProvider()
-                            : const FMTCStore('mapStore')
-                                .getTileProvider(), // Usa cache de tiles do flutter_map_tile_caching
-                        keepBuffer: 3, // Colocamos mais tiles na memória
-                        panBuffer: 2, // Carrega mais tiles ao redor da camera
-                      ),
-                      MarkerLayer(
-                        markers: _markers, // Exibe os marcadores no mapa
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ====================================
-                // Título "Mapa Interativo"
-                // ====================================
-                Positioned(
-                  top: titlePosition,
-                  left: titlePosition,
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    color: Colors.black.withOpacity(0.2),
-                    child: const Text(
-                      'Mapa Interativo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+          // Envolve o Scaffold com um widget Focus para gerenciar o foco da página
+          return Focus(
+            focusNode:
+                widget.focusNode, // Usa o FocusNode fornecido pelo MainScreen
+            autofocus: true, // Foca automaticamente ao entrar na página
+            child: Semantics(
+              label:
+                  'Conteúdo com Mapa visual interativo para pessoas com baixa visão. Para saber as distâncias aos locais, vá para a página de locais próximos.',
+              excludeSemantics: true,
+              child: Scaffold(
+                body: Stack(
+                  children: [
+                    Semantics(
+                      label: 'Mapa Interativo.',
+                      child: // ====================================
+                          // FlutterMap
+                          // ====================================
+                          // Componente principal que renderiza o mapa.
+                          FlutterMap(
+                        mapController: _mapController, // Controlador do mapa.
+                        // Opções do mapa
+                        options: MapOptions(
+                          initialCenter:
+                              _currentPosition, // Posição inicial do usuário
+                          initialZoom: 15, // Zoom inicial
+                          maxZoom: 18, // Zoom máximo permitido
+                          cameraConstraint: CameraConstraint.contain(
+                            bounds:
+                                _southAmericaBounds, // Limita a área de navegação do mapa
+                          ),
+                          interactionOptions: const InteractionOptions(
+                            flags: InteractiveFlag.all &
+                                ~InteractiveFlag
+                                    .rotate, // Permite todas as interações e desativa somente a rotação do mapa
+                          ),
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            tileProvider: (kIsWeb ||
+                                    Platform.isWindows ||
+                                    Platform.isMacOS ||
+                                    Platform.isLinux)
+                                ? NetworkTileProvider()
+                                : const FMTCStore('mapStore')
+                                    .getTileProvider(), // Usa cache de tiles do flutter_map_tile_caching
+                            keepBuffer: 3, // Colocamos mais tiles na memória
+                            panBuffer:
+                                2, // Carrega mais tiles ao redor da camera
+                          ),
+                          MarkerLayer(
+                            markers: _markers, // Exibe os marcadores no mapa
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ),
 
-                // ====================================
-                // Botões de Zoom In e Zoom Out
-                // ====================================
-                Positioned(
-                  top: buttonZoom,
-                  right: buttonZoom,
-                  child: Column(
-                    children: [
-                      FloatingActionButton(
-                        heroTag: 'zoom_in',
-                        mini: true,
+                    // ====================================
+                    // Título "Mapa Interativo"
+                    // ====================================
+                    // Título do Mapa com fundo escuro e texto claro
+                    Positioned(
+                      top: titlePosition,
+                      left: titlePosition,
+                      child: Container(
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Mapa Interativo',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // ===============================
+                    // Botões de Zoom In e Zoom Out
+                    // ===============================
+                    Positioned(
+                      top: buttonZoom,
+                      right: buttonZoom,
+                      child: Column(
+                        children: [
+                          FloatingActionButton(
+                            heroTag: 'zoom_in',
+                            backgroundColor: const Color(0xFFae35c1),
+                            onPressed: () {
+                              _animatedMapMove(
+                                _mapController.camera.center,
+                                _mapController.camera.zoom + 1,
+                              );
+                            },
+                            child: const Icon(Icons.zoom_in,
+                                color: Colors.white, size: 34),
+                          ),
+                          const SizedBox(height: 8),
+                          FloatingActionButton(
+                            heroTag: 'zoom_out',
+                            backgroundColor: const Color(0xFFae35c1),
+                            onPressed: () {
+                              _animatedMapMove(
+                                _mapController.camera.center,
+                                _mapController.camera.zoom - 1,
+                              );
+                            },
+                            child: const Icon(Icons.zoom_out,
+                                color: Colors.white, size: 34),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ===============================
+                    // Botão para centralizar no usuário
+                    // ===============================
+                    Positioned(
+                      bottom: buttonUserLocationFocus,
+                      right: buttonUserLocationFocus,
+                      child: FloatingActionButton(
+                        heroTag: 'center_on_user',
+                        backgroundColor: const Color(0xFFae35c1),
                         onPressed: () {
-                          _animatedMapMove(
-                            _mapController.camera.center,
-                            _mapController.camera.zoom + 1, // Aumenta o zoom
-                          );
+                          _animatedMapMove(_currentPosition, 15);
                         },
-                        child: const Icon(Icons.zoom_in),
+                        child: const Icon(
+                          Icons.person_pin_circle,
+                          color: Colors.white,
+                          size: 34, // Ícone aumentado
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      FloatingActionButton(
-                        heroTag: 'zoom_out',
-                        mini: true,
-                        onPressed: () {
-                          _animatedMapMove(
-                            _mapController.camera.center,
-                            _mapController.camera.zoom - 1, // Diminui o zoom
-                          );
-                        },
-                        child: const Icon(Icons.zoom_out),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ====================================
-                // Botão para centralizar no usuário
-                // ====================================
-                Positioned(
-                  bottom: buttonUserLocationFocus,
-                  right: buttonUserLocationFocus,
-                  child: FloatingActionButton(
-                    heroTag: 'center_on_user',
-                    mini: true,
-                    onPressed: () {
-                      // Centraliza o mapa no usuário chamando o método de animação suave
-                      _animatedMapMove(_currentPosition, 15);
-                    },
-                    child: const Icon(
-                      Icons.person_pin_circle,
-                      color: Colors.blue,
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         } else if (state is MapsError) {
