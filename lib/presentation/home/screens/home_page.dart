@@ -133,7 +133,7 @@ class HomePageState extends State<HomePage> {
                   return previous is! CategoryLoaded ||
                       current is! CategoryLoaded ||
                       context.read<CategoryBloc>().selectedCity !=
-                          (previous as CategoryLoaded).selectedCity;
+                          (previous).selectedCity;
                 },
                 builder: (context, state) {
                   final cityName = context.read<CategoryBloc>().selectedCity;

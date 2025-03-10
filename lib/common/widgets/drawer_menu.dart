@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_bloc.dart';
 import 'package:sigacidades/presentation/home/bloc/home_event.dart';
-import 'package:sigacidades/presentation/home/bloc/home_state.dart';
 
 class DrawerMenu extends StatelessWidget {
   final Function(String) onCitySelected;

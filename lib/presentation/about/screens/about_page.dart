@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart'; // Adicionado para SemanticsService
+// Adicionado para SemanticsService
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:sigacidades/core/utils/privacy_policy_text.dart';
 import 'package:sigacidades/core/utils/terms_of_use_text.dart';
