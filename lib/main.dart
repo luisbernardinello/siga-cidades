@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text/auto_size_text.dart' ;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +88,7 @@ class MyApp extends StatelessWidget {
         // ====================================
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Sigacidades',
+          title: 'Siga Cidades',
           theme: ThemeData(
             primarySwatch: Colors.blue,
             // Responsividade de tela

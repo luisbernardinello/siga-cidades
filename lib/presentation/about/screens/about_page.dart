@@ -222,71 +222,111 @@ class AboutPageState extends State<AboutPage> {
   }
 
   void _showModal(BuildContext context, String title, String content) {
-    final FocusNode modalFocusNode = FocusNode();
-
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        // Anuncia o título ao abrir a modal
-        SemanticsService.announce(
-          'Mostrando janela de $title',
-          TextDirection.ltr,
-        );
-
-        return FocusScope(
-          autofocus: true,
-          node: FocusScopeNode(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 12,
+          backgroundColor: Colors.white,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 600,
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Botão de fechar com foco
-                    Focus(
-                      focusNode: modalFocusNode,
-                      child: Semantics(
-                        label: 'Voltar.',
-                        hint: 'Toque para voltar para a página Sobre.',
-                        button: true,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Icon(Icons.close),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF333333),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    // Título da modal
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Material(
+                        color: Colors.transparent,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.black87),
+                          onPressed: () => Navigator.of(context).pop(),
+                          tooltip: 'Fechar',
+                          splashRadius: 20,
                         ),
-                        textAlign: TextAlign.start,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 10),
-                // Conteúdo do texto
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      content,
-                      style: const TextStyle(fontSize: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Scrollbar(
+                      thickness: 8,
+                      radius: const Radius.circular(12),
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          content,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Colors.grey[800],
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFae35c1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          elevation: 4,
+                        ),
+                        child: const Text(
+                          'Fechar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -294,11 +334,9 @@ class AboutPageState extends State<AboutPage> {
           ),
         );
       },
-    ).then((_) => modalFocusNode.dispose());
+    );
   }
 }
-
-// Mantenha a classe Contacts como está
 
 class Contacts extends StatelessWidget {
   const Contacts({super.key});

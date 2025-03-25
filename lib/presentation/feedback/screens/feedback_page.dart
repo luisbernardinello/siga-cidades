@@ -282,19 +282,23 @@ class FeedbackPageState extends State<FeedbackPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Semantics(
-                      header: true,
-                      label: 'Feedback',
-                      excludeSemantics: true,
-                      child: Text(
-                        'Envie o seu feedback:',
-                        style: TextStyle(
-                          color: const Color(0xFF080808),
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w800,
+                    Focus(
+                      focusNode: _nameFocusNode,
+                      child: Semantics(
+                        header: true,
+                        label: 'Feedback',
+                        excludeSemantics: true,
+                        child: Text(
+                          'Envie o seu feedback:',
+                          style: TextStyle(
+                            color: const Color(0xFF080808),
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 15),
 
                     // Campo Nome Completo
@@ -305,7 +309,7 @@ class FeedbackPageState extends State<FeedbackPage> {
                         width: fieldWidth,
                         child: TextFormField(
                           controller: _nameController,
-                          focusNode: _nameFocusNode,
+                          // focusNode: _nameFocusNode,
                           decoration: const InputDecoration(
                             labelText: 'Nome Completo',
                             border: OutlineInputBorder(),

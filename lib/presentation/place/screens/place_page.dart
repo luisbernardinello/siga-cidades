@@ -205,7 +205,7 @@ class PlacePageState extends State<PlacePage> {
         double subtitleFontSize = isDesktop ? 20 : 18;
         double descriptionFontSize = isDesktop ? 18 : 16;
         double buttonPadding = isDesktop ? 18 : 16;
-        double toggleTextFontSize = isDesktop ? 20 : 18;
+        double toggleTextFontSize = isDesktop ? 20 : 17;
         final double buttonFontSize = isDesktop ? 20 : 18;
         final double buttonWidth = isDesktop ? 200 : 180;
 

@@ -1,0 +1,2 @@
+/Users/bibliotecafalada/Documents/projects/siga/Siga-Cidades/android/app/.cxx/RelWithDebInfo/203u6a2r/x86_64/CMakeFiles/edit_cache.dir
+/Users/bibliotecafalada/Documents/projects/siga/Siga-Cidades/android/app/.cxx/RelWithDebInfo/203u6a2r/x86_64/CMakeFiles/rebuild_cache.dir
