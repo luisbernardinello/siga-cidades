@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sigacidades/domain/entities/place.dart';
 import 'package:sigacidades/presentation/place/widgets/audio_player.dart';
 import 'package:flutter/semantics.dart';
@@ -189,8 +191,98 @@ class PlacePageState extends State<PlacePage> {
     }
   }
 
-  /// Build da interface da página. Exibe as informações do local, controla
-  /// a alternância entre os players de áudio e oferece um botão para abrir a localização no mapa.
+  /// Widget para exibir o shimmer effect enquanto a imagem carrega
+  Widget _buildImageShimmer(double height) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      enabled: true,
+      child: Container(
+        width: double.infinity,
+        height: height,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  /// Widget para exibir a imagem com fade-in animation
+  Widget _buildImageWithFadeIn(double imageHeight) {
+    return Stack(
+      children: [
+        // Shimmer effect por baixo
+        _buildImageShimmer(imageHeight),
+        // Imagem com fade-in animation
+        Semantics(
+          image: true,
+          label: "Imagem de ${widget.place.name}",
+          hint: widget.place.imageDescription,
+          excludeSemantics: true,
+          child: CachedNetworkImage(
+            imageUrl: widget.place.imageUrl,
+            width: double.infinity,
+            height: imageHeight,
+            fit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 500),
+            fadeInCurve: Curves.easeIn,
+            placeholder: (context, url) => Container(),
+            imageBuilder: (context, imageProvider) => Hero(
+              tag: 'place_image_${widget.place.name}',
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              width: double.infinity,
+              height: imageHeight,
+              color: Colors.grey[300],
+              child: Center(
+                child: Icon(
+                  Icons.broken_image,
+                  size: 50,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Botão de voltar sobrepondo a imagem
+        Positioned(
+          top: 40,
+          left: 16,
+          child: Semantics(
+            label: "Voltar",
+            hint: "Toque duas vezes para voltar à página anterior",
+            button: true,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.8),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build da interface da página. Exibe as informações do local,
+  /// controle a alternância entre os players de áudio e botão para abrir a localização no mapa.
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -214,43 +306,8 @@ class PlacePageState extends State<PlacePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Exibe a imagem do local com um botão para voltar
-                Stack(
-                  children: [
-                    Image.network(
-                      widget.place.imageUrl,
-                      width: double.infinity,
-                      height: imageHeight,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 40,
-                      left: 16,
-                      child: Semantics(
-                        label: "Voltar",
-                        hint: "Toque duas vezes para voltar à página anterior",
-                        button: true,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.8),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                // Exibe a imagem do local com shimmer effect e fade-in animation
+                _buildImageWithFadeIn(imageHeight),
 
                 Padding(
                   padding: EdgeInsets.all(padding),

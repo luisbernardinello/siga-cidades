@@ -15,17 +15,25 @@ import 'package:sigacidades/presentation/feedback/screens/feedback_page.dart';
 class MainScreen extends StatefulWidget {
   static const routeName = '/main';
 
-  // Adicionamos este parâmetro para controlar o foco inicial
+  // Controla o foco inicial
   final bool initialFocus;
 
-  const MainScreen({super.key, this.initialFocus = false});
+  // Indexação inicial
+  final int initialIndex;
+
+  const MainScreen({
+    super.key,
+    this.initialFocus = false,
+    this.initialIndex = 0,
+  });
 
   @override
   MainScreenState createState() => MainScreenState();
 }
 
-class MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+class MainScreenState extends State<MainScreen>
+    with AutomaticKeepAliveClientMixin {
+  late int _selectedIndex;
   String? selectedCity;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -41,11 +49,23 @@ class MainScreenState extends State<MainScreen> {
     4: FocusNode(),
   };
 
-  // FocusNode específico para a navbar
+  // FocusNode em específico para a navbar
   final FocusNode _navBarFocusNode = FocusNode();
 
-  // FocusNode gerencia o escopo do foco geral
+  // FocusNode que gerencia o escopo do foco geral
   final FocusScopeNode _mainFocusScope = FocusScopeNode();
+
+  // Controllers para PageView
+  late PageController _pageController;
+
+  // Controla o carregamento lazy
+  final Map<int, bool> _pageLoaded = {
+    0: true, // Home sempre carregada
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+  };
 
   late List<Widget> _pages;
 
@@ -60,12 +80,22 @@ class MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
+
+    // Inicializa o controller com a página inicial
+    _pageController = PageController(initialPage: _selectedIndex);
+
+    // Pré-carrega a página do mapa se estiver nela no inicio
+    if (_selectedIndex == 2) {
+      _pageLoaded[2] = true;
+    }
+
     _initializePages();
 
-    // Se initialFocus for true, programamos para focar na navbar
+    // Se initialFocus for true, foco vai para navbar
     if (widget.initialFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Foco na navbar depois do build estar completo
+        // Foco depois do build completo
         _navBarFocusNode.requestFocus();
 
         SemanticsService.announce(
@@ -74,15 +104,36 @@ class MainScreenState extends State<MainScreen> {
         );
       });
     }
+
+    // Carrega o mapa em segundo plano depois do build inicial
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preloadMapPage();
+    });
+  }
+
+  void _preloadMapPage() {
+    if (_selectedIndex != 2 && _pageLoaded[2] != true) {
+      setState(() {
+        _pageLoaded[2] = true;
+      });
+    }
   }
 
   void _initializePages() {
     _pages = [
       HomePage(focusNode: _pageFocusNodes[0]),
-      DistancesPage(focusNode: _pageFocusNodes[1]),
-      MapsPage(focusNode: _pageFocusNodes[2]),
-      AboutPage(focusNode: _pageFocusNodes[3]),
-      FeedbackPage(focusNode: _pageFocusNodes[4]),
+      _pageLoaded[1] == true
+          ? DistancesPage(focusNode: _pageFocusNodes[1])
+          : Container(),
+      _pageLoaded[2] == true
+          ? MapsPage(focusNode: _pageFocusNodes[2])
+          : Container(),
+      _pageLoaded[3] == true
+          ? AboutPage(focusNode: _pageFocusNodes[3])
+          : Container(),
+      _pageLoaded[4] == true
+          ? FeedbackPage(focusNode: _pageFocusNodes[4])
+          : Container(),
     ];
   }
 
@@ -94,11 +145,15 @@ class MainScreenState extends State<MainScreen> {
     }
     _navBarFocusNode.dispose();
     _mainFocusScope.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(
+        context); // Necessário para funcionar o AutomaticKeepAliveClientMixin
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
@@ -114,7 +169,7 @@ class MainScreenState extends State<MainScreen> {
           setState(() {
             selectedCity = city;
             // Se a cidade for selecionada força a navegação para a home (índice 0)
-            _selectedIndex = 0;
+            _changePage(0);
           });
           _scaffoldKey.currentState?.closeDrawer();
 
@@ -168,13 +223,48 @@ class MainScreenState extends State<MainScreen> {
                 ),
               ),
 
-            // ====== Conteúdo principal  ======
+            // ====== Conteúdo principal utiliza do PageView para manter o estado ======
             Expanded(
               child: FocusScope(
                 node: _mainFocusScope,
-                child: Semantics(
-                  label: 'Página ${_pageTitles[_selectedIndex]}',
-                  child: _pages[_selectedIndex],
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    // Evita que o PageView carregue todas páginas
+                    if (notification is ScrollEndNotification) {
+                      final page = _pageController.page?.round() ?? 0;
+                      if (page != _selectedIndex) {
+                        _changePage(page);
+                      }
+                    }
+                    return false;
+                  },
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) {
+                      setState(() {
+                        _selectedIndex = index;
+                        _loadPageAtIndex(index);
+                      });
+                    },
+                    children: List.generate(_pages.length, (index) {
+                      return Semantics(
+                        label: 'Página ${_pageTitles[index]}',
+                        child: KeepAliveWrapper(
+                          keepAlive: index ==
+                              2, // Keep Alive usado de modo a manter a página do mapa viva
+                          child: _pageLoaded[index] == true
+                              ? _pages[index]
+                              : Container(
+                                  color: const Color(0xFFF2F2F2),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
@@ -197,7 +287,18 @@ class MainScreenState extends State<MainScreen> {
   void _changePage(int index) {
     setState(() {
       _selectedIndex = index;
+
+      _loadPageAtIndex(index);
     });
+
+    _pageController.jumpToPage(index);
+
+    // Animação teste de pagina
+    // _pageController.animateToPage(
+    //   index,
+    //   duration: const Duration(milliseconds: 250),
+    //   curve: Curves.easeInOut,
+    // );
 
     SemanticsService.announce(
       'Página ${_pageTitles[index]} selecionada.',
@@ -210,4 +311,44 @@ class MainScreenState extends State<MainScreen> {
       _pageFocusNodes[index]?.requestFocus();
     });
   }
+
+  void _loadPageAtIndex(int index) {
+    if (_pageLoaded[index] != true) {
+      setState(() {
+        _pageLoaded[index] = true;
+        _initializePages();
+      });
+    }
+  }
+
+  @override
+  bool get wantKeepAlive => true; // Implementa o AutomaticKeepAliveClientMixin
+}
+
+// Widget criado a fim de manter o estado da página
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  final bool keepAlive;
+
+  const KeepAliveWrapper({
+    super.key,
+    required this.child,
+    this.keepAlive = true,
+  });
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _KeepAliveWrapperState createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive;
 }

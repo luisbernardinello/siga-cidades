@@ -16,7 +16,6 @@ import 'package:sigacidades/presentation/place/screens/place_page.dart';
 class MapsPage extends StatefulWidget {
   static const routeName = '/maps';
 
-  // Adicionando o FocusNode como parâmetro opcional
   final FocusNode? focusNode;
 
   const MapsPage({super.key, this.focusNode});
@@ -25,22 +24,29 @@ class MapsPage extends StatefulWidget {
   MapsPageState createState() => MapsPageState();
 }
 
-class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
+class MapsPageState extends State<MapsPage>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   // Controller do mapa
   late MapController _mapController;
 
   // Posição atual do usuário
-  late LatLng _currentPosition;
+  late LatLng _currentPosition =
+      const LatLng(-15.793889, -47.882778); // Default Brasília
 
   // Lista de marcadores para exibir no mapa
   final List<Marker> _markers = [];
+
+  // Flag para controlar se o mapa já tiver sido inicializado
+  bool _mapInitialized = false;
 
   // Limites da América do Sul
   final LatLngBounds _southAmericaBounds = LatLngBounds(
     const LatLng(-56.0, -81.0), // Ponto no extremo sudoeste (Chile)
     const LatLng(13.0, -34.0), // Ponto no extremo nordeste (Venezuela)
   );
+
   OverlayEntry? _overlayEntry;
+
   // ====================================
   // Método initState
   // ====================================
@@ -51,28 +57,40 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     // Inicializa o MapController
     _mapController = MapController();
 
-    // Envia o evento Bloc para carregar a localização do usuário e os lugares
-    context.read<MapsBloc>().add(LoadUserLocationAndPlaces());
+    // Adiar o carregamento para o primeiro frame para evitar problemas de context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeMap();
+    });
+  }
+
+  // Método para inicializar o mapa uma única vez
+  void _initializeMap() {
+    if (!_mapInitialized && mounted) {
+      // Envia o evento Bloc para carregar a localização do usuário e os lugares
+      context.read<MapsBloc>().add(LoadUserLocationAndPlaces());
+      _mapInitialized = true;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Verificar se o mapa está inicializado após a mudança de dependências
+    if (!_mapInitialized) {
+      _initializeMap();
+    }
   }
 
   @override
   void dispose() {
-    _removeOverlay(); // Fechar o overlay automaticamente
-    _mapController.dispose(); // Liberar recursos do MapController
+    _removeOverlay();
+    _mapController.dispose();
     super.dispose();
   }
 
   // ====================================
   // Função para animar o movimento do mapa
   // ====================================
-
-  // Torna suave a transição do mapa para uma nova posição e nível de zoom (zoom in e zoom out),
-  // em vez de mudar agressivamente.
-  // Tween<double> cria uma interpolação (pega dois valores (início e fim) e gera valores intermediários).
-  // Faz isso para valores de latitude, longitude e zoom.
-  // AnimationController controla a animação e o TickerProviderStateMixin é usado para sincronizar
-  // essa animação com o tempo de tela.
-
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     final camera = _mapController.camera;
 
@@ -83,15 +101,14 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
         begin: camera.center.longitude, end: destLocation.longitude);
     final zoomTween = Tween<double>(begin: camera.zoom, end: destZoom);
 
-    // Controller da animação, responsável por gerenciar o tempo de animação.
-    // O vsync controla a sincronização da animação com o tempo da tela para otimizar o desempenho.
+    // Controller da animação para gerenciar o tempo de animação.
     final controller = AnimationController(
       duration:
           const Duration(milliseconds: 300), // Duração da animação (300ms)
       vsync: this,
     );
 
-    // Curva de animação, usa um movimento easeInOut para ficar suave no início e no fim.
+    // Curva de animação, usa um movimento easeInOut
     final Animation<double> animation = CurvedAnimation(
       parent: controller,
       curve: Curves.easeInOut,
@@ -99,13 +116,19 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
 
     // O listener faz a atualização do mapa conforme a animação é executada.
     controller.addListener(() {
-      _mapController.move(
-        LatLng(
-            latTween.evaluate(animation),
-            lngTween.evaluate(
-                animation)), // Movimenta o mapa para as novas coordenadas
-        zoomTween.evaluate(animation), // Aplica o novo nível de zoom
-      );
+      if (mounted) {
+        _mapController.move(
+          LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+          zoomTween.evaluate(animation),
+        );
+      }
+    });
+
+    // Após a conclusão da animação, libera os recursos
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.dispose();
+      }
     });
 
     // Inicia a animação
@@ -113,8 +136,8 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
   }
 
   // ====================================
-// Função para abrir aplicativos externos de mapas usando map_launcher e direcionar para a página de lugares
-// ====================================
+  // Função para abrir aplicativos externos de mapas usando map_launcher e direcionar para a página de lugares
+  // ====================================
   /// Função que adapta a exibição do modal para todas as plataformas
   Future<void> _showPlaceDetailsModal(Place place) async {
     final availableMaps = await MapLauncher.installedMaps;
@@ -130,7 +153,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     }
   }
 
-// Função auxiliar para o diálogo (ex: para Web)
+  // Função auxiliar para Web
   void _showDialog(Place place, List<AvailableMap> availableMaps) {
     if (!mounted) return;
 
@@ -180,7 +203,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     );
   }
 
-// Função auxiliar para o modal (ex: para Android/iOS)
+  // Função auxiliar para o modal (Android/iOS)
   void _showBottomSheet(Place place, List<AvailableMap> availableMaps) {
     if (!mounted) return;
 
@@ -388,8 +411,10 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
       ),
     );
 
-    // Insere o overlay na árvore de widgets
-    Overlay.of(context).insert(_overlayEntry!);
+    // Insere o overlay na widgets tree
+    if (mounted) {
+      Overlay.of(context).insert(_overlayEntry!);
+    }
   }
 
   void _removeOverlay() {
@@ -399,12 +424,171 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
     }
   }
 
+  // Método para atualizar marcadores a partir do estado atual
+  void _updateMarkersFromState(MapsState state) {
+    if (state is MapsLoaded) {
+      _markers.clear();
+
+      // Atualiza a posição atual
+      _currentPosition = LatLng(
+        state.userLocation.latitude,
+        state.userLocation.longitude,
+      );
+
+      // Se a posição estiver fora dos limites da América do Sul, ajusta para o centro
+      if (!_southAmericaBounds.contains(_currentPosition)) {
+        _currentPosition = _southAmericaBounds.center;
+      }
+
+      final screenWidth = MediaQuery.of(context).size.width;
+      final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+      final bool isDesktop = screenWidth >= 1024;
+      final double markerSize = isDesktop ? 100 : (isTablet ? 90 : 80);
+      final double locationPinIcon = isDesktop ? 60 : (isTablet ? 50 : 40);
+      final double placeText = isDesktop ? 13 : (isTablet ? 12 : 12);
+
+      // Adiciona o marcador do usuário
+      _markers.add(
+        Marker(
+          point: _currentPosition,
+          width: markerSize,
+          height: markerSize,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: markerSize * 0.5,
+                height: markerSize * 0.5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.5),
+                ),
+              ),
+              Container(
+                width: markerSize * 0.3,
+                height: markerSize * 0.3,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+              ),
+              Container(
+                width: markerSize * 0.3,
+                height: markerSize * 0.3,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Adiciona os marcadores de lugares
+      for (Place place in state.places) {
+        _markers.add(
+          Marker(
+            point: LatLng(
+              place.coordinates.latitude,
+              place.coordinates.longitude,
+            ),
+            width: markerSize * 1.15,
+            height: markerSize * 1.3,
+            child: kIsWeb ||
+                    defaultTargetPlatform == TargetPlatform.macOS ||
+                    defaultTargetPlatform == TargetPlatform.windows ||
+                    defaultTargetPlatform == TargetPlatform.linux
+                ? ElevatedButton(
+                    onPressed: () => _showOverlay(place),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                          size: locationPinIcon,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(153, 0, 0, 0),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          constraints: const BoxConstraints(
+                            maxWidth: 160,
+                            maxHeight: 80,
+                          ),
+                          child: Text(
+                            place.name,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: placeText,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () => _showPlaceDetailsModal(place),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                          size: locationPinIcon,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          constraints: const BoxConstraints(
+                            maxWidth: 160,
+                            maxHeight: 80,
+                          ),
+                          child: Text(
+                            place.name,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: placeText,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        );
+      }
+    }
+  }
+
   // ====================================
   // Widget build
   // ====================================
-  // Builda o layout da página com o mapa e os componentes
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Necessário para o AutomaticKeepAliveClientMixin
+
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
     final bool isDesktop = screenWidth >= 1024;
@@ -413,168 +597,25 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
         isDesktop ? 40.0 : (isTablet ? 25.0 : 20.0);
     double buttonZoom = isDesktop ? 40.0 : (isTablet ? 25.0 : 20.0);
     double titlePosition = isDesktop ? 30 : (isTablet ? 20 : 10);
-    double markerSize = isDesktop ? 100 : (isTablet ? 90 : 80);
-    double locationPinIcon = isDesktop ? 60 : (isTablet ? 50 : 40);
-    double placeText = isDesktop ? 13 : (isTablet ? 12 : 12);
 
-    return BlocBuilder<MapsBloc, MapsState>(
+    return BlocConsumer<MapsBloc, MapsState>(
+      listener: (context, state) {
+        // Atualize os marcadores quando o estado mudar
+        if (state is MapsLoaded) {
+          _updateMarkersFromState(state);
+        }
+      },
       builder: (context, state) {
-        if (state is MapsLoading) {
-          // Exibe o loading enquanto o mapa está sendo carregado
+        if (state is MapsLoading && _markers.isEmpty) {
+          // Exibe o loading somente se não tiver marcador
           return const Center(child: CircularProgressIndicator());
-        } else if (state is MapsLoaded) {
-          // Posição do usuário carregada do estado
-          _currentPosition = LatLng(
-            state.userLocation.latitude,
-            state.userLocation.longitude,
-          );
-
-          // Se a posição estiver fora dos limites da América do Sul, ajusta para o centro
-          if (!_southAmericaBounds.contains(_currentPosition)) {
-            _currentPosition = _southAmericaBounds.center;
-          }
-
-          // Marcador da Posição do Usuário
-          _markers.clear(); // Limpa os marcadores antes de adicionar novamente
-          _markers.add(
-            Marker(
-              point: _currentPosition,
-              width: markerSize,
-              height: markerSize,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: markerSize * 0.5,
-                    height: markerSize * 0.5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          Colors.white.withOpacity(0.5), // Círculo translucido
-                    ),
-                  ),
-                  Container(
-                    width: markerSize * 0.3,
-                    height: markerSize * 0.3,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white, // Círculo sólido
-                    ),
-                  ),
-                  Container(
-                    width: markerSize * 0.3,
-                    height: markerSize * 0.3,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-
-          // Adiciona os marcadores de lugares carregados no Mapa
-          for (Place place in state.places) {
-            _markers.add(
-              Marker(
-                point: LatLng(
-                  place.coordinates.latitude,
-                  place.coordinates.longitude,
-                ),
-                width: markerSize * 1.15, // 15% a mais do tamanho do container
-                height: markerSize *
-                    1.3, // 30% a mais de altura em relação ao markerSize para não criar outra variável
-                child: kIsWeb ||
-                        defaultTargetPlatform == TargetPlatform.macOS ||
-                        defaultTargetPlatform == TargetPlatform.windows ||
-                        defaultTargetPlatform == TargetPlatform.linux
-                    ? ElevatedButton(
-                        onPressed: () => _showOverlay(place),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.location_pin,
-                              color: Colors.red,
-                              size: locationPinIcon,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6.0, vertical: 4.0),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(153, 0, 0, 0),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              constraints: const BoxConstraints(
-                                maxWidth: 160,
-                                maxHeight: 80,
-                              ),
-                              child: Text(
-                                place.name,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: placeText,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () => _showPlaceDetailsModal(place),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.location_pin,
-                              color: Colors.red,
-                              size: locationPinIcon,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6.0, vertical: 4.0),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              constraints: const BoxConstraints(
-                                maxWidth: 160,
-                                maxHeight: 80,
-                              ),
-                              child: Text(
-                                place.name,
-                                maxLines: 3, // 3 linhas de texto no máximo
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: placeText,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-            );
-          }
-
-          // Envolve o Scaffold com um widget Focus para gerenciar o foco da página
+        } else {
+          // Se tiver erro, exibimos o mapa com os dados disponíveis ou um mapa vazio
+          // Focus faz o wrap do Scaffold para gerenciar o foco da página
           return Focus(
-            focusNode:
-                widget.focusNode, // Usa o FocusNode fornecido pelo MainScreen
-            autofocus: true, // Foca automaticamente ao entrar na página
+            focusNode: widget
+                .focusNode, // Utilizs o FocusNode fornecido pelo MainScreen
+            autofocus: true, // Gera o foco automatico ao entrar na página
             child: Semantics(
               label:
                   'Conteúdo com Mapa visual interativo para pessoas com baixa visão. Para saber as distâncias aos locais, vá para a página de locais próximos.',
@@ -587,23 +628,19 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                       child: // ====================================
                           // FlutterMap
                           // ====================================
-                          // Componente principal que renderiza o mapa.
                           FlutterMap(
                         mapController: _mapController, // Controlador do mapa.
                         // Opções do mapa
                         options: MapOptions(
-                          initialCenter:
-                              _currentPosition, // Posição inicial do usuário
-                          initialZoom: 15, // Zoom inicial
-                          maxZoom: 18, // Zoom máximo permitido
+                          initialCenter: _currentPosition,
+                          initialZoom: 15,
+                          maxZoom: 18,
                           cameraConstraint: CameraConstraint.contain(
-                            bounds:
-                                _southAmericaBounds, // Limita a área de navegação do mapa
+                            bounds: _southAmericaBounds,
                           ),
                           interactionOptions: const InteractionOptions(
-                            flags: InteractiveFlag.all &
-                                ~InteractiveFlag
-                                    .rotate, // Permite todas as interações e desativa somente a rotação do mapa
+                            flags:
+                                InteractiveFlag.all & ~InteractiveFlag.rotate,
                           ),
                         ),
                         children: [
@@ -615,23 +652,39 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                                     Platform.isMacOS ||
                                     Platform.isLinux)
                                 ? NetworkTileProvider()
-                                : const FMTCStore('mapStore')
-                                    .getTileProvider(), // Usa cache de tiles do flutter_map_tile_caching
-                            keepBuffer: 3, // Colocamos mais tiles na memória
-                            panBuffer:
-                                2, // Carrega mais tiles ao redor da camera
+                                : const FMTCStore('mapStore').getTileProvider(),
+                            keepBuffer: 5,
+                            panBuffer: 3,
                           ),
                           MarkerLayer(
-                            markers: _markers, // Exibe os marcadores no mapa
+                            markers: _markers,
                           ),
                         ],
                       ),
                     ),
 
+                    if (state is MapsError)
+                      Positioned(
+                        bottom: buttonUserLocationFocus * 2,
+                        left: buttonUserLocationFocus,
+                        right: buttonUserLocationFocus,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Erro ao carregar dados: ${state.message}',
+                            style: const TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+
                     // ====================================
                     // Título "Mapa Interativo"
                     // ====================================
-                    // Título do Mapa com fundo escuro e texto claro
                     Positioned(
                       top: titlePosition,
                       left: titlePosition,
@@ -651,6 +704,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+
                     // ===============================
                     // Botões de Zoom In e Zoom Out
                     // ===============================
@@ -703,7 +757,7 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
                         child: const Icon(
                           Icons.person_pin_circle,
                           color: Colors.white,
-                          size: 34, // Ícone aumentado
+                          size: 34,
                         ),
                       ),
                     ),
@@ -712,17 +766,12 @@ class MapsPageState extends State<MapsPage> with TickerProviderStateMixin {
               ),
             ),
           );
-        } else if (state is MapsError) {
-          // Caso de erro, gera erro com mensagem do estado do erro como feedback para o usuário
-          return Center(
-            child: Text(
-              'Erro ao carregar mapa: ${state.message}',
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
         }
-        return Container(); // Estado padrão
       },
     );
   }
+
+  @override
+  bool get wantKeepAlive =>
+      true; // Implementação do AutomaticKeepAliveClientMixin para manter o estado
 }
